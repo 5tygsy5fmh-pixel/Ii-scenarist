@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Studio PRO</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        * { box-sizing: border-box; }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: #000; border-bottom: 1px solid #222; }
+        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .user-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; }
+        .preview-area { flex: 1; background: #0a0a0a; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .preview-placeholder { text-align: center; color: #444; font-size: 14px; font-weight: 600; }
+        .control-panel { background: #111; border-top: 1px solid #333; display: flex; flex-direction: column; }
+        .tools { display: flex; padding: 10px; gap: 10px; overflow-x: auto; border-bottom: 1px solid #222; }
+        .tools::-webkit-scrollbar { display: none; }
+        .tool-btn { flex: 0 0 auto; background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .tool-btn.active { background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; }
+        .input-area { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 60px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 12px; font-size: 14px; resize: none; outline: none; font-family: 'Inter', sans-serif; }
+        textarea:focus { border-color: #10b981; }
+        .action-buttons { display: flex; gap: 10px; }
+        .btn-primary { flex: 1; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: transform 0.1s; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-secondary { flex: 1; padding: 15px; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; }
+        .timeline { height: 140px; background: #000; border-top: 1px solid #333; display: flex; flex-direction: column; }
+        .timeline-header { padding: 5px 15px; background: #080808; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #666; font-weight: 800; letter-spacing: 1px; }
+        .timeline-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; position: relative; padding: 10px 0; }
+        .timeline-scroll::-webkit-scrollbar { height: 4px; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        .track { height: 40px; position: relative; margin-bottom: 5px; padding-left: 10px; display: flex; align-items: center; border-bottom: 1px solid #111; }
+        .track-video { background: rgba(16, 185, 129, 0.02); }
+        .track-audio { background: rgba(59, 130, 246, 0.02); }
+        .track-label { position: absolute; left: 5px; font-size: 9px; color: #444; font-weight: bold; z-index: 1; }
+        .clip { height: 32px; border-radius: 4px; position: absolute; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .clip-video { background: linear-gradient(135deg, #10b981, #047857); }
+        .clip-audio { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #ff2850; z-index: 10; left: 10px; pointer-events: none; }
+        .playhead::before { content: ''; position: absolute; top: 0; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #ff2850; }
+        .loader { display: none; width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">STUDIO PRO</div>
+        <button class="user-btn" id="loginBtn">Войти</button>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+        <div class="preview-placeholder" id="previewText">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" style="margin-bottom:10px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+            <br>Здесь появится ваша сцена
+        </div>
+        <div class="loader" id="mainLoader"></div>
+        <video id="videoPlayer" style="display:none; width:100%; height:100%; object-fit:contain;" controls></video>
+    </div>
+
+    <div class="control-panel">
+        <div class="tools">
+            <button class="tool-btn active" onclick="switchTool('script', this)">✍️ Сценарий</button>
+            <button class="tool-btn" onclick="switchTool('image', this)">🖼️ Фото</button>
+            <button class="tool-btn" onclick="switchTool('video', this)">🎬 Видео</button>
+            <button class="tool-btn" onclick="switchTool('voice', this)">🎙️ Голос</button>
+        </div>
+
+        <div class="input-area">
+            <textarea id="aiPrompt" placeholder="Опишите, что нужно сгенерировать..."></textarea>
+            <div class="action-buttons">
+                <button class="btn-primary" id="generateBtn">Сгенерировать</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="timeline">
+        <div class="timeline-header">
+            <span>ТАЙМЛАЙН</span>
+            <span id="addToTimelineBtn" style="color:#10b981; cursor:pointer; display:none;">+ Добавить в проект</span>
+        </div>
+        <div class="timeline-scroll" id="timelineScroll">
+            <div class="track track-video">
+                <span class="track-label">ВИДЕО</span>
+            </div>
+            <div class="track track-audio">
+                <span class="track-label">АУДИО</span>
+            </div>
+            <div class="playhead" id="playhead"></div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAUIrQTOW_aDL6ziFVpXerHf6pPD6waRI8",
+            authDomain: "fake-strim.firebaseapp.com",
+            projectId: "fake-strim",
+            storageBucket: "fake-strim.firebasestorage.app",
+            messagingSenderId: "838988558430",
+            appId: "1:838988558430:web:579a441e92556fb4d384cf"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        document.getElementById('loginBtn').onclick = () => {
+            if (auth.currentUser) {
+                auth.signOut();
+            } else {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider).catch(e => alert(e.message));
+            }
+        };
+
+        auth.onAuthStateChanged(user => {
+            const btn = document.getElementById('loginBtn');
+            if (user) {
+                btn.innerText = user.displayName || 'Выйти';
+                btn.style.background = '#10b981';
+            } else {
+                btn.innerText = 'Войти';
+                btn.style.background = '#111';
+            }
+        });
+
+        let currentTool = 'script';
+
+        function switchTool(tool, btn) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const promptInput = document.getElementById('aiPrompt');
+            if (tool === 'script') promptInput.placeholder = "Напишите идею для видео (например: История про кота)...";
+            if (tool === 'image') promptInput.placeholder = "Опишите картинку (например: Неоновый город)...";
+            if (tool === 'video') promptInput.placeholder = "Опишите видео (например: Полет над горами)...";
+            if (tool === 'voice') promptInput.placeholder = "Введите текст для озвучки...";
+        }
+
+        document.getElementById('generateBtn').onclick = function() {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt) { alert("Введите текст!"); return; }
+
+            document.getElementById('mainLoader').style.display = 'block';
+            document.getElementById('previewText').style.display = 'none';
+            document.getElementById('videoPlayer').style.display = 'none';
+            this.innerText = 'Генерация...';
+            this.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('mainLoader').style.display = 'none';
+                this.innerText = 'Сгенерировать';
+                this.disabled = false;
+                
+                if (currentTool === 'script') {
+                    document.getElementById('previewText').style.display = 'block';
+                    document.getElementById('previewText').innerHTML = `<b style="color:#10b981;">Сценарий готов:</b><br><br>1. Вступление. 2. ${prompt}. 3. Концовка.`;
+                    document.getElementById('addToTimelineBtn').style.display = 'block';
+                } else {
+                    const video = document.getElementById('videoPlayer');
+                    video.src = "https://assets.mixkit.co/videos/preview/mixkit-stars-in-space-1610-large.mp4";
+                    video.style.display = 'block';
+                    video.play();
+                    document.getElementById('addToTimelineBtn').style.display = 'block';
+                }
+            }, 2000);
+        };
+
+        let clips = 0;
+        document.getElementById('addToTimelineBtn').onclick = function() {
+            const videoTrack = document.querySelector('.track-video');
+            const audioTrack = document.querySelector('.track-audio');
+            const startX = 30 + (clips * 120);
+            
+            const vClip = document.createElement('div');
+            vClip.className = 'clip clip-video';
+            vClip.style.width = '110px';
+            vClip.style.left = startX + 'px';
+            vClip.innerText = 'Клип ' + (clips + 1);
+            videoTrack.appendChild(vClip);
+
+            const aClip = document.createElement('div');
+            aClip.className = 'clip clip-audio';
+            aClip.style.width = '110px';
+            aClip.style.left = startX + 'px';
+            aClip.innerText = 'Аудио ' + (clips + 1);
+            audioTrack.appendChild(aClip);
+
+            clips++;
+            
+            const scroll = document.getElementById('timelineScroll');
+            scroll.scrollLeft = scroll.scrollWidth;
+        };
+
+        const timelineScroll = document.getElementById('timelineScroll');
+        const playhead = document.getElementById('playhead');
+        
+        timelineScroll.addEventListener('click', (e) => {
+            if (e.target.classList.contains('clip') || e.target.classList.contains('track-label')) return;
+            const rect = timelineScroll.getBoundingClientRect();
+            const x = e.clientX - rect.left + timelineScroll.scrollLeft;
+            playhead.style.left = x + 'px';
+        });
+    </script>
+</body>
+</html>
