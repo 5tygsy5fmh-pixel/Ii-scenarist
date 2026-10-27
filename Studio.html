@@ -5,162 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Studio PRO</title>
     
-    <!-- Подключение Firebase -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     
-    <!-- Puter.js для генерации видео -->
+    <!-- Puter.js (ИИ прямо в браузере) -->
     <script src="https://js.puter.com/v2/"></script>
 
+    <!-- Leaflet (Карты) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
+
+    <!-- Three.js (3D) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-        body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Строгий дизайн */
+        :root {
+            --bg: #050505;
+            --surface: #121212;
+            --border: #333333;
+            --text: #ffffff;
+            --text-secondary: #888888;
+            --accent: #10b981;
+            --radius-card: 0px;
+            --radius-btn: 8px;
+        }
+
+        body { 
+            margin: 0; padding: 0; background-color: var(--bg); color: var(--text); 
+            font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; 
+            display: flex; flex-direction: column; 
+        }
         * { box-sizing: border-box; }
         
         /* Шапка */
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; background: #000; border-bottom: 1px solid #222; z-index: 10; }
-        .logo { font-weight: 900; font-size: 20px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .header { 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 16px 20px; background: var(--bg); border-bottom: 1px solid var(--border); 
+            z-index: 10; 
+        }
+        .logo { font-weight: 700; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; }
         .header-controls { display: flex; gap: 10px; align-items: center; }
-        .user-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .user-btn { 
+            background: var(--surface); border: 1px solid var(--border); color: var(--text); 
+            padding: 8px 16px; border-radius: var(--radius-btn); font-size: 13px; 
+            font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
         
         /* Зона предпросмотра */
-        .preview-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .preview-placeholder { text-align: center; color: #444; font-size: 14px; font-weight: 600; }
+        .preview-area { 
+            flex: 1; background: var(--bg); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; position: relative; overflow: hidden; 
+        }
+        .preview-placeholder { text-align: center; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
         
         /* Панель управления */
-        .control-panel { background: #111; border-top: 1px solid #333; display: flex; flex-direction: column; }
-        .tools { display: flex; padding: 10px; gap: 10px; overflow-x: auto; border-bottom: 1px solid #222; }
+        .control-panel { background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
+        .tools { display: flex; padding: 12px 20px; gap: 8px; overflow-x: auto; border-bottom: 1px solid var(--border); }
         .tools::-webkit-scrollbar { display: none; }
-        .tool-btn { flex: 0 0 auto; background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .tool-btn.active { background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; }
+        .tool-btn { 
+            flex: 0 0 auto; background: var(--surface); border: 1px solid var(--border); 
+            color: var(--text-secondary); padding: 10px 16px; border-radius: var(--radius-btn); 
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .tool-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
         
-        .input-area { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        textarea { width: 100%; height: 60px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 12px; font-size: 14px; resize: none; outline: none; font-family: 'Inter', sans-serif; }
-        textarea:focus { border-color: #10b981; }
+        .input-area { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+        textarea { 
+            width: 100%; height: 60px; background: var(--surface); border: 1px solid var(--border); 
+            border-radius: var(--radius-btn); color: var(--text); padding: 12px; font-size: 14px; 
+            resize: none; outline: none; font-family: 'Inter', sans-serif; transition: 0.2s;
+        }
+        textarea:focus { border-color: var(--accent); }
         
-        .action-buttons { display: flex; gap: 10px; }
-        .btn-primary { flex: 1; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: transform 0.1s; display: flex; justify-content: center; align-items: center;}
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+        .action-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-primary { 
+            flex: 1; padding: 14px; background: var(--accent); border: none; 
+            border-radius: var(--radius-btn); color: var(--bg); font-size: 14px; 
+            font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center;
+        }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Оверлеи */
+        #galleryOverlay, #trashOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; flex-direction: column; }
+        .gallery-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .gallery-grid { padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; overflow-y: auto; flex: 1; align-content: start; }
+        .gallery-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); position: relative; aspect-ratio: 1; cursor: pointer; overflow: hidden; }
+        .gallery-item img, .gallery-item video { width: 100%; height: 100%; object-fit: cover; }
+        
+        .loader { display: none; width: 24px; height: 24px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Карта и 3D */
+        #mapContainer, #threeContainer { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5; }
+        #map { width: 100%; height: 100%; }
+        #canvas3d { width: 100%; height: 100%; background: #000; }
         
         /* Таймлайн */
-        .timeline { height: 140px; background: #000; border-top: 1px solid #333; display: flex; flex-direction: column; }
-        .timeline-header { padding: 5px 15px; background: #080808; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #666; font-weight: 800; letter-spacing: 1px; }
-        .timeline-scroll { flex: 1; overflow-x: auto; overflow-y: hidden; position: relative; padding: 10px 0; }
-        .timeline-scroll::-webkit-scrollbar { height: 4px; }
-        .timeline-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-        .track { height: 40px; position: relative; margin-bottom: 5px; padding-left: 10px; display: flex; align-items: center; border-bottom: 1px solid #111; }
-        .track-video { background: rgba(16, 185, 129, 0.02); }
-        .track-audio { background: rgba(59, 130, 246, 0.02); }
-        .track-label { position: absolute; left: 5px; font-size: 9px; color: #444; font-weight: bold; z-index: 1; }
-        .clip { height: 32px; border-radius: 4px; position: absolute; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .clip-video { background: linear-gradient(135deg, #10b981, #047857); }
-        .clip-audio { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-        .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #ff2850; z-index: 10; left: 10px; pointer-events: none; }
-        .playhead::before { content: ''; position: absolute; top: 0; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #ff2850; }
-        
-        .loader { display: none; width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Оверлеи (Галерея и Корзина) */
-        #galleryOverlay, #trashOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; z-index: 999; flex-direction: column; }
-        .gallery-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; background: #000; }
-        .gallery-grid { padding: 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; overflow-y: auto; flex: 1; align-content: start; }
-        .gallery-item { background: #111; border-radius: 12px; overflow: hidden; border: 1px solid #222; position: relative; aspect-ratio: 1; cursor: pointer; transition: transform 0.2s; }
-        .gallery-item:active { transform: scale(0.95); }
-        .gallery-item img, .gallery-item video { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; }
+        .timeline { height: 80px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
+        .timeline-header { padding: 8px 20px; font-size: 10px; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; }
+        .track { height: 24px; margin-bottom: 2px; padding-left: 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border); font-size: 10px; color: var(--text-secondary); }
     </style>
 </head>
 <body>
 
-    <!-- Шапка -->
     <div class="header">
         <div class="logo">STUDIO PRO</div>
         <div class="header-controls">
-            <button class="user-btn" id="openGalleryBtn" style="display: none; padding: 8px 12px; font-size: 16px;">📁</button>
-            <button class="user-btn" id="openTrashBtn" style="display: none; padding: 8px 12px; font-size: 16px;">🗑️</button>
+            <button class="user-btn" id="openGalleryBtn" style="display: none;">📁</button>
+            <button class="user-btn" id="openTrashBtn" style="display: none;">🗑️</button>
             <button class="user-btn" id="loginBtn">Войти</button>
         </div>
     </div>
 
-    <!-- Оверлей Галереи -->
     <div id="galleryOverlay">
-        <div class="gallery-header">
-            <h2 style="margin: 0; font-size: 18px; color: #10b981;">Мои проекты</h2>
-            <button id="closeGalleryBtn" style="background: transparent; border: none; font-size: 24px; color: #fff; cursor: pointer;">✕</button>
-        </div>
+        <div class="gallery-header"><h2 style="margin: 0; font-size: 16px;">Проекты</h2><button id="closeGalleryBtn" style="background: transparent; border: none; font-size: 20px; color: var(--text); cursor: pointer;">✕</button></div>
         <div id="galleryGrid" class="gallery-grid"></div>
     </div>
-
-    <!-- Оверлей Корзины -->
+    
     <div id="trashOverlay">
-        <div class="gallery-header">
-            <h2 style="margin: 0; font-size: 18px; color: #ef4444;">Корзина</h2>
-            <button id="closeTrashBtn" style="background: transparent; border: none; font-size: 24px; color: #fff; cursor: pointer;">✕</button>
-        </div>
+        <div class="gallery-header"><h2 style="margin: 0; font-size: 16px; color: #ef4444;">Корзина</h2><button id="closeTrashBtn" style="background: transparent; border: none; font-size: 20px; color: var(--text); cursor: pointer;">✕</button></div>
         <div id="trashGrid" class="gallery-grid"></div>
     </div>
 
-    <!-- Зона предпросмотра -->
     <div class="preview-area" id="previewArea">
-        <div class="preview-placeholder" id="previewText">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" style="margin-bottom:10px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-            <br>Здесь появится ваша сцена
-        </div>
-        
+        <div class="preview-placeholder" id="previewText">Здесь появится ваша сцена</div>
         <div class="loader" id="mainLoader"></div>
         
         <video id="videoPlayer" style="display:none; width:100%; height:100%; object-fit:contain;" controls></video>
-        <img id="imageResult" style="display:none; width:100%; height:100%; object-fit:contain; padding: 10px;">
+        <img id="imageResult" style="display:none; width:100%; height:100%; object-fit:contain;">
         
-        <div id="formatSelector" style="display:none; margin: 10px auto; width: 90%; max-width: 300px; text-align: center;">
-            <label for="videoFormat" style="font-size: 12px; color: #aaa; margin-bottom: 5px; display: block;">Формат сохранения:</label>
-            <select id="videoFormat" style="width: 100%; padding: 10px; background: #111; color: #fff; border: 1px solid #333; border-radius: 8px; outline: none;">
+        <div id="formatSelector" style="display:none; margin: 16px auto; width: 90%; max-width: 300px;">
+            <select id="videoFormat" style="width: 100%; padding: 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-btn); outline: none; font-family: 'Inter';">
                 <option value="mp4">MP4 (Видео)</option>
                 <option value="webm">WebM (Для сайтов)</option>
             </select>
         </div>
+        <button id="saveBtn" class="btn-primary" style="display:none; margin: 16px auto; width: 90%; max-width: 300px;">💾 Сохранить проект</button>
 
-        <button id="saveBtn" class="btn-primary" style="display:none; margin: 15px auto; width: 90%; max-width: 300px; z-index: 10;">💾 Сохранить в галерею</button>
+        <!-- 2D Карта -->
+        <div id="mapContainer">
+            <div id="map"></div>
+            <button id="generate3dBtn" class="btn-primary" style="position:absolute; bottom:24px; left:5%; width:90%; z-index:10;">Создать 3D-сцену</button>
+        </div>
+
+        <!-- 3D Сцена -->
+        <div id="threeContainer">
+            <div id="canvas3d"></div>
+            <button id="backToMapBtn" style="display: block; position:absolute; top:24px; left:24px; width:auto; padding: 10px 16px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: white; border-radius: 8px;">Назад</button>
+            
+            <div id="directorPanel" style="position:absolute; bottom:24px; left:24px; right:24px; z-index:10; display:none; gap:10px; background: rgba(18,18,18,0.9); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-btn);">
+                <button id="addActorBtn" class="btn-primary" style="flex:1; padding: 10px; font-size: 12px;">+ Актер</button>
+                <input type="text" id="directorPrompt" placeholder="Действие (напр: Идет к ручке)" style="flex:2; padding:10px; border-radius: var(--radius-btn); border: 1px solid var(--border); background:var(--bg); color:var(--text); font-size: 12px; outline: none;">
+                <button id="playSceneBtn" class="btn-primary" style="flex:1; padding: 10px; font-size: 12px;">▶ Играть</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Панель управления -->
     <div class="control-panel">
         <div class="tools">
-            <button class="tool-btn active" onclick="switchTool('script', this)">✍️ Сценарий</button>
-            <button class="tool-btn" onclick="switchTool('image', this)">🖼️ Фото</button>
-            <button class="tool-btn" onclick="switchTool('video', this)">🎬 Видео</button>
-            <button class="tool-btn" onclick="switchTool('voice', this)">🎙️ Голос</button>
+            <button class="tool-btn active" onclick="switchTool('script', this)">Сценарий</button>
+            <button class="tool-btn" onclick="switchTool('image', this)">Фото</button>
+            <button class="tool-btn" onclick="switchTool('video', this)">Видео</button>
+            <button class="tool-btn" onclick="switchTool('map', this)">3D Карта</button>
         </div>
 
         <div class="input-area">
-            <textarea id="aiPrompt" placeholder="Напишите идею для видео..."></textarea>
+            <textarea id="aiPrompt" placeholder="Опишите вашу идею..."></textarea>
             <div class="action-buttons">
                 <button class="btn-primary" id="generateBtn">Сгенерировать</button>
             </div>
         </div>
     </div>
 
-    <!-- Таймлайн -->
     <div class="timeline">
-        <div class="timeline-header">
-            <span>ТАЙМЛАЙН</span>
-            <span id="addToTimelineBtn" style="color:#10b981; cursor:pointer; display:none;">+ Добавить в проект</span>
-        </div>
-        <div class="timeline-scroll" id="timelineScroll">
-            <div class="track track-video"><span class="track-label">ВИДЕО</span></div>
-            <div class="track track-audio"><span class="track-label">АУДИО</span></div>
-            <div class="playhead" id="playhead"></div>
-        </div>
+        <div class="timeline-header">ТАЙМЛАЙН</div>
+        <div class="track">ВИДЕО</div>
+        <div class="track">АУДИО</div>
     </div>
 
     <script>
-        // ==========================================
-        // 1. НАСТРОЙКИ FIREBASE
-        // ==========================================
+        // 1. FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAUIrQTOW_aDL6ziFVpXerHf6pPD6waRI8",
             authDomain: "fake-strim.firebaseapp.com",
@@ -171,106 +203,82 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const storage = firebase.storage();
         const db = firebase.firestore();
+        const storage = firebase.storage();
 
-        // ==========================================
-        // 2. АВТОРИЗАЦИЯ И ИНТЕРФЕЙС
-        // ==========================================
+        // 2. ПЕРЕМЕННЫЕ
+        let currentTool = 'script';
+        let map = null;
+        let scene3D, camera3D, renderer3D;
+        let sceneObjects = {}; 
+        let objectCounter = 0;
+
+        // 3. АВТОРИЗАЦИЯ
         document.getElementById('loginBtn').onclick = () => {
             if (auth.currentUser) auth.signOut();
-            else {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                auth.signInWithPopup(provider).catch(e => alert(e.message));
-            }
+            else auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message));
         };
 
         auth.onAuthStateChanged(user => {
             const btn = document.getElementById('loginBtn');
-            const galleryBtn = document.getElementById('openGalleryBtn');
-            const trashBtn = document.getElementById('openTrashBtn');
-            
             if (user) {
                 btn.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Выйти';
-                btn.style.background = '#10b981';
-                galleryBtn.style.display = 'block';
-                trashBtn.style.display = 'block';
+                document.getElementById('openGalleryBtn').style.display = 'block';
+                document.getElementById('openTrashBtn').style.display = 'block';
             } else {
                 btn.innerText = 'Войти';
-                btn.style.background = '#111';
-                galleryBtn.style.display = 'none';
-                trashBtn.style.display = 'none';
+                document.getElementById('openGalleryBtn').style.display = 'none';
+                document.getElementById('openTrashBtn').style.display = 'none';
                 document.getElementById('galleryOverlay').style.display = 'none';
                 document.getElementById('trashOverlay').style.display = 'none';
             }
         });
 
-        // ==========================================
-        // 3. ЛОГИКА ИНСТРУМЕНТОВ
-        // ==========================================
-        // 👇 ВСТАВЬ СЮДА СВОЙ URL CLOUDFLARE WORKER 👇
-        const WORKER_URL = "https://ai-studio-api.твое_имя.workers.dev"; 
-        
-        let currentTool = 'script';
-
+        // 4. ИНТЕРФЕЙС
         function switchTool(tool, btn) {
             currentTool = tool;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             
-            const promptInput = document.getElementById('aiPrompt');
-            if (tool === 'script') promptInput.placeholder = "Напишите идею для видео...";
-            if (tool === 'image') promptInput.placeholder = "Опишите картинку...";
-            if (tool === 'video') promptInput.placeholder = "Опишите видео...";
-            if (tool === 'voice') promptInput.placeholder = "Введите текст для озвучки...";
-
             document.getElementById('videoPlayer').style.display = 'none';
             document.getElementById('imageResult').style.display = 'none';
             document.getElementById('saveBtn').style.display = 'none';
             document.getElementById('formatSelector').style.display = 'none';
+            document.getElementById('mapContainer').style.display = 'none';
+            document.getElementById('threeContainer').style.display = 'none';
             document.getElementById('previewText').style.display = 'block';
-            document.getElementById('previewText').innerHTML = "Здесь появится ваша сцена";
-            document.getElementById('addToTimelineBtn').style.display = 'none';
+            
+            const promptInput = document.getElementById('aiPrompt');
+            if (tool === 'script') promptInput.placeholder = "Напишите идею для видео...";
+            else if (tool === 'image') promptInput.placeholder = "Опишите картинку...";
+            else if (tool === 'video') promptInput.placeholder = "Опишите видео...";
+            else if (tool === 'map') {
+                promptInput.placeholder = "Выделите область на карте...";
+                document.getElementById('previewText').style.display = 'none';
+                document.getElementById('mapContainer').style.display = 'block';
+                initMap();
+            }
         }
 
-        // ==========================================
-        // 4. ГЕНЕРАЦИЯ
-        // ==========================================
+        // 5. ГЕНЕРАЦИЯ
         document.getElementById('generateBtn').onclick = async function() {
+            if (currentTool === 'map') return;
             const prompt = document.getElementById('aiPrompt').value;
             if (!prompt) { alert("Введите текст!"); return; }
 
             document.getElementById('mainLoader').style.display = 'block';
             document.getElementById('previewText').style.display = 'none';
-            document.getElementById('videoPlayer').style.display = 'none';
-            document.getElementById('imageResult').style.display = 'none';
-            document.getElementById('saveBtn').style.display = 'none';
-            document.getElementById('formatSelector').style.display = 'none';
-            
-            this.innerText = 'Арена ИИ думает...'; // Наша UX-правка
+            this.innerText = 'Генерация...';
             this.disabled = true;
 
-            // --- ТЕКСТ ---
+            // --- СЦЕНАРИЙ (Напрямую через Puter.js) ---
             if (currentTool === 'script') {
-                if(WORKER_URL.includes("твое_имя")) {
-                    alert("Вставь URL своего Cloudflare Worker в код!");
-                    document.getElementById('mainLoader').style.display = 'none';
-                    this.innerText = 'Сгенерировать';
-                    this.disabled = false;
-                    document.getElementById('previewText').style.display = 'block';
-                    return;
-                }
                 try {
-                    const response = await fetch(WORKER_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: prompt, toolType: 'script' })
-                    });
-                    const data = await response.json();
+                    const response = await puter.ai.chat(`Напиши кинематографичный сценарий для видео на тему: ${prompt}. Опиши свет и ракурсы.`);
+                    const text = response.message?.content || response.text || response;
                     
                     document.getElementById('previewText').style.display = 'block';
-                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: #ddd; overflow-y:auto; max-height: 100%; padding: 15px;">${data.text.replace(/\n/g, '<br>')}</div>`;
-                    document.getElementById('addToTimelineBtn').style.display = 'block';
+                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: var(--text-secondary); overflow-y:auto; max-height: 100%; padding: 20px;">${text.replace(/\n/g, '<br>')}</div>`;
                 } catch (error) {
                     alert("Ошибка: " + error.message);
                     document.getElementById('previewText').style.display = 'block';
@@ -282,56 +290,35 @@
             } 
             // --- ФОТО ---
             else if (currentTool === 'image') {
-                const encodedPrompt = encodeURIComponent(prompt);
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
-                
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
                 const imgElement = document.getElementById('imageResult');
-                
                 imgElement.onload = () => {
                     document.getElementById('mainLoader').style.display = 'none';
                     imgElement.style.display = 'block';
                     document.getElementById('saveBtn').style.display = 'block';
-                    document.getElementById('addToTimelineBtn').style.display = 'block';
                     this.innerText = 'Сгенерировать';
                     this.disabled = false;
                 };
-
-                imgElement.onerror = () => {
-                    alert("Не удалось сгенерировать картинку.");
-                    document.getElementById('mainLoader').style.display = 'none';
-                    document.getElementById('previewText').style.display = 'block';
-                    this.innerText = 'Сгенерировать';
-                    this.disabled = false;
-                };
-
+                imgElement.onerror = () => { alert("Ошибка фото."); document.getElementById('mainLoader').style.display = 'none'; this.innerText = 'Сгенерировать'; this.disabled = false; };
                 imgElement.src = imageUrl;
             }
-            // --- ВИДЕО (С Canvas-апскейлом) ---
+            // --- ВИДЕО (Puter.js + Canvas) ---
             else if (currentTool === 'video') {
                 try {
-                    const encodedPrompt = encodeURIComponent(prompt);
-                    const baseImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
-                    
+                    const baseImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
                     const img = new Image();
                     img.crossOrigin = "Anonymous"; 
-                    
                     img.onload = async () => {
                         try {
-                            // Canvas Апскейл до Full HD (1920x1080)
                             const canvas = document.createElement('canvas');
-                            canvas.width = 1920; 
-                            canvas.height = 1080;
+                            canvas.width = 1920; canvas.height = 1080;
                             const ctx = canvas.getContext('2d');
-                            
-                            ctx.imageSmoothingEnabled = true;
-                            ctx.imageSmoothingQuality = 'high';
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            
-                            const upscaledImageBase64 = canvas.toDataURL('image/jpeg', 0.95);
+                            const upscaledBase64 = canvas.toDataURL('image/jpeg', 0.95);
 
                             const videoElement = await puter.ai.txt2vid(prompt, {
                                 model: "google/veo-2.0", 
-                                input_reference: upscaledImageBase64, 
+                                input_reference: upscaledBase64, 
                                 duration: 5, 
                                 size: "1280x720" 
                             });
@@ -344,254 +331,172 @@
                             document.getElementById('mainLoader').style.display = 'none';
                             document.getElementById('formatSelector').style.display = 'block';
                             document.getElementById('saveBtn').style.display = 'block';
-                            document.getElementById('addToTimelineBtn').style.display = 'block';
-                            
                             document.getElementById('generateBtn').innerText = 'Сгенерировать';
                             document.getElementById('generateBtn').disabled = false;
-
-                        } catch (innerError) {
-                            throw new Error("Ошибка видео: " + innerError.message);
-                        }
+                        } catch (innerError) { throw new Error("Ошибка видео: " + innerError.message); }
                     };
-                    
-                    img.onerror = () => { throw new Error("Ошибка загрузки картинки для улучшения."); };
+                    img.onerror = () => { throw new Error("Ошибка картинки."); };
                     img.src = baseImageUrl;
-
                 } catch (error) {
-                    console.error("Ошибка видео:", error);
                     alert(error.message);
                     document.getElementById('mainLoader').style.display = 'none';
-                    document.getElementById('previewText').style.display = 'block';
                     document.getElementById('generateBtn').innerText = 'Сгенерировать';
                     document.getElementById('generateBtn').disabled = false;
                 }
             }
         };
 
-        // ==========================================
-        // 5. СОХРАНЕНИЕ В FIREBASE
-        // ==========================================
+        // 6. СОХРАНЕНИЕ В БАЗУ
         document.getElementById('saveBtn').onclick = async function() {
             const user = auth.currentUser;
-            if (!user) { alert("Войдите в аккаунт!"); return; }
-
-            const btn = this;
-            const originalText = btn.innerText;
-            btn.innerText = 'Сохранение...';
-            btn.disabled = true;
-
+            if (!user) { alert("Войдите!"); return; }
+            const btn = this; btn.innerText = 'Сохранение...'; btn.disabled = true;
             try {
-                let fileUrl = '';
-                let fileExtension = '';
-                let contentType = currentTool;
-                let blob;
-
-                if (currentTool === 'image') {
-                    const img = document.getElementById('imageResult');
-                    fileUrl = img.src;
-                    fileExtension = 'jpg';
-                    const response = await fetch(fileUrl);
-                    blob = await response.blob();
-                } 
-                else if (currentTool === 'video') {
-                    const video = document.getElementById('videoPlayer');
-                    fileUrl = video.src;
-                    fileExtension = document.getElementById('videoFormat').value;
-                    const response = await fetch(fileUrl);
-                    blob = await response.blob();
-                } else throw new Error("Нельзя сохранить");
-
+                let fileUrl = '', fileExtension = '', blob;
+                if (currentTool === 'image') { fileUrl = document.getElementById('imageResult').src; fileExtension = 'png'; }
+                else if (currentTool === 'video') { fileUrl = document.getElementById('videoPlayer').src; fileExtension = document.getElementById('videoFormat').value; }
+                const response = await fetch(fileUrl);
+                blob = await response.blob();
                 const filename = `ai_${Date.now()}.${fileExtension}`;
-
                 const storageRef = storage.ref(`users/${user.uid}/${filename}`);
                 const snapshot = await storageRef.put(blob);
                 const downloadURL = await snapshot.ref.getDownloadURL();
-
-                await db.collection('projects').add({
-                    userId: user.uid,
-                    type: contentType,
-                    format: fileExtension,
-                    prompt: document.getElementById('aiPrompt').value,
-                    fileUrl: downloadURL,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    isDeleted: false 
-                });
-
-                const blobUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-                
-                btn.innerText = '✅ Сохранено!';
-                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
-
-            } catch (error) {
-                console.error(error);
-                alert("Ошибка: " + error.message);
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+                await db.collection('projects').add({ userId: user.uid, type: currentTool, format: fileExtension, prompt: document.getElementById('aiPrompt').value, fileUrl: downloadURL, createdAt: firebase.firestore.FieldValue.serverTimestamp(), isDeleted: false });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+                btn.innerText = 'Сохранено!'; setTimeout(() => { btn.innerText = '💾 Сохранить проект'; btn.disabled = false; }, 2000);
+            } catch (error) { alert("Ошибка: " + error.message); btn.innerText = '💾 Сохранить проект'; btn.disabled = false; }
         };
 
-        // ==========================================
-        // 6. ГАЛЕРЕЯ
-        // ==========================================
+        // 7. ГАЛЕРЕЯ
         document.getElementById('openGalleryBtn').onclick = async () => {
             document.getElementById('galleryOverlay').style.display = 'flex';
-            const grid = document.getElementById('galleryGrid');
-            grid.innerHTML = '<div style="color: #888; text-align: center; grid-column: span 2; margin-top: 20px;">Загрузка...</div>';
-
+            const grid = document.getElementById('galleryGrid'); grid.innerHTML = 'Загрузка...';
             try {
                 const snapshot = await db.collection('projects').where('userId', '==', auth.currentUser.uid).get();
-                const projects = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.isDeleted !== true) projects.push({ id: doc.id, ...data });
-                });
-                
-                projects.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-                grid.innerHTML = '';
-
-                if (projects.length === 0) {
-                    grid.innerHTML = '<div style="color: #888; text-align: center; grid-column: span 2; margin-top: 20px;">Нет проектов 🎨</div>';
-                    return;
-                }
-
+                const projects = []; snapshot.forEach(doc => { if (doc.data().isDeleted !== true) projects.push({ id: doc.id, ...doc.data() }); });
+                grid.innerHTML = ''; if (projects.length === 0) { grid.innerHTML = '<div style="color:#888;">Пусто</div>'; return; }
                 projects.forEach(proj => {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    
-                    if (proj.type === 'image') {
-                        item.innerHTML = `<img src="${proj.fileUrl}">`;
-                    } else {
-                        item.innerHTML = `<video src="${proj.fileUrl}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video><div class="gallery-badge">🎬 Видео</div>`;
-                    }
-
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.innerText = '🗑️';
-                    deleteBtn.style.cssText = 'position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); border: 1px solid #ef4444; color: #fff; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; z-index: 2;';
-                    deleteBtn.onclick = async (e) => {
-                        e.stopPropagation();
-                        if (!confirm('В корзину?')) return;
-                        await db.collection('projects').doc(proj.id).update({ isDeleted: true, deletedAt: firebase.firestore.FieldValue.serverTimestamp() });
-                        item.remove();
-                    };
-                    item.appendChild(deleteBtn);
-                    item.onclick = () => window.open(proj.fileUrl, '_blank');
-                    grid.appendChild(item);
+                    const item = document.createElement('div'); item.className = 'gallery-item';
+                    item.innerHTML = proj.type === 'image' ? `<img src="${proj.fileUrl}">` : `<video src="${proj.fileUrl}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+                    const delBtn = document.createElement('button'); delBtn.innerText = '🗑️'; delBtn.style.cssText = 'position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); border:none; color:#fff; padding:8px; border-radius:4px; cursor:pointer;';
+                    delBtn.onclick = async (e) => { e.stopPropagation(); await db.collection('projects').doc(proj.id).update({ isDeleted: true }); item.remove(); };
+                    item.appendChild(delBtn); grid.appendChild(item);
                 });
-            } catch (error) {
-                grid.innerHTML = `<div style="color: red; text-align: center; grid-column: span 2;">Ошибка: ${error.message}</div>`;
-            }
+            } catch (error) { grid.innerHTML = `Ошибка: ${error.message}`; }
         };
         document.getElementById('closeGalleryBtn').onclick = () => document.getElementById('galleryOverlay').style.display = 'none';
 
-        // ==========================================
-        // 7. КОРЗИНА (С ИСПРАВЛЕННЫМ УДАЛЕНИЕМ)
-        // ==========================================
+        // 8. КОРЗИНА
         document.getElementById('openTrashBtn').onclick = async () => {
             document.getElementById('trashOverlay').style.display = 'flex';
-            const grid = document.getElementById('trashGrid');
-            grid.innerHTML = '<div style="color: #888; text-align: center; grid-column: span 2; margin-top: 20px;">Загрузка...</div>';
-
+            const grid = document.getElementById('trashGrid'); grid.innerHTML = 'Загрузка...';
             try {
                 const snapshot = await db.collection('projects').where('userId', '==', auth.currentUser.uid).get();
-                const deletedProjects = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.isDeleted === true) deletedProjects.push({ id: doc.id, ...data });
-                });
-
-                grid.innerHTML = '';
-                if (deletedProjects.length === 0) {
-                    grid.innerHTML = '<div style="color: #888; text-align: center; grid-column: span 2; margin-top: 20px;">Корзина пуста 🗑️</div>';
-                    return;
-                }
-
-                deletedProjects.forEach(proj => {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
+                const deleted = []; snapshot.forEach(doc => { if (doc.data().isDeleted === true) deleted.push({ id: doc.id, ...doc.data() }); });
+                grid.innerHTML = ''; if (deleted.length === 0) { grid.innerHTML = '<div style="color:#888;">Пусто</div>'; return; }
+                deleted.forEach(proj => {
+                    const item = document.createElement('div'); item.className = 'gallery-item';
                     item.innerHTML = `<img src="${proj.fileUrl}" style="filter: grayscale(80%);">`;
-
-                    const actionsDiv = document.createElement('div');
-                    actionsDiv.style.cssText = 'position: absolute; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 5px; background: rgba(0,0,0,0.7);';
-
-                    const restoreBtn = document.createElement('button');
-                    restoreBtn.innerText = '↺';
-                    restoreBtn.style.cssText = 'background: #10b981; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;';
-                    restoreBtn.onclick = async () => {
-                        await db.collection('projects').doc(proj.id).update({ isDeleted: false, deletedAt: null });
-                        item.remove();
-                    };
-
-                    const deleteForeverBtn = document.createElement('button');
-                    deleteForeverBtn.innerText = '✕';
-                    deleteForeverBtn.style.cssText = 'background: #ef4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;';
-                    deleteForeverBtn.onclick = async () => {
-                        if (!confirm('Удалить навсегда?')) return;
-                        try {
-                            await db.collection('projects').doc(proj.id).delete();
-                            try {
-                                const fileRef = storage.refFromURL(proj.fileUrl);
-                                await fileRef.delete();
-                            } catch (storageError) {
-                                console.log("Файл уже удален или ссылка неверна:", storageError);
-                            }
-                            item.remove();
-                        } catch (dbError) {
-                            alert("Ошибка удаления: " + dbError.message);
-                        }
-                    };
-
-                    actionsDiv.appendChild(restoreBtn);
-                    actionsDiv.appendChild(deleteForeverBtn);
-                    item.appendChild(actionsDiv);
-                    grid.appendChild(item);
+                    const actions = document.createElement('div'); actions.style.cssText = 'position:absolute; bottom:0; left:0; width:100%; display:flex; justify-content:space-between; padding:8px; background:rgba(0,0,0,0.8);';
+                    const restore = document.createElement('button'); restore.innerText = '↺'; restore.style.cssText = 'background:var(--accent); color:#000; border:none; border-radius:4px; padding:6px 12px; cursor:pointer;';
+                    restore.onclick = async () => { await db.collection('projects').doc(proj.id).update({ isDeleted: false }); item.remove(); };
+                    const del = document.createElement('button'); del.innerText = '✕'; del.style.cssText = 'background:#ef4444; color:#fff; border:none; border-radius:4px; padding:6px 12px; cursor:pointer;';
+                    del.onclick = async () => { if (!confirm('Удалить навсегда?')) return; await db.collection('projects').doc(proj.id).delete(); try { const f = storage.refFromURL(proj.fileUrl); await f.delete(); } catch(e){} item.remove(); };
+                    actions.appendChild(restore); actions.appendChild(del); item.appendChild(actions); grid.appendChild(item);
                 });
-            } catch (error) {
-                grid.innerHTML = `<div style="color: red; text-align: center; grid-column: span 2;">Ошибка: ${error.message}</div>`;
-            }
+            } catch (error) { grid.innerHTML = `Ошибка: ${error.message}`; }
         };
         document.getElementById('closeTrashBtn').onclick = () => document.getElementById('trashOverlay').style.display = 'none';
 
-        // ==========================================
-        // 8. ТАЙМЛАЙН
-        // ==========================================
-        let clips = 0;
-        document.getElementById('addToTimelineBtn').onclick = function() {
-            const vTrack = document.querySelector('.track-video');
-            const aTrack = document.querySelector('.track-audio');
-            const startX = 30 + (clips * 120);
-            
-            const vClip = document.createElement('div');
-            vClip.className = 'clip clip-video';
-            vClip.style.width = '110px';
-            vClip.style.left = startX + 'px';
-            vClip.innerText = 'Клип ' + (clips + 1);
-            vTrack.appendChild(vClip);
+        // 9. 3D КАРТА И РЕЖИССЕР
+        function initMap() {
+            if (map) return;
+            map = L.map('map').setView([55.751244, 37.618423], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            map.pm.addControls({ position: 'topleft' });
+        }
 
-            const aClip = document.createElement('div');
-            aClip.className = 'clip clip-audio';
-            aClip.style.width = '110px';
-            aClip.style.left = startX + 'px';
-            aClip.innerText = 'Аудио ' + (clips + 1);
-            aTrack.appendChild(aClip);
-            clips++;
-            document.getElementById('timelineScroll').scrollLeft = document.getElementById('timelineScroll').scrollWidth;
+        document.getElementById('generate3dBtn').onclick = () => {
+            if (!map.pm.getGeomanDrawLayers().length) { alert("Выделите область!"); return; }
+            document.getElementById('mapContainer').style.display = 'none';
+            document.getElementById('threeContainer').style.display = 'block';
+            document.getElementById('directorPanel').style.display = 'flex';
+            generate3DScene();
         };
 
-        const timelineScroll = document.getElementById('timelineScroll');
-        const playhead = document.getElementById('playhead');
-        timelineScroll.addEventListener('click', (e) => {
-            if (e.target.classList.contains('clip') || e.target.classList.contains('track-label')) return;
-            const rect = timelineScroll.getBoundingClientRect();
-            const x = e.clientX - rect.left + timelineScroll.scrollLeft;
-            playhead.style.left = x + 'px';
-        });
+        document.getElementById('backToMapBtn').onclick = () => {
+            document.getElementById('threeContainer').style.display = 'none';
+            document.getElementById('mapContainer').style.display = 'block';
+            if (scene3D) { scene3D.clear(); }
+        };
+
+        function generate3DScene() {
+            const container = document.getElementById('canvas3d'); container.innerHTML = '';
+            scene3D = new THREE.Scene(); scene3D.background = new THREE.Color(0x222222);
+            camera3D = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer3D = new THREE.WebGLRenderer({ antialias: true }); renderer3D.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer3D.domElement);
+
+            scene3D.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const light = new THREE.DirectionalLight(0xffffff, 0.8); light.position.set(10, 20, 10); scene3D.add(light);
+
+            // Простая комната-коробка (заглушка)
+            const geo = new THREE.BoxGeometry(20, 10, 20);
+            const mat = new THREE.MeshLambertMaterial({ color: 0x333333, side: THREE.DoubleSide });
+            const room = new THREE.Mesh(geo, mat); room.position.y = 5; scene3D.add(room);
+
+            camera3D.position.set(0, 5, 15); camera3D.lookAt(0, 5, 0);
+
+            function animate() { requestAnimationFrame(animate); renderer3D.render(scene3D, camera3D); }
+            animate();
+        }
+
+        document.getElementById('addActorBtn').onclick = () => {
+            objectCounter++;
+            const actorGroup = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2, 16), new THREE.MeshLambertMaterial({ color: 0x10b981 }));
+            body.position.y = 1; actorGroup.add(body);
+            const head = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16), new THREE.MeshLambertMaterial({ color: 0xffdbac }));
+            head.position.y = 2.5; actorGroup.add(head);
+            actorGroup.position.set((Math.random() - 0.5) * 10, 0, (Math.random() - 0.5) * 10);
+            actorGroup.userData = { id: `Actor_${objectCounter}` };
+            scene3D.add(actorGroup); sceneObjects[`Actor_${objectCounter}`] = actorGroup;
+        };
+
+        document.getElementById('playSceneBtn').onclick = async function() {
+            const prompt = document.getElementById('directorPrompt').value; if (!prompt) return;
+            const btn = this; btn.innerText = 'Думает...'; btn.disabled = true;
+            try {
+                const availableObjects = Object.keys(sceneObjects);
+                // Используем Puter.js вместо Cloudflare
+                const response = await puter.ai.chat(`Ты режиссер. Объекты: ${availableObjects.join(', ')}. Запрос: "${prompt}". Верни ТОЛЬКО JSON массив действий. Пример: [{"object": "Actor_1", "target": "X:5, Z:5", "duration": 2000}]. Без лишнего текста.`);
+                const rawText = response.message?.content || response.text || response;
+                
+                const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const actions = JSON.parse(cleanJson);
+                
+                actions.forEach(act => {
+                    const targetObj = sceneObjects[act.object]; if (!targetObj) return;
+                    let targetPos;
+                    if (act.target && act.target.includes(':')) {
+                        const x = parseFloat(act.target.match(/X:(-?\d+\.?\d*)/)[1]);
+                        const z = parseFloat(act.target.match(/Z:(-?\d+\.?\d*)/)[1]);
+                        targetPos = { x, z };
+                    }
+                    if (targetPos) {
+                        const startPos = targetObj.position.clone(); const duration = act.duration || 2000; const startTime = Date.now();
+                        function animateMove() {
+                            const elapsed = Date.now() - startTime; const progress = Math.min(elapsed / duration, 1);
+                            targetObj.position.x = startPos.x + (targetPos.x - startPos.x) * progress;
+                            targetObj.position.z = startPos.z + (targetPos.z - startPos.z) * progress;
+                            if (progress < 1) requestAnimationFrame(animateMove);
+                        }
+                        animateMove();
+                    }
+                });
+            } catch (error) { alert("Ошибка режиссера: " + error.message); }
+            finally { btn.innerText = '▶ Играть'; btn.disabled = false; }
+        };
     </script>
 </body>
 </html>
