@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cometa AI Studio</title>
     
-    <!-- Firebase -->
+    <!-- Firebase (можно удалить, если не нужен) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -15,52 +15,113 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
         body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         * { box-sizing: border-box; }
-        
+
+        /* ШАПКА */
         .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #000; border-bottom: 1px solid #222; z-index: 10; }
         .logo { font-weight: 900; font-size: 18px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-controls { display: flex; gap: 6px; align-items: center; }
         .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; transition: 0.2s; }
         .icon-btn:hover { background: #222; }
         
-        .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        /* ЖЕЛТЫЙ ЭКРАН ВХОДА С ЛУЧАМИ */
+        #loginScreen {
+            display: none; position: fixed; inset: 0; z-index: 2000;
+            background: #fbc02d; /* Желтый фон */
+            align-items: center; justify-content: center; flex-direction: column;
+            overflow: hidden;
+        }
+        /* Белые лучи из центра */
+        #loginScreen::before {
+            content: ''; position: absolute; width: 200vw; height: 200vh;
+            background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg);
+            animation: rotateRays 30s linear infinite;
+        }
+        @keyframes rotateRays { 100% { transform: rotate(360deg); } }
         
-        /* ==========================================
-           КАСТОМНЫЙ ЛОАДЕР (ТВОЯ ИКОНКА)
-        ========================================== */
-        #mainLoader {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 140px; height: 140px;
-            display: none; z-index: 100;
+        .login-box {
+            position: relative; z-index: 2; width: 260px; height: 260px;
+            background: rgba(255,255,255,0.95); border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            text-align: center; padding: 20px; cursor: pointer;
         }
-        .loader-track {
-            fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round;
-        }
-        .loader-anim {
-            fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round;
-            /* Длина пути для анимации */
-            stroke-dasharray: 350; 
-            stroke-dashoffset: 350;
-            animation: loadDraw 3.5s linear infinite;
-        }
-        .loader-text {
-            fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9;
-        }
-        @keyframes loadDraw {
-            0% { stroke-dashoffset: 350; }
-            100% { stroke-dashoffset: 0; }
+        .login-box h2 { color: #333; margin: 0 0 10px 0; font-size: 26px; font-weight: 900; }
+        .login-box p { color: #555; font-size: 14px; line-height: 1.4; font-weight: 600; }
+        
+        .skip-btn {
+            position: absolute; top: 20px; right: 20px; z-index: 2;
+            background: rgba(0,0,0,0.2); color: #000; border: none; padding: 10px 20px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px;
         }
 
-        /* ЧАТ */
+        /* ВЕРРИТИ (АССИСТЕНТ) */
+        #verityContainer {
+            display: none; position: fixed; z-index: 3000;
+            width: 50px; height: 50px; cursor: grab; touch-action: none;
+        }
+        #verityContainer:active { cursor: grabbing; }
+        
+        .verity-face {
+            width: 50px; height: 50px; background: #ffd21e; border-radius: 50%;
+            position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: background 0.3s;
+        }
+        .verity-eye { width: 6px; height: 6px; background: #000; border-radius: 50%; position: absolute; top: 16px; transition: 0.3s; }
+        .verity-eye.left { left: 13px; }
+        .verity-eye.right { right: 13px; }
+        
+        .verity-mouth {
+            width: 16px; height: 6px; background: #000; border-radius: 0 0 10px 10px;
+            position: absolute; bottom: 12px; transition: height 0.2s;
+        }
+        
+        /* Эмоции Веррити */
+        .verity-face.angry { background: #ff5252; }
+        .verity-face.angry .verity-eye { top: 20px; transform: rotate(20deg); }
+        .verity-face.angry .verity-eye.right { transform: rotate(-20deg); }
+        .verity-face.angry .verity-mouth { height: 3px; border-radius: 10px 10px 0 0; bottom: 15px; width: 20px; }
+        
+        .verity-face.blush { background: #ffb8b8; }
+        .verity-face.blush::after {
+            content: ''; position: absolute; width: 30px; height: 10px; background: rgba(255,0,0,0.3);
+            border-radius: 50%; bottom: 8px; filter: blur(3px);
+        }
+        
+        .verity-face.talking .verity-mouth { animation: talk 0.2s infinite alternate; }
+        @keyframes talk { 0% { height: 6px; } 100% { height: 14px; } }
+
+        /* Кнопки под шариком */
+        .verity-controls {
+            position: absolute; top: 55px; left: -15px; display: flex; gap: 10px; opacity: 0; transition: 0.3s;
+        }
+        #verityContainer:hover .verity-controls, #verityContainer.active .verity-controls { opacity: 1; }
+        .v-btn {
+            width: 30px; height: 30px; background: #111; border: 1px solid #10b981; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* ЛОАДЕР */
+        .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; scroll-behavior: smooth; }
+        #mainLoader {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 140px; height: 140px; display: none; z-index: 100;
+        }
+        .loader-track { fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round; }
+        .loader-anim { fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 350; stroke-dashoffset: 350; animation: loadDraw 3.5s linear infinite; }
+        .loader-text { fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9; }
+        @keyframes loadDraw { 0% { stroke-dashoffset: 350; } 100% { stroke-dashoffset: 0; } }
+
+        /* ЧАТ И ИНТЕРФЕЙС */
         .chat-container { padding: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
         .message-row { display: flex; flex-direction: column; width: 100%; }
         .message-row.user { align-items: flex-end; }
         .message-row.bot { align-items: flex-start; }
-        
         .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 15px; line-height: 1.5; position: relative; word-wrap: break-word; }
         .message-row.user .message-bubble { background: #3b82f6; color: #fff; border-bottom-right-radius: 4px; }
         .message-row.bot .message-bubble { background: #222; color: #eee; border-bottom-left-radius: 4px; }
-        
-        .message-actions { margin-top: 5px; font-size: 12px; color: #888; cursor: pointer; display: flex; gap: 10px; }
+        .message-actions { margin-top: 5px; font-size: 12px; color: #888; cursor: pointer; }
         .message-actions span:hover { color: #10b981; }
 
         .edit-textarea { width: 100%; background: #000; border: 1px solid #10b981; color: #fff; padding: 10px; border-radius: 8px; font-size: 14px; resize: vertical; min-height: 80px; margin-bottom: 5px; }
@@ -76,66 +137,74 @@
         .control-panel { background: #111; border-top: 1px solid #333; padding: 10px 15px; }
         .input-wrapper { display: flex; gap: 10px; align-items: flex-end; max-width: 800px; margin: 0 auto; }
         textarea { flex: 1; height: 50px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 14px; font-size: 15px; resize: none; outline: none; }
-        textarea:focus { border-color: #10b981; }
         .send-btn { width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
         /* МОДАЛКИ */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
         .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; border: 1px solid #333; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
         .input-field { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 15px; font-size: 14px; }
         
-        /* ЖАНРЫ */
-        .genre-category { padding: 14px; background: #111; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #333; font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .genre-category:hover { border-color: #10b981; background: #1a1a1a; }
-        .genre-category.active { border-color: #10b981; color: #10b981; }
-        .genre-category::after { content: '▼'; font-size: 10px; transition: 0.3s; }
-        .genre-category.active::after { transform: rotate(180deg); }
-
+        .genre-category { padding: 14px; background: #111; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #333; font-size: 15px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .genre-list { display: none; margin-top: -5px; margin-bottom: 15px; padding: 10px; background: #0a0a0a; border-radius: 0 0 10px 10px; border: 1px solid #333; border-top: none; }
-        .genre-item { padding: 10px 12px; background: #1a1a1a; border-radius: 6px; margin-bottom: 6px; font-size: 14px; cursor: pointer; color: #ccc; transition: 0.2s; border: 1px solid transparent; }
-        .genre-item:hover { background: #222; color: #fff; border-color: #444; }
+        .genre-item { padding: 10px 12px; background: #1a1a1a; border-radius: 6px; margin-bottom: 6px; font-size: 14px; cursor: pointer; color: #ccc; }
         .genre-item.selected { background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981; font-weight: bold; }
 
-        /* ЯЗЫКИ */
         .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .lang-item { padding: 10px; background: #111; border-radius: 8px; cursor: pointer; border: 1px solid #222; font-size: 13px; text-align: center; }
-        .lang-item:hover { border-color: #10b981; background: #1a1a1a; }
+        .lang-item:hover { border-color: #10b981; }
 
         .audio-player { display: none; padding: 10px; background: #000; border-top: 1px solid #333; align-items: center; gap: 10px; }
-        .audio-player audio { width: 100%; height: 40px; }
-        
         .btn-primary { flex: 1; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
         .btn-secondary { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
+    <!-- ЭКРАН ВХОДА -->
+    <div id="loginScreen">
+        <button class="skip-btn" onclick="closeLoginScreen()">Пропустить</button>
+        <div class="login-box" onclick="handleDoubleTap(event)">
+            <h2>Cometa AI</h2>
+            <p>Коснитесь экрана дважды, чтобы призвать своего ИИ-помощника Verity</p>
+        </div>
+    </div>
+
+    <!-- АССИСТЕНТ VERITY -->
+    <div id="verityContainer" style="top: 70%; left: 80%;">
+        <div class="verity-face" id="verityFace">
+            <div class="verity-eye left"></div>
+            <div class="verity-eye right"></div>
+            <div class="verity-mouth"></div>
+        </div>
+        <div class="verity-controls">
+            <div class="v-btn" onclick="startVoiceInput()" title="Голос">🎤</div>
+            <div class="v-btn" onclick="openVerityChat()" title="Текст">💬</div>
+        </div>
+    </div>
+
+    <!-- ШАПКА -->
     <div class="header">
         <div class="logo">Cometa AI</div>
         <div class="header-controls">
-            <button class="icon-btn" id="openSettingsBtn" title="Настройки ИИ">⚙️</button>
-            <button class="icon-btn" id="openGenreBtn" title="Стиль картинок">🎨</button>
-            <button class="icon-btn" id="openLangBtn" title="Языки">🌐</button>
-            <button class="icon-btn" id="openMusicBtn" title="Фоновая музыка">🎵</button>
+            <button class="icon-btn" id="openSettingsBtn">⚙️</button>
+            <button class="icon-btn" id="openGenreBtn">🎨</button>
+            <button class="icon-btn" id="openLangBtn">🌐</button>
+            <button class="icon-btn" id="openMusicBtn">🎵</button>
+            <button class="icon-btn" id="loginBtn" style="width: auto; padding: 0 10px; border-radius: 20px; font-weight: bold;">Войти</button>
         </div>
     </div>
 
     <div class="content-area" id="contentArea">
-        
-        <!-- КАСТОМНЫЙ ЛОАДЕР -->
+        <!-- ЛОАДЕР -->
         <svg id="mainLoader" viewBox="0 0 100 100">
             <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4b74ff" />
-                    <stop offset="100%" stop-color="#51d5a7" />
+                    <stop offset="0%" stop-color="#4b74ff" /><stop offset="100%" stop-color="#51d5a7" />
                 </linearGradient>
             </defs>
-            <!-- Задний фон рамки -->
             <path class="loader-track" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
-            <!-- Анимированная линия -->
             <path class="loader-anim" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
-            <!-- Текст AI -->
             <text x="50" y="62" class="loader-text">AI</text>
         </svg>
 
@@ -146,34 +215,30 @@
     <div class="audio-player" id="audioPlayer">
         <audio id="bgMusic" loop></audio>
         <span style="font-size: 12px; color: #10b981;" id="musicTitle">Фон играет</span>
+        <button onclick="document.getElementById('bgMusic').pause()" style="background:none; border:none; color:#fff; cursor:pointer;">⏸</button>
     </div>
 
     <div class="control-panel">
         <div class="input-wrapper">
             <textarea id="aiPrompt" placeholder="Напиши сообщение..." rows="1" onkeypress="handleEnter(event)"></textarea>
-            <button class="send-btn" id="readTextBtn" title="Озвучить" onclick="speakChat()" style="background: #3b82f6;">🔊</button>
-            <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+            <button class="send-btn" onclick="speakChat()" style="background: #3b82f6;">🔊</button>
+            <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
-    <!-- ГЛАВНОЕ МЕНЮ НАСТРОЕК -->
+    <!-- МОДАЛКИ -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header"><span>⚙️ Настройки</span><button onclick="closeModal('settingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            
             <p style="font-size: 13px; color: #aaa; margin-top: 0;">Характер бота (System Prompt):</p>
-            <textarea id="systemPromptInput" class="input-field" style="height: 80px;" placeholder="Ты - дерзкий киберпанк-хакер..."></textarea>
+            <textarea id="systemPromptInput" class="input-field" style="height: 80px;"></textarea>
             <button class="btn-primary" onclick="saveSettings()">Сохранить характер</button>
-            
             <hr style="border-color:#333; margin: 15px 0;">
-            
             <p style="font-size: 13px; color: #aaa;">Управление чатом:</p>
-            <button class="btn-secondary" onclick="toggleView()" id="toggleViewBtn" style="background: #3b82f6; width: 100%;">📜 Переключить в режим сценария</button>
-            <button class="btn-secondary" onclick="clearChat()" style="background: #ef4444; width: 100%;">🗑️ Очистить всю историю</button>
-            <button class="btn-secondary" onclick="openRewindModal()" style="background: #f59e0b; color: #000; width: 100%;">⏳ Начать отсюда (Откат)</button>
-
+            <button class="btn-secondary" onclick="toggleView()" style="background: #3b82f6; width: 100%;">📜 Режим сценария</button>
+            <button class="btn-secondary" onclick="clearChat()" style="background: #ef4444; width: 100%;">🗑️ Очистить чат</button>
+            <button class="btn-secondary" onclick="openRewindModal()" style="background: #f59e0b; color: #000; width: 100%;">⏳ Начать отсюда</button>
             <hr style="border-color:#333; margin: 15px 0;">
-            
             <p style="font-size: 12px; color: #888;">API Ключ (OpenAI):</p>
             <input type="password" id="apiKeyInput" class="input-field" placeholder="sk-...">
             <button class="btn-primary" onclick="saveApiKey()" style="background:#3b82f6;">Обновить Ключ</button>
@@ -183,8 +248,7 @@
     <div class="modal" id="rewindModal">
         <div class="modal-content">
             <div class="modal-header"><span>⏳ Начать отсюда</span><button onclick="closeModal('rewindModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Всё, что ниже выбранного сообщения, удалится.</p>
-            <div id="rewindList" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            <div id="rewindList" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -197,7 +261,7 @@
 
     <div class="modal" id="langModal">
         <div class="modal-content">
-            <div class="modal-header"><span>🌐 Языки</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            <div class="modal-header"><span>🌐 Языки (152)</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
             <input type="text" id="langSearch" class="input-field" placeholder="Поиск языка..." oninput="filterLangs()">
             <div id="langList" class="lang-grid"></div>
         </div>
@@ -211,174 +275,362 @@
         </div>
     </div>
 
+    <div class="modal" id="verityChatModal">
+        <div class="modal-content" style="background: #2a2a2a;">
+            <div class="modal-header"><span>💬 Чат с Verity</span><button onclick="closeModal('verityChatModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            <div id="verityChatHistory" style="height: 200px; overflow-y: auto; background: #111; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px;">
+                <div style="font-size: 12px; color: #888;">Задай мне вопрос или попроси идею!</div>
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="verityInput" class="input-field" style="margin-bottom:0;" placeholder="Написать Verity...">
+                <button class="btn-primary" style="margin-bottom:0; padding: 10px;" onclick="sendVerityText()">➤</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         window.onerror = function(msg) { console.warn("Ошибка JS: ", msg); return false; };
 
-        let chatHistory = []; 
+        // --- НАСТРОЙКИ И ПЕРЕМЕННЫЕ ---
         let systemPrompt = localStorage.getItem('cometa_system_prompt') || "Ты полезный ассистент.";
         let selectedGenre = "Случайный";
+        let chatHistory = [];
         let isChatMode = true;
         let lastBotMessageText = "";
 
+        // --- ЭКРАН ЛОГИНА И VERITY ---
+        let loginScreen = document.getElementById('loginScreen');
+        let verityContainer = document.getElementById('verityContainer');
+        let verityFace = document.getElementById('verityFace');
+        let tapTimer = 0;
+        let angryClicks = 0;
+        
+        document.getElementById('loginBtn').onclick = () => loginScreen.style.display = 'flex';
+        function closeLoginScreen() { loginScreen.style.display = 'none'; }
+
+        // Двойной тап
+        function handleDoubleTap(e) {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - tapTimer;
+            if (tapLength < 300 && tapLength > 0) {
+                loginScreen.style.display = 'none';
+                verityContainer.style.display = 'block';
+                verityContainer.classList.add('active');
+                speakVerity("Привет! Я Веррити. Твой умный помощник. Я могу подсказать идею для книги или включить музыку. Просто нажми на микрофон или напиши мне!");
+                setTimeout(() => verityContainer.classList.remove('active'), 4000);
+            }
+            tapTimer = currentTime;
+        }
+
+        // Перетаскивание Verity
+        let isDragging = false;
+        let offsetX, offsetY;
+        verityContainer.addEventListener('mousedown', startDrag);
+        verityContainer.addEventListener('touchstart', startDrag, {passive: false});
+        
+        function startDrag(e) {
+            isDragging = false;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            offsetX = clientX - verityContainer.getBoundingClientRect().left;
+            offsetY = clientY - verityContainer.getBoundingClientRect().top;
+            
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('touchmove', drag, {passive: false});
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+        
+        function drag(e) {
+            e.preventDefault();
+            isDragging = true;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            verityContainer.style.left = (clientX - offsetX) + 'px';
+            verityContainer.style.top = (clientY - offsetY) + 'px';
+        }
+        
+        function stopDrag() {
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('touchmove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        // Клики по Verity
+        verityFace.addEventListener('click', () => {
+            if(isDragging) return;
+            angryClicks++;
+            if(angryClicks > 5) {
+                verityFace.classList.add('angry');
+                speakVerity("Прекрати меня тыкать! Это больно! Я ухожу.");
+                setTimeout(() => { 
+                    verityFace.classList.remove('angry'); 
+                    angryClicks = 0; 
+                    verityContainer.style.display = 'none'; // Уходит
+                    setTimeout(() => { verityContainer.style.display = 'block'; speakVerity("Ладно, я вернулся. Больше так не делай."); }, 5000);
+                }, 2000);
+            } else {
+                speakVerity("Хи-хи! Щекотно.");
+                verityFace.classList.add('blush');
+                setTimeout(() => verityFace.classList.remove('blush'), 1000);
+            }
+        });
+
+        // --- ГОЛОС VERITY ---
+        function speakVerity(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Останавливаем прошлую речь
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ru-RU';
+                utterance.pitch = 1.4; // Детский/милый голос
+                utterance.onstart = () => verityFace.classList.add('talking');
+                utterance.onend = () => verityFace.classList.remove('talking');
+                utterance.onerror = () => verityFace.classList.remove('talking');
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function startVoiceInput() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) { alert("Ваш браузер не поддерживает микрофон."); return; }
+            
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ru-RU';
+            recognition.interimResults = false;
+            
+            recognition.onstart = () => speakVerity("Я слушаю...");
+            recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                processVerityRequest(text);
+            };
+            recognition.start();
+        }
+
+        function openVerityChat() {
+            document.getElementById('verityChatModal').style.display = 'flex';
+        }
+
+        function sendVerityText() {
+            const input = document.getElementById('verityInput');
+            if(!input.value) return;
+            const text = input.value;
+            document.getElementById('verityChatHistory').innerHTML += `<div style="background:#3b82f6; padding:8px; border-radius:8px; align-self:flex-end; font-size:13px; color:#fff; max-width:80%;">${text}</div>`;
+            input.value = '';
+            processVerityRequest(text);
+        }
+
+        // --- ЛОГИКА VERITY (Музыка и Идеи) ---
+        async function processVerityRequest(text) {
+            const chatHistoryBox = document.getElementById('verityChatHistory');
+            chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+            const loadingId = 'loading-' + Date.now();
+            chatHistoryBox.innerHTML += `<div id="${loadingId}" style="font-size:12px; color:#aaa; font-style:italic;">Verity думает...</div>`;
+            chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+
+            // Проверка на музыку (голосовое управление)
+            const lowerText = text.toLowerCase();
+            if (lowerText.includes('включи музыку') || lowerText.includes('поставь песню')) {
+                const songName = text.replace(/включи музыку|поставь песню/gi, '').trim();
+                playMusicByVoice(songName);
+                document.getElementById(loadingId).remove();
+                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">Включаю музыку! 🎵</div>`;
+                speakVerity("С удовольствием! Включаю музыку.");
+                return;
+            }
+            if (lowerText.includes('выключи музыку')) {
+                document.getElementById('bgMusic').pause();
+                document.getElementById(loadingId).remove();
+                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">Музыка выключена. ⏸</div>`;
+                speakVerity("Музыка выключена.");
+                return;
+            }
+
+            // Обращение к OpenAI
+            const apiKey = localStorage.getItem('cometa_api_key');
+            if(apiKey) {
+                try {
+                    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                        body: JSON.stringify({ 
+                            model: "gpt-3.5-turbo", 
+                            messages: [
+                                { role: 'system', content: "Ты - Веррити, маленький желтый шарик-помощник на сайте Cometa AI. Ты умеешь придумывать идеи для книг, музыки, сценариев. Отвечай кратко, мило, с эмодзи. Если тебя просят идею, сгенерируй качественный промпт для нейросети." },
+                                { role: 'user', content: text }
+                            ] 
+                        })
+                    });
+                    const data = await res.json();
+                    const reply = data.choices[0].message.content;
+                    
+                    document.getElementById(loadingId).remove();
+                    chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${reply}</div>`;
+                    chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+                    
+                    speakVerity(reply);
+                    verityFace.classList.add('blush');
+                    setTimeout(() => verityFace.classList.remove('blush'), 2000);
+                    
+                } catch(e) { 
+                    document.getElementById(loadingId).remove();
+                    speakVerity("Ой, у меня заклинило мозги. Проверь API ключ."); 
+                }
+            } else {
+                // Если ключа нет
+                setTimeout(() => {
+                    document.getElementById(loadingId).remove();
+                    let reply = "";
+                    if(text.includes('идея') || text.includes('идею')) {
+                        reply = "Вот идея промпта: 'Напиши рассказ про осенний лес, где деревья шепчутся о прошлом'. Скопируй и вставь в чат!";
+                        verityFace.classList.add('blush');
+                        // Подсветка кнопки (как ты просил)
+                        const promptArea = document.getElementById('aiPrompt');
+                        promptArea.style.borderColor = '#10b981';
+                        promptArea.style.boxShadow = '0 0 10px #10b981';
+                        setTimeout(() => { promptArea.style.borderColor = '#333'; promptArea.style.boxShadow = 'none'; }, 3000);
+                    } else {
+                        reply = "Я бы с радостью ответила, но хозяин не дал мне API ключ. Добавь его в настройках (⚙️)!";
+                        verityFace.classList.add('angry');
+                    }
+                    chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${reply}</div>`;
+                    speakVerity(reply);
+                    setTimeout(() => verityFace.classList.remove('blush', 'angry'), 3000);
+                }, 1000);
+            }
+        }
+
+        // Включение музыки (демо-трек)
+        function playMusicByVoice(songName) {
+            const bgMusic = document.getElementById('bgMusic');
+            // Используем демо-трек, так как нет реального API
+            const randomMusic = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
+            bgMusic.src = randomMusic;
+            document.getElementById('audioPlayer').style.display = 'flex';
+            document.getElementById('musicTitle').innerText = songName || "Случайный трек";
+            bgMusic.volume = 0.5;
+            bgMusic.play();
+        }
+
+        // --- ОСНОВНОЙ ЧАТ (COMETA) ---
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('systemPromptInput').value = systemPrompt;
             document.getElementById('apiKeyInput').value = localStorage.getItem('cometa_api_key') || '';
             if (!localStorage.getItem('cometa_api_key')) document.getElementById('settingsModal').style.display = 'flex';
-            
-            addMessageToChat('bot', "Привет! Я готов к работе. Открой настройки ⚙️, чтобы задать мой характер, и давай начнем!");
+            addMessageToChat('bot', "Привет! Я Cometa AI. Настрой меня в ⚙️ и давай начнем!");
         });
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
+        
         function saveSettings() {
             systemPrompt = document.getElementById('systemPromptInput').value;
             localStorage.setItem('cometa_system_prompt', systemPrompt);
-            alert("Характер ИИ сохранен!");
-            closeModal('settingsModal');
+            alert("Характер сохранен!"); closeModal('settingsModal');
         }
-
+        
         function saveApiKey() {
             const key = document.getElementById('apiKeyInput').value.trim();
-            if (key.length > 10) {
-                localStorage.setItem('cometa_api_key', key);
-                alert("Ключ сохранен!");
-            }
+            if (key.length > 10) { localStorage.setItem('cometa_api_key', key); alert("Ключ сохранен!"); }
         }
         document.getElementById('openSettingsBtn').onclick = () => document.getElementById('settingsModal').style.display = 'flex';
-
-        function openRewindModal() {
-            closeModal('settingsModal');
-            const list = document.getElementById('rewindList');
-            list.innerHTML = '';
-            
-            if (chatHistory.length === 0) {
-                list.innerHTML = '<div style="color:#888; text-align:center;">История пуста</div>';
-            } else {
-                chatHistory.forEach((msg, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'lang-item';
-                    const shortText = msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text;
-                    div.innerHTML = `<strong>${msg.role === 'user' ? 'Вы' : 'ИИ'}:</strong> ${shortText}`;
-                    div.onclick = () => rewindTo(index);
-                    list.appendChild(div);
-                });
-            }
-            document.getElementById('rewindModal').style.display = 'flex';
-        }
-
-        async function rewindTo(index) {
-            closeModal('rewindModal');
-            const msg = chatHistory[index];
-            
-            if (msg.role === 'user') {
-                chatHistory = chatHistory.slice(0, index + 1);
-                renderChat();
-                sendToAPI(); 
-            } else if (msg.role === 'bot') {
-                chatHistory = chatHistory.slice(0, index);
-                renderChat();
-                if (chatHistory.length > 0) sendToAPI(); 
-            }
-        }
 
         function renderChat() {
             const container = document.getElementById('chatContainer');
             container.innerHTML = '';
-            
             chatHistory.forEach((msg, index) => {
                 const row = document.createElement('div');
                 row.className = `message-row ${msg.role}`;
-                
                 const bubble = document.createElement('div');
                 bubble.className = 'message-bubble';
                 bubble.innerHTML = msg.text.replace(/\n/g, '<br>');
-                
                 row.appendChild(bubble);
-                
                 if (index === chatHistory.length - 1) {
                     const actions = document.createElement('div');
                     actions.className = 'message-actions';
                     actions.innerHTML = `<span onclick="editMessage(${index})">✏️ Редактировать</span>`;
                     row.appendChild(actions);
                 }
-                
                 container.appendChild(row);
             });
-            
-            const contentArea = document.getElementById('contentArea');
-            contentArea.scrollTop = contentArea.scrollHeight;
+            document.getElementById('contentArea').scrollTop = document.getElementById('contentArea').scrollHeight;
         }
 
         function addMessageToChat(role, text) {
             chatHistory.push({ role, text });
-            if (role === 'bot') lastBotMessageText = text;
+            if(role === 'bot') lastBotMessageText = text;
             renderChat();
         }
 
         function editMessage(index) {
             const msg = chatHistory[index];
-            const container = document.getElementById('chatContainer');
-            const rows = container.querySelectorAll('.message-row');
-            const targetRow = rows[index];
-            
-            targetRow.innerHTML = `
+            const rows = document.getElementById('chatContainer').querySelectorAll('.message-row');
+            rows[index].innerHTML = `
                 <textarea class="edit-textarea" id="editInput-${index}">${msg.text}</textarea>
                 <div class="edit-buttons">
                     <button class="btn-small btn-save" onclick="saveEditedMessage(${index})">Сохранить</button>
                     <button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button>
-                </div>
-            `;
+                </div>`;
         }
 
         function saveEditedMessage(index) {
-            const newText = document.getElementById(`editInput-${index}`).value;
-            chatHistory[index].text = newText;
-            if (chatHistory[index].role === 'bot') lastBotMessageText = newText;
+            chatHistory[index].text = document.getElementById('editInput-'+index).value;
+            if(chatHistory[index].role === 'bot') lastBotMessageText = chatHistory[index].text;
             renderChat();
         }
 
-        function clearChat() {
-            if(confirm("Очистить всю историю чата?")) {
-                chatHistory = [];
-                lastBotMessageText = "";
-                addMessageToChat('bot', "Чат очищен. О чем поговорим?");
-                closeModal('settingsModal');
+        function clearChat() { 
+            chatHistory = []; 
+            addMessageToChat('bot', 'Чат очищен.'); 
+            closeModal('settingsModal'); 
+        }
+
+        function openRewindModal() {
+            closeModal('settingsModal');
+            const list = document.getElementById('rewindList');
+            list.innerHTML = '';
+            chatHistory.forEach((msg, index) => {
+                const div = document.createElement('div');
+                div.className = 'lang-item';
+                const shortText = msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text;
+                div.innerHTML = `<strong>${msg.role === 'user' ? 'Вы' : 'ИИ'}:</strong> ${shortText}`;
+                div.onclick = () => rewindTo(index);
+                list.appendChild(div);
+            });
+            document.getElementById('rewindModal').style.display = 'flex';
+        }
+
+        async function rewindTo(index) {
+            closeModal('rewindModal');
+            const msg = chatHistory[index];
+            if (msg.role === 'user') {
+                chatHistory = chatHistory.slice(0, index + 1);
+                renderChat(); sendToAPI(); 
+            } else if (msg.role === 'bot') {
+                chatHistory = chatHistory.slice(0, index);
+                renderChat(); if (chatHistory.length > 0) sendToAPI(); 
             }
         }
 
-        function handleEnter(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        }
+        function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
         function sendMessage() {
             const input = document.getElementById('aiPrompt');
-            const text = input.value.trim();
-            if (!text) return;
-
-            addMessageToChat('user', text);
+            if (!input.value.trim()) return;
+            addMessageToChat('user', input.value.trim());
             input.value = '';
             sendToAPI();
         }
 
         async function sendToAPI() {
             const apiKey = localStorage.getItem('cometa_api_key');
-            if (!apiKey) {
-                alert("Введите API ключ в настройках (⚙️)!");
-                document.getElementById('settingsModal').style.display = 'flex';
-                return;
-            }
+            if (!apiKey) { alert("Введите API ключ!"); document.getElementById('settingsModal').style.display = 'flex'; return; }
 
             document.getElementById('mainLoader').style.display = 'block';
-            document.getElementById('sendBtn').disabled = true;
-
+            
             try {
                 let messages = [{ role: 'system', content: systemPrompt }];
-                chatHistory.forEach(msg => {
-                    messages.push({ role: msg.role === 'bot' ? 'assistant' : 'user', content: msg.text });
-                });
+                chatHistory.forEach(msg => messages.push({ role: msg.role === 'bot' ? 'assistant' : 'user', content: msg.text }));
 
                 const res = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: 'POST',
@@ -388,161 +640,58 @@
                 
                 if (!res.ok) throw new Error("Ошибка API");
                 const data = await res.json();
-                const botReply = data.choices[0].message.content;
-                
-                addMessageToChat('bot', botReply);
+                addMessageToChat('bot', data.choices[0].message.content);
 
-            } catch (e) {
-                alert("Ошибка ИИ: " + e.message);
-            } finally {
-                document.getElementById('mainLoader').style.display = 'none';
-                document.getElementById('sendBtn').disabled = false;
-            }
+            } catch (e) { alert("Ошибка ИИ: " + e.message); } 
+            finally { document.getElementById('mainLoader').style.display = 'none'; }
         }
 
-        function speakChat() {
-            if (!lastBotMessageText) { alert("Нет текста для озвучки."); return; }
-            const bgMusic = document.getElementById('bgMusic');
-            let originalVolume = bgMusic.volume;
-            if (!bgMusic.paused) bgMusic.volume = 0.1; 
-
-            const utterance = new SpeechSynthesisUtterance(lastBotMessageText);
-            utterance.lang = 'ru-RU';
-            utterance.onend = () => { if (!bgMusic.paused) bgMusic.volume = originalVolume; };
-            utterance.onerror = () => { if (!bgMusic.paused) bgMusic.volume = originalVolume; };
-            
-            window.speechSynthesis.speak(utterance);
-        }
+        function speakChat() { if(lastBotMessageText) speakVerity(lastBotMessageText); }
 
         function toggleView() {
             isChatMode = !isChatMode;
-            const chatDiv = document.getElementById('chatContainer');
-            const scriptDiv = document.getElementById('scriptContainer');
-            const btn = document.getElementById('toggleViewBtn');
-
-            if (isChatMode) {
-                btn.innerText = "📜 Переключить в режим сценария";
-                chatDiv.style.display = 'flex';
-                scriptDiv.style.display = 'none';
-            } else {
-                btn.innerText = "💬 Вернуться в режим чата";
-                chatDiv.style.display = 'none';
-                scriptDiv.style.display = 'block';
-                generateScriptWithImages();
-            }
+            document.getElementById('chatContainer').style.display = isChatMode ? 'flex' : 'none';
+            document.getElementById('scriptContainer').style.display = isChatMode ? 'none' : 'block';
+            if (!isChatMode) generateScriptWithImages();
             closeModal('settingsModal');
         }
 
         async function generateScriptWithImages() {
-            const scriptDiv = document.getElementById('scriptContainer');
             document.getElementById('mainLoader').style.display = 'block';
-            scriptDiv.innerHTML = '';
-            
-            let fullText = "";
-            chatHistory.forEach(msg => {
-                if (msg.role === 'user') fullText += `**Вы:** ${msg.text}\n\n`;
-                else fullText += `${msg.text}\n\n`;
-            });
-
-            const paragraphs = fullText.split('\n').filter(p => p.trim().length > 0);
-            
-            let imgInterval = 0;
-            if (paragraphs.length <= 10) imgInterval = 10; 
-            else if (paragraphs.length > 10 && paragraphs.length <= 100) imgInterval = 50;
-            else if (paragraphs.length > 100) imgInterval = 100;
-
             let finalHTML = '';
             const stylePrompt = selectedGenre !== "Случайный" ? `, стиль: ${selectedGenre}` : '';
-
-            if (paragraphs.length <= 10) {
-                const firstPrompt = paragraphs[0] || "Сцена";
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(firstPrompt.substring(0, 100) + stylePrompt)}?width=1024&height=1024&nologo=true`;
-                finalHTML += `<img src="${imgUrl}" alt="Обложка">`;
-            }
-
-            for (let i = 0; i < paragraphs.length; i++) {
-                finalHTML += `<p>${paragraphs[i].replace(/\*\*Вы:\*\*/g, '<strong style="color:#3b82f6;">Вы:</strong>')}</p>`;
-                
-                if (imgInterval > 0 && (i + 1) % imgInterval === 0 && (i + 1) !== paragraphs.length) {
-                    const imgPrompt = paragraphs[i].substring(0, 150) + stylePrompt; 
-                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imgPrompt)}?width=1024&height=1024&nologo=true`;
-                    finalHTML += `<img src="${imgUrl}" alt="Иллюстрация">`;
+            chatHistory.forEach((msg, i) => {
+                finalHTML += `<p><strong>${msg.role === 'user' ? 'Вы:' : 'ИИ:'}</strong> ${msg.text}</p>`;
+                if ((i + 1) % 10 === 0 || i === 0) {
+                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(msg.text.substring(0, 100) + stylePrompt)}?width=1024&height=1024&nologo=true`;
+                    finalHTML += `<img src="${imgUrl}">`;
                 }
-            }
-
-            setTimeout(() => { 
-                scriptDiv.innerHTML = finalHTML; 
-                document.getElementById('mainLoader').style.display = 'none';
-            }, 1500);
+            });
+            setTimeout(() => { document.getElementById('scriptContainer').innerHTML = finalHTML; document.getElementById('mainLoader').style.display = 'none'; }, 1500);
         }
 
-        const bgMusic = document.getElementById('bgMusic');
-        document.getElementById('openMusicBtn').onclick = () => document.getElementById('musicModal').style.display = 'flex';
-        document.getElementById('musicInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            bgMusic.src = URL.createObjectURL(file);
-            document.getElementById('audioPlayer').style.display = 'flex';
-            document.getElementById('musicTitle').innerText = file.name;
-            bgMusic.play();
-            closeModal('musicModal');
-        };
-
-        // ЖАНРЫ
+        // --- ЖАНРЫ И ЯЗЫКИ ---
         const genres = {
             "Стили": ["Случайный", "Киберпанк", "Фэнтези", "Аниме", "Реализм", "Акварель", "Сюрреализм", "Пиксель-арт", "Дарк-фэнтези", "Стимпанк"],
-            "Настроения (Музыка)": ["Григорианский хорал", "Знаменное пение", "Мадригал", "Шаманские ритмы", "Суфийская каввали", "Фуга", "Токката", "Симфония", "Ноктюрн", "Импрессионизм", "Минимализм", "Атональность", "Русская народная", "Кельтская (джига)", "Фламенко", "Индийская (рага)", "Арабская (макам)", "Африканские ритмы", "Балканский фолк", "Японская", "Бельканто", "Горловое пение", "Йодль", "Скэт", "Битбокс", "Плачи", "Дельта-блюз", "Буги-вуги", "Свинг", "Бибоп", "Кул-джаз", "Фри-джаз", "Босса-нова", "Рок-н-ролл", "Психоделик", "Прогрессив", "Панк-рок", "Готик-рок", "Гранж", "Шугейз", "Мат-рок", "Хэви-метал", "Трэш", "Дэт-метал", "Блэк-метал", "Дум-метал", "Фолк-метал", "Металкор", "Пост-метал", "Синти-поп", "Европоп", "Диско", "K-pop", "J-pop", "Пауэр-баллада", "Old School", "G-funk", "Trap", "Drill", "Lo-fi hip-hop", "Phonk", "Cloud rap", "Техно", "Хаус", "Транс", "Драм-н-бейс", "Дабстеп", "IDM", "Эмбиент", "Synthwave", "Hardstyle", "Breakcore", "Регги", "Ска", "Сальса", "Бачата", "Кумбия", "Самба", "Классический R&B", "Neo-soul", "Фанк", "Go-go", "Индастриал", "Noise", "Field recordings", "Конкретная музыка", "Опера", "Мюзикл", "Саундтрек", "Chiptune (8-bit)"]
+            "Настроения": ["Григорианский хорал", "Шаманские ритмы", "Симфония", "Минимализм", "Фламенко", "Блюз", "Свинг", "Панк-рок", "Дэт-метал", "Синти-поп", "Trap", "Phonk", "Техно", "Эмбиент", "Регги", "Фанк", "Индастриал", "Chiptune"]
         };
-
         function renderGenres() {
             const container = document.getElementById('genreContainer');
-            for (const [category, items] of Object.entries(genres)) {
-                const catDiv = document.createElement('div'); 
-                catDiv.className = 'genre-category'; 
-                catDiv.innerText = category;
-                
-                const listDiv = document.createElement('div'); 
-                listDiv.className = 'genre-list';
-                
-                items.forEach(item => {
-                    const itemDiv = document.createElement('div'); 
-                    itemDiv.className = 'genre-item'; 
-                    itemDiv.innerText = item;
-                    if (item === selectedGenre) itemDiv.classList.add('selected');
-                    
-                    itemDiv.onclick = () => { 
-                        selectedGenre = item; 
-                        document.querySelectorAll('.genre-item').forEach(el => el.classList.remove('selected'));
-                        itemDiv.classList.add('selected');
-                        closeModal('genreModal'); 
-                        alert("Стиль иллюстраций: " + item); 
-                    };
-                    listDiv.appendChild(itemDiv);
+            for (const [cat, items] of Object.entries(genres)) {
+                const div = document.createElement('div'); div.className = 'genre-category'; div.innerText = cat;
+                const list = document.createElement('div'); list.className = 'genre-list';
+                items.forEach(i => {
+                    const item = document.createElement('div'); item.className = 'genre-item'; item.innerText = i;
+                    item.onclick = () => { selectedGenre = i; closeModal('genreModal'); alert("Стиль: " + i); };
+                    list.appendChild(item);
                 });
-                
-                catDiv.onclick = () => { 
-                    const isHidden = listDiv.style.display === 'block' || listDiv.style.display === '';
-                    document.querySelectorAll('.genre-list').forEach(el => el.style.display = 'none');
-                    document.querySelectorAll('.genre-category').forEach(el => el.classList.remove('active'));
-                    
-                    if (isHidden) {
-                        listDiv.style.display = 'none';
-                        catDiv.classList.remove('active');
-                    } else {
-                        listDiv.style.display = 'block';
-                        catDiv.classList.add('active');
-                    }
-                };
-                container.appendChild(catDiv); 
-                container.appendChild(listDiv);
+                div.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
+                container.appendChild(div); container.appendChild(list);
             }
         }
         renderGenres();
         document.getElementById('openGenreBtn').onclick = () => document.getElementById('genreModal').style.display = 'flex';
 
-        // ==========================================
-        // 150+ ЯЗЫКОВ (ПОЛНЫЙ СПИСОК, БЕЗ СОКРАЩЕНИЙ)
-        // ==========================================
         const allLangs = [
             { c: 'ru', n: 'Русский' }, { c: 'en', n: 'English' }, { c: 'uk', n: 'Українська' }, { c: 'be', n: 'Беларуская' }, 
             { c: 'de', n: 'Deutsch' }, { c: 'fr', n: 'Français' }, { c: 'es', n: 'Español' }, { c: 'pt', n: 'Português' }, 
@@ -570,37 +719,52 @@
             { c: 'pi', n: 'Pali' }, { c: 'haw', n: 'Hawaiian' }, { c: 'mi', n: 'Māori' }, { c: 'sm', n: 'Samoan' },
             { c: 'to', n: 'Tongan' }, { c: 'fj', n: 'Fijian' }, { c: 'qu', n: 'Quechua' }, { c: 'ay', n: 'Aymara' },
             { c: 'gn', n: 'Guaraní' }, { c: 'nah', n: 'Nahuatl' }, { c: 'yua', n: 'Yucatec Maya' }, { c: 'iu', n: 'Inuktitut' },
-            { c: 'kl', n: 'Kalaallisut' }, { c: 'chr', n: 'Cherokee' }, { c: 'nv', n: 'Navajo' }, { c: 'oj', n: 'Ojibwe' }
+            { c: 'kl', n: 'Kalaallisut' }, { c: 'chr', n: 'Cherokee' }, { c: 'nv', n: 'Navajo' }, { c: 'oj', n: 'Ojibwe' },
+            { c: 'cu', n: 'Словѣ́ньскъ' }, { c: 'lb', n: 'Lëtzebuergesch' }, { c: 'fo', n: 'Føroyskt' }, { c: 'ca', n: 'Català' },
+            { c: 'gl', n: 'Galego' }, { c: 'oc', n: 'Occitan' }, { c: 'co', n: 'Corsu' }, { c: 'sc', n: 'Sardu' },
+            { c: 'rm', n: 'Rumantsch' }, { c: 'fur', n: 'Furlan' }, { c: 'kv', n: 'Коми' }, { c: 'udm', n: 'Удмурт' },
+            { c: 'mhr', n: 'Марий' }, { c: 'myv', n: 'Эрзянь' }, { c: 'tk', n: 'Türkmençe' }, { c: 'ba', n: 'Башҡорт' },
+            { c: 'tt', n: 'Татарча' }, { c: 'cv', n: 'Чӑвашла' }, { c: 'sah', n: 'Саха' }, { c: 'os', n: 'Ирон' },
+            { c: 'ce', n: 'Нохчийн' }, { c: 'av', n: 'Авар' }, { c: 'kbd', n: 'Адыгэбзэ' }, { c: 'bo', n: 'བོད་སྐད་' },
+            { c: 'ug', n: 'ئۇيغۇرچە' }, { c: 'yue', n: '粵語' }, { c: 'wuu', n: '吴语' }, { c: 'nan', n: '闽南语' },
+            { c: 'hak', n: '客家话' }, { c: 'jv', n: 'Basa Jawa' }, { c: 'su', n: 'Basa Sunda' }, { c: 'ceb', n: 'Cebuano' },
+            { c: 'as', n: 'অসমীয়া' }, { c: 'or', n: 'ଓଡ଼ିଆ' }, { c: 'sd', n: 'سنڌي' }, { c: 'xh', n: 'isiXhosa' },
+            { c: 'st', n: 'Sesotho' }, { c: 'tn', n: 'Setswana' }, { c: 'mg', n: 'Malagasy' }, { c: 'ti', n: 'ትግርኛ' },
+            { c: 'om', n: 'Oromoo' }, { c: 'wo', n: 'Wolof' }, { c: 'ty', n: 'Reo Tahiti' }, { c: 'cr', n: 'Cree' },
+            { c: 'ia', n: 'Interlingua' }, { c: 'vo', n: 'Volapük' }, { c: 'jbo', n: 'Lojban' }, { c: 'lfn', n: 'Lingua Franca Nova' },
+            { c: 'afh', n: 'Afrihili' }
         ];
 
         function renderLangs(filter = "") {
             const list = document.getElementById('langList');
             list.innerHTML = '';
-            // Фильтруем список
             const filtered = allLangs.filter(l => l.n.toLowerCase().includes(filter.toLowerCase()) || l.c.includes(filter.toLowerCase()));
-            
-            if (filtered.length === 0) {
-                list.innerHTML = '<div style="color:#888; text-align:center; grid-column: span 2;">Ничего не найдено</div>';
-            } else {
+            if (filtered.length === 0) list.innerHTML = '<div style="color:#888; text-align:center; grid-column: span 2;">Ничего не найдено</div>';
+            else {
                 filtered.forEach(l => {
-                    const d = document.createElement('div'); 
-                    d.className = 'lang-item'; 
-                    d.innerText = l.n;
+                    const d = document.createElement('div'); d.className = 'lang-item'; d.innerText = l.n;
                     d.onclick = () => { alert("Выбран язык: " + l.n); closeModal('langModal'); };
                     list.appendChild(d);
                 });
             }
         }
-
-        function filterLangs() {
-            renderLangs(document.getElementById('langSearch').value);
-        }
-
+        function filterLangs() { renderLangs(document.getElementById('langSearch').value); }
         renderLangs();
         document.getElementById('openLangBtn').onclick = () => { 
-            document.getElementById('langSearch').value = '';
-            renderLangs();
-            document.getElementById('langModal').style.display = 'flex'; 
+            document.getElementById('langSearch').value = ''; renderLangs(); document.getElementById('langModal').style.display = 'flex'; 
+        };
+
+        // Загрузка своей музыки
+        document.getElementById('openMusicBtn').onclick = () => document.getElementById('musicModal').style.display = 'flex';
+        document.getElementById('musicInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const bgMusic = document.getElementById('bgMusic');
+            bgMusic.src = URL.createObjectURL(file);
+            document.getElementById('audioPlayer').style.display = 'flex';
+            document.getElementById('musicTitle').innerText = file.name;
+            bgMusic.play();
+            closeModal('musicModal');
         };
     </script>
 </body>
