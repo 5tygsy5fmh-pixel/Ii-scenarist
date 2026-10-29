@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cometa AI</title>
+    <title>AI Studio PRO</title>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -11,255 +11,130 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     
-    <!-- Puter.js -->
+    <!-- Puter.js для видео -->
     <script src="https://js.puter.com/v2/"></script>
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
-    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        :root {
-            --bg: #050505;
-            --surface: #121212;
-            --border: #333333;
-            --text: #ffffff;
-            --text-secondary: #888888;
-            --accent: #10b981;
-            --radius-card: 0px;
-            --radius-btn: 8px;
-        }
-
-        body { 
-            margin: 0; padding: 0; background-color: var(--bg); color: var(--text); 
-            font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; 
-            display: flex; flex-direction: column; 
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+        body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         * { box-sizing: border-box; }
         
         /* Шапка */
-        .header { 
-            display: flex; align-items: center; justify-content: space-between; 
-            padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border); 
-            z-index: 10; 
-        }
-        .logo-container { display: flex; align-items: center; gap: 8px; }
-        .logo-text { display: flex; flex-direction: column; align-items: flex-start; }
-        .logo-title { font-weight: 700; font-size: 16px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); }
-        .logo-subtitle { font-size: 9px; font-weight: 500; color: var(--text-secondary); text-transform: none; letter-spacing: 0.5px; margin-top: -2px; }
-        
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #000; border-bottom: 1px solid #222; z-index: 10; }
+        .logo { font-weight: 900; font-size: 16px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-controls { display: flex; gap: 8px; align-items: center; }
-        .user-btn { 
-            background: var(--surface); border: 1px solid var(--border); color: var(--text); 
-            padding: 8px 12px; border-radius: var(--radius-btn); font-size: 13px; 
-            font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center;
-        }
+        .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
         
         /* Зона предпросмотра */
-        .preview-area { 
-            flex: 1; background: var(--bg); display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; position: relative; overflow: hidden; 
-        }
-        .preview-placeholder { text-align: center; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
+        .preview-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .preview-placeholder { text-align: center; color: #444; font-size: 14px; font-weight: 600; padding: 20px; }
         
         /* Панель управления */
-        .control-panel { background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
-        .tools { display: flex; padding: 10px 16px; gap: 8px; overflow-x: auto; border-bottom: 1px solid var(--border); }
+        .control-panel { background: #111; border-top: 1px solid #333; display: flex; flex-direction: column; }
+        .tools { display: flex; padding: 10px; gap: 10px; overflow-x: auto; border-bottom: 1px solid #222; }
         .tools::-webkit-scrollbar { display: none; }
-        .tool-btn { 
-            flex: 0 0 auto; background: var(--surface); border: 1px solid var(--border); 
-            color: var(--text-secondary); padding: 8px 14px; border-radius: var(--radius-btn); 
-            font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .tool-btn.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .tool-btn { flex: 0 0 auto; background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .tool-btn.active { background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; }
         
-        .input-area { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
-        textarea { 
-            width: 100%; height: 50px; background: var(--surface); border: 1px solid var(--border); 
-            border-radius: var(--radius-btn); color: var(--text); padding: 12px; font-size: 14px; 
-            resize: none; outline: none; font-family: 'Inter', sans-serif; transition: 0.2s;
-        }
-        textarea:focus { border-color: var(--accent); }
+        .input-area { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        textarea { width: 100%; height: 60px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 12px; font-size: 14px; resize: none; outline: none; }
+        textarea:focus { border-color: #10b981; }
         
-        .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
-        .btn-primary { 
-            flex: 1; padding: 14px; background: var(--accent); border: none; 
-            border-radius: var(--radius-btn); color: var(--bg); font-size: 14px; 
-            font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center;
-        }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .action-buttons { display: flex; gap: 10px; }
+        .btn-primary { flex: 1; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.7; }
         
-        /* Оверлеи */
-        #galleryOverlay, #trashOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; flex-direction: column; }
-        .gallery-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .gallery-grid { padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; overflow-y: auto; flex: 1; align-content: start; }
-        .gallery-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); position: relative; aspect-ratio: 1; cursor: pointer; overflow: hidden; }
-        .gallery-item img, .gallery-item video { width: 100%; height: 100%; object-fit: cover; }
+        /* Модальные окна (Языки и Музыка) */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; border: 1px solid #333; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .lang-item { padding: 12px; background: #111; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 1px solid #222; }
+        .lang-item:hover { border-color: #10b981; }
         
-        .loader { display: none; width: 24px; height: 24px; border: 2px solid var(--border); border-top: 2px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Карта и 3D */
-        #mapContainer, #threeContainer { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5; }
-        #map { width: 100%; height: 100%; }
-        #canvas3d { width: 100%; height: 100%; background: #000; }
-        
-        /* Таймлайн */
-        .timeline { height: 70px; background: var(--bg); border-top: 1px solid var(--border); display: flex; flex-direction: column; }
-        .timeline-header { padding: 6px 16px; font-size: 10px; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; }
-        .track { height: 24px; margin-bottom: 2px; padding-left: 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); font-size: 10px; color: var(--text-secondary); }
+        /* Плеер */
+        .audio-player { display: none; padding: 10px; background: #000; border-top: 1px solid #333; align-items: center; gap: 10px; }
+        .audio-player audio { width: 100%; height: 40px; }
 
-        /* Анимация загрузки (Cometa AI) */
-        #preloader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: flex;
-            justify-content: center; align-items: center;
-            transition: opacity 0.5s ease;
-        }
-        .loader-svg { width: 120px; height: 120px; }
-        .liquid-line {
-            fill: none;
-            stroke: url(#cometGradient);
-            stroke-width: 8;
-            stroke-linecap: round;
-            stroke-dasharray: 200 1000; 
-            animation: flow 2s linear infinite;
-        }
-        @keyframes flow {
-            0% { stroke-dashoffset: 1000; }
-            100% { stroke-dashoffset: 0; }
-        }
+        .loader { display: none; width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid #10b981; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- Прелоадер Cometa AI -->
-    <div id="preloader">
-        <svg class="loader-svg" viewBox="0 0 100 100">
-            <defs>
-                <linearGradient id="cometGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4FACFE" />
-                    <stop offset="100%" stop-color="#00F2FE" />
-                </linearGradient>
-            </defs>
-            <path class="liquid-line" d="M 70 20 L 30 20 A 10 10 0 0 0 20 30 L 20 70 A 10 10 0 0 0 30 80 L 70 80 A 10 10 0 0 0 80 70 L 80 45" />
-            <text x="50" y="60" font-family="Inter, sans-serif" font-size="24" font-weight="700" fill="url(#cometGradient)" text-anchor="middle">AI</text>
-            <path d="M 85 15 C 95 5, 105 5, 105 5 C 105 5, 105 15, 95 25 C 90 30, 85 25, 85 15 Z" fill="url(#cometGradient)" opacity="0.8"/>
-            <circle cx="88" cy="18" r="3" fill="white" />
-        </svg>
-    </div>
-
-    <!-- Музыка (Фоновый трек) -->
-    <audio id="bgMusic" loop>
-        <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3" type="audio/mpeg">
-    </audio>
-
     <!-- Шапка -->
     <div class="header">
-        <div class="logo-container">
-            <svg width="32" height="32" viewBox="0 0 100 100">
-                <defs>
-                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#4FACFE" />
-                        <stop offset="100%" stop-color="#00F2FE" />
-                    </linearGradient>
-                </defs>
-                <path d="M 70 20 L 30 20 A 10 10 0 0 0 20 30 L 20 70 A 10 10 0 0 0 30 80 L 70 80 A 10 10 0 0 0 80 70 L 80 45" fill="none" stroke="url(#logoGrad)" stroke-width="10" stroke-linecap="round" />
-                <text x="50" y="60" font-family="Inter, sans-serif" font-size="26" font-weight="700" fill="url(#logoGrad)" text-anchor="middle">AI</text>
-                <path d="M 85 15 C 95 5, 105 5, 105 5 C 105 5, 105 15, 95 25 C 90 30, 85 25, 85 15 Z" fill="url(#logoGrad)"/>
-            </svg>
-            <div class="logo-text">
-                <span class="logo-title">COMETA AI</span>
-                <span class="logo-subtitle">всегда на небесах</span>
-            </div>
-        </div>
+        <div class="logo">STUDIO PRO</div>
         <div class="header-controls">
-            <button class="user-btn" id="musicToggleBtn" style="padding: 8px 10px; font-size: 14px; border-color: var(--accent);">🔇</button>
-            <button class="user-btn" id="openGalleryBtn" style="display: none;">📁</button>
-            <button class="user-btn" id="openTrashBtn" style="display: none;">🗑️</button>
-            <button class="user-btn" id="loginBtn">Войти</button>
+            <button class="icon-btn" id="openLangBtn" title="Языки">🌐</button>
+            <button class="icon-btn" id="openMusicBtn" title="Музыка">🎵</button>
+            <button class="icon-btn" id="openGalleryBtn" style="display: none;" title="Галерея">📁</button>
+            <button class="user-btn" id="loginBtn" style="background: #111; border: 1px solid #333; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;">Войти</button>
         </div>
     </div>
 
-    <!-- Оверлеи -->
-    <div id="galleryOverlay">
-        <div class="gallery-header"><h2 style="margin: 0; font-size: 16px;">Проекты</h2><button id="closeGalleryBtn" style="background: transparent; border: none; font-size: 20px; color: var(--text); cursor: pointer;">✕</button></div>
-        <div id="galleryGrid" class="gallery-grid"></div>
+    <!-- Модалка Языков -->
+    <div class="modal" id="langModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>🌐 Выберите язык</span>
+                <button onclick="document.getElementById('langModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            <div id="langList"></div>
+        </div>
     </div>
-    
-    <div id="trashOverlay">
-        <div class="gallery-header"><h2 style="margin: 0; font-size: 16px; color: #ef4444;">Корзина</h2><button id="closeTrashBtn" style="background: transparent; border: none; font-size: 20px; color: var(--text); cursor: pointer;">✕</button></div>
-        <div id="trashGrid" class="gallery-grid"></div>
+
+    <!-- Модалка Музыки -->
+    <div class="modal" id="musicModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>🎵 Плейлист</span>
+                <button onclick="document.getElementById('musicModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            <input type="file" id="musicInput" accept="audio/*" style="margin-bottom: 15px; color: #aaa;">
+            <div id="musicList" style="color: #888;">Музыка не загружена.</div>
+        </div>
+    </div>
+
+    <!-- Плеер -->
+    <div class="audio-player" id="audioPlayer">
+        <audio id="bgMusic" loop></audio>
+        <span style="font-size: 12px; color: #10b981;" id="musicTitle">Музыка играет</span>
     </div>
 
     <!-- Зона предпросмотра -->
     <div class="preview-area" id="previewArea">
         <div class="preview-placeholder" id="previewText">Здесь появится ваша сцена</div>
         <div class="loader" id="mainLoader"></div>
-        
         <video id="videoPlayer" style="display:none; width:100%; height:100%; object-fit:contain;" controls></video>
-        <img id="imageResult" style="display:none; width:100%; height:100%; object-fit:contain;">
+        <img id="imageResult" style="display:none; width:100%; height:100%; object-fit:contain; padding: 10px;">
         
-        <div id="formatSelector" style="display:none; margin: 16px auto; width: 90%; max-width: 300px;">
-            <select id="videoFormat" style="width: 100%; padding: 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-btn); outline: none; font-family: 'Inter';">
-                <option value="mp4">MP4 (Видео)</option>
-                <option value="webm">WebM (Для сайтов)</option>
-            </select>
-        </div>
-        <button id="saveBtn" class="btn-primary" style="display:none; margin: 16px auto; width: 90%; max-width: 300px;">💾 Сохранить проект</button>
-
-        <!-- 2D Карта -->
-        <div id="mapContainer">
-            <div id="map"></div>
-            <button id="generate3dBtn" class="btn-primary" style="position:absolute; bottom:24px; left:5%; width:90%; z-index:10;">Создать 3D-сцену</button>
-        </div>
-
-        <!-- 3D Сцена -->
-        <div id="threeContainer">
-            <div id="canvas3d"></div>
-            <button id="backToMapBtn" style="display: block; position:absolute; top:24px; left:24px; width:auto; padding: 10px 16px; z-index: 10; background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: white; border-radius: 8px;">Назад</button>
-            
-            <div id="directorPanel" style="position:absolute; bottom:24px; left:24px; right:24px; z-index:10; display:none; gap:10px; background: rgba(18,18,18,0.9); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius-btn);">
-                <button id="addActorBtn" class="btn-primary" style="flex:1; padding: 10px; font-size: 12px;">+ Актер</button>
-                <input type="text" id="directorPrompt" placeholder="Действие..." style="flex:2; padding:10px; border-radius: var(--radius-btn); border: 1px solid var(--border); background:var(--bg); color:var(--text); font-size: 12px; outline: none;">
-                <button id="playSceneBtn" class="btn-primary" style="flex:1; padding: 10px; font-size: 12px;">▶ Играть</button>
-            </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;" id="actionArea" style="display: none;">
+            <button id="saveBtn" class="btn-primary" style="display:none; width: 150px; padding: 10px;">💾 Сохранить</button>
+            <button id="readTextBtn" class="btn-primary" style="display:none; width: 150px; padding: 10px; background: #3b82f6;">🔊 Озвучить</button>
         </div>
     </div>
 
     <!-- Панель управления -->
     <div class="control-panel">
         <div class="tools">
-            <button class="tool-btn active" onclick="switchTool('script', this)">Сценарий</button>
-            <button class="tool-btn" onclick="switchTool('image', this)">Фото</button>
-            <button class="tool-btn" onclick="switchTool('video', this)">Видео</button>
-            <button class="tool-btn" onclick="switchTool('map', this)">3D Карта</button>
+            <button class="tool-btn active" onclick="switchTool('script', this)">✍️ Сценарий</button>
+            <button class="tool-btn" onclick="switchTool('image', this)">🖼️ Фото</button>
+            <button class="tool-btn" onclick="switchTool('video', this)">🎬 Видео</button>
         </div>
 
         <div class="input-area">
-            <textarea id="aiPrompt" placeholder="Опишите вашу идею..."></textarea>
+            <textarea id="aiPrompt" placeholder="Напишите идею..."></textarea>
             <div class="action-buttons">
                 <button class="btn-primary" id="generateBtn">Сгенерировать</button>
             </div>
         </div>
     </div>
 
-    <!-- Таймлайн -->
-    <div class="timeline">
-        <div class="timeline-header">ТАЙМЛАЙН</div>
-        <div class="track">ВИДЕО</div>
-        <div class="track">АУДИО</div>
-    </div>
-
     <script>
-        // 1. FIREBASE
+        // ==========================================
+        // 1. НАСТРОЙКИ FIREBASE
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyAUIrQTOW_aDL6ziFVpXerHf6pPD6waRI8",
             authDomain: "fake-strim.firebaseapp.com",
@@ -270,38 +145,137 @@
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
-        const db = firebase.firestore();
         const storage = firebase.storage();
+        const db = firebase.firestore();
 
-        // 2. ПЕРЕМЕННЫЕ
-        let currentTool = 'script';
-        let map = null;
-        let scene3D, camera3D, renderer3D;
-        let sceneObjects = {}; 
-        let objectCounter = 0;
+        // ==========================================
+        // 2. СИСТЕМА ЯЗЫКОВ
+        // ==========================================
+        const languages = [
+            { code: 'en', name: 'English' }, { code: 'ru', name: 'Русский' },
+            { code: 'uk', name: 'Українська' }, { code: 'de', name: 'Deutsch' },
+            { code: 'fr', name: 'Français' }, { code: 'es', name: 'Español' },
+            { code: 'zh', name: '简体中文' }, { code: 'ja', name: '日本語' },
+            { code: 'ko', name: '한국어' }, { code: 'pl', name: 'Polski' },
+            { code: 'tr', name: 'Türkçe' }, { code: 'pt', name: 'Português' }
+        ];
 
-        // 3. АВТОРИЗАЦИЯ
+        const i18n = {
+            en: { script: "✍️ Script", image: "🖼️ Image", video: "🎬 Video", gen: "Generate", thinking: "AI Arena thinking...", save: "💾 Save", read: "🔊 Read", placeholder: "Enter idea..." },
+            ru: { script: "✍️ Сценарий", image: "🖼️ Фото", video: "🎬 Видео", gen: "Сгенерировать", thinking: "Арена ИИ думает...", save: "💾 Сохранить", read: "🔊 Озвучить", placeholder: "Напишите идею..." },
+            uk: { script: "✍️ Сценарій", image: "🖼️ Фото", video: "🎬 Відео", gen: "Згенерувати", thinking: "Арена ШІ думає...", save: "💾 Зберегти", read: "🔊 Озвучити", placeholder: "Напишіть ідею..." }
+            // Остальные языки будут использовать английский как fallback для простоты
+        };
+
+        let currentLang = localStorage.getItem('studioLang') || 'ru';
+
+        function applyLang() {
+            const dict = i18n[currentLang] || i18n['en'];
+            document.querySelectorAll('.tool-btn')[0].innerText = dict.script;
+            document.querySelectorAll('.tool-btn')[1].innerText = dict.image;
+            document.querySelectorAll('.tool-btn')[2].innerText = dict.video;
+            document.getElementById('generateBtn').innerText = dict.gen;
+            document.getElementById('aiPrompt').placeholder = dict.placeholder;
+            document.getElementById('saveBtn').innerText = dict.save;
+            document.getElementById('readTextBtn').innerText = dict.read;
+        }
+
+        // Отрисовка меню языков
+        const langListEl = document.getElementById('langList');
+        languages.forEach(l => {
+            const div = document.createElement('div');
+            div.className = 'lang-item';
+            div.innerText = l.name;
+            if(l.code === currentLang) div.style.borderColor = '#10b981';
+            div.onclick = () => {
+                currentLang = l.code;
+                localStorage.setItem('studioLang', l.code);
+                applyLang();
+                document.getElementById('langModal').style.display = 'none';
+            };
+            langListEl.appendChild(div);
+        });
+
+        document.getElementById('openLangBtn').onclick = () => document.getElementById('langModal').style.display = 'flex';
+        applyLang();
+
+        // ==========================================
+        // 3. МУЗЫКА (АУДИО-ПЛЕЕР И DUCKING)
+        // ==========================================
+        const bgMusic = document.getElementById('bgMusic');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const musicInput = document.getElementById('musicInput');
+
+        document.getElementById('openMusicBtn').onclick = () => document.getElementById('musicModal').style.display = 'flex';
+
+        musicInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const url = URL.createObjectURL(file);
+            bgMusic.src = url;
+            audioPlayer.style.display = 'flex';
+            document.getElementById('musicTitle').innerText = file.name;
+            document.getElementById('musicList').innerText = "Загружено: " + file.name;
+            bgMusic.play();
+            document.getElementById('musicModal').style.display = 'none';
+        };
+
+        // УМНОЕ ОТКЛЮЧЕНИЕ МУЗЫКИ ПРИ ЧТЕНИИ ТЕКСТА (Ducking)
+        let currentSpeakingText = "";
+        
+        function speakText() {
+            if (!currentSpeakingText) return;
+            if ('speechSynthesis' in window) {
+                // Сохраняем текущую громкость музыки и делаем её тише
+                const originalVolume = bgMusic.volume;
+                bgMusic.volume = 0.1; 
+
+                const utterance = new SpeechSynthesisUtterance(currentSpeakingText);
+                utterance.lang = currentLang === 'ru' ? 'ru-RU' : (currentLang === 'uk' ? 'uk-UA' : 'en-US');
+                
+                // Когда текст прочитан, возвращаем громкость
+                utterance.onend = () => { bgMusic.volume = originalVolume; };
+                utterance.onerror = () => { bgMusic.volume = originalVolume; };
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Браузер не поддерживает озвучку.");
+            }
+        }
+
+        document.getElementById('readTextBtn').onclick = speakText;
+
+        // ==========================================
+        // 4. АВТОРИЗАЦИЯ
+        // ==========================================
         document.getElementById('loginBtn').onclick = () => {
             if (auth.currentUser) auth.signOut();
-            else auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message));
+            else {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                auth.signInWithPopup(provider).catch(e => alert(e.message));
+            }
         };
 
         auth.onAuthStateChanged(user => {
             const btn = document.getElementById('loginBtn');
+            const galleryBtn = document.getElementById('openGalleryBtn');
             if (user) {
                 btn.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Выйти';
-                document.getElementById('openGalleryBtn').style.display = 'block';
-                document.getElementById('openTrashBtn').style.display = 'block';
+                btn.style.background = '#10b981';
+                galleryBtn.style.display = 'flex';
             } else {
                 btn.innerText = 'Войти';
-                document.getElementById('openGalleryBtn').style.display = 'none';
-                document.getElementById('openTrashBtn').style.display = 'none';
-                document.getElementById('galleryOverlay').style.display = 'none';
-                document.getElementById('trashOverlay').style.display = 'none';
+                btn.style.background = '#111';
+                galleryBtn.style.display = 'none';
             }
         });
 
-        // 4. ИНТЕРФЕЙС
+        // ==========================================
+        // 5. ГЕНЕРАЦИЯ
+        // ==========================================
+        let currentTool = 'script';
+        const WORKER_URL = "https://твой-воркер.workers.dev"; // ВСТАВЬ СВОЙ URL
+
         function switchTool(tool, btn) {
             currentTool = tool;
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
@@ -310,84 +284,90 @@
             document.getElementById('videoPlayer').style.display = 'none';
             document.getElementById('imageResult').style.display = 'none';
             document.getElementById('saveBtn').style.display = 'none';
-            document.getElementById('formatSelector').style.display = 'none';
-            document.getElementById('mapContainer').style.display = 'none';
-            document.getElementById('threeContainer').style.display = 'none';
+            document.getElementById('readTextBtn').style.display = 'none';
             document.getElementById('previewText').style.display = 'block';
-            
-            const promptInput = document.getElementById('aiPrompt');
-            if (tool === 'script') promptInput.placeholder = "Напишите идею для видео...";
-            else if (tool === 'image') promptInput.placeholder = "Опишите картинку...";
-            else if (tool === 'video') promptInput.placeholder = "Опишите видео...";
-            else if (tool === 'map') {
-                promptInput.placeholder = "Выделите область на карте...";
-                document.getElementById('previewText').style.display = 'none';
-                document.getElementById('mapContainer').style.display = 'block';
-                initMap();
-            }
+            document.getElementById('previewText').innerHTML = "Здесь появится ваша сцена";
         }
 
-        // 5. ГЕНЕРАЦИЯ (Puter.js)
         document.getElementById('generateBtn').onclick = async function() {
-            if (currentTool === 'map') return;
             const prompt = document.getElementById('aiPrompt').value;
             if (!prompt) { alert("Введите текст!"); return; }
 
             document.getElementById('mainLoader').style.display = 'block';
             document.getElementById('previewText').style.display = 'none';
-            this.innerText = 'Генерация...';
+            document.getElementById('videoPlayer').style.display = 'none';
+            document.getElementById('imageResult').style.display = 'none';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('readTextBtn').style.display = 'none';
+            
+            const dict = i18n[currentLang] || i18n['en'];
+            this.innerText = dict.thinking;
             this.disabled = true;
 
-            // СЦЕНАРИЙ
+            // --- СЦЕНАРИЙ ---
             if (currentTool === 'script') {
                 try {
-                    const response = await puter.ai.chat(`Напиши кинематографичный сценарий для видео на тему: ${prompt}. Опиши свет и ракурсы.`);
-                    const text = response.message?.content || response.text || response;
+                    const response = await fetch(WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt: prompt, toolType: 'script' })
+                    });
+                    const data = await response.json();
+                    currentSpeakingText = data.text;
                     
                     document.getElementById('previewText').style.display = 'block';
-                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: var(--text-secondary); overflow-y:auto; max-height: 100%; padding: 20px;">${text.replace(/\n/g, '<br>')}</div>`;
+                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: #ddd; overflow-y:auto; max-height: 100%; padding: 15px;">${data.text.replace(/\n/g, '<br>')}</div>`;
+                    document.getElementById('readTextBtn').style.display = 'block';
                 } catch (error) {
                     alert("Ошибка: " + error.message);
                     document.getElementById('previewText').style.display = 'block';
                 } finally {
                     document.getElementById('mainLoader').style.display = 'none';
-                    this.innerText = 'Сгенерировать';
+                    this.innerText = dict.gen;
                     this.disabled = false;
                 }
             } 
-            // ФОТО
+            // --- ФОТО ---
             else if (currentTool === 'image') {
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+                const encodedPrompt = encodeURIComponent(prompt);
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
                 const imgElement = document.getElementById('imageResult');
+                
                 imgElement.onload = () => {
                     document.getElementById('mainLoader').style.display = 'none';
                     imgElement.style.display = 'block';
                     document.getElementById('saveBtn').style.display = 'block';
-                    this.innerText = 'Сгенерировать';
+                    this.innerText = dict.gen;
                     this.disabled = false;
                 };
-                imgElement.onerror = () => { alert("Ошибка фото."); document.getElementById('mainLoader').style.display = 'none'; this.innerText = 'Сгенерировать'; this.disabled = false; };
+                imgElement.onerror = () => {
+                    alert("Ошибка загрузки картинки.");
+                    document.getElementById('mainLoader').style.display = 'none';
+                    document.getElementById('previewText').style.display = 'block';
+                    this.innerText = dict.gen;
+                    this.disabled = false;
+                };
                 imgElement.src = imageUrl;
             }
-            // ВИДЕО
+            // --- ВИДЕО ---
             else if (currentTool === 'video') {
                 try {
-                    const baseImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
-                    const img = new Image();
-                    img.crossOrigin = "Anonymous"; 
+                    const encodedPrompt = encodeURIComponent(prompt);
+                    const baseImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
+                    const img = new Image(); img.crossOrigin = "Anonymous"; 
+                    
                     img.onload = async () => {
                         try {
                             const canvas = document.createElement('canvas');
                             canvas.width = 1920; canvas.height = 1080;
                             const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            const upscaledBase64 = canvas.toDataURL('image/jpeg', 0.95);
-
-                            const videoElement = await puter.ai.txt2vid(prompt, {
-                                model: "google/veo-2.0", 
-                                input_reference: upscaledBase64, 
-                                duration: 5, 
-                                size: "1280x720" 
+                            ctx.imageSmoothingEnabled = true; ctx false.imageSmoothingQuality = 'high';
+                           ;
+ ctx.drawImage(img,                0, 0, canvas.width }
+, canvas.height);
+                            
+                                       const videoElement = await puter.ai.txt2vid(prompt, {
+                                model: "google/veo-2.0", input_reference: canvas.toDataURL('image/jpeg', 0.95), duration: 5, size: "1280x720" 
                             });
 
                             const videoPlayer = document.getElementById('videoPlayer');
@@ -396,194 +376,61 @@
                             videoPlayer.play();
                             
                             document.getElementById('mainLoader').style.display = 'none';
-                            document.getElementById('formatSelector').style.display = 'block';
                             document.getElementById('saveBtn').style.display = 'block';
-                            document.getElementById('generateBtn').innerText = 'Сгенерировать';
+                            document.getElementById('generateBtn').innerText = dict.gen;
                             document.getElementById('generateBtn').disabled = false;
                         } catch (innerError) { throw new Error("Ошибка видео: " + innerError.message); }
                     };
-                    img.onerror = () => { throw new Error("Ошибка картинки."); };
+                    img.onerror = () => { throw new Error("Ошибка загрузки картинки."); };
                     img.src = baseImageUrl;
                 } catch (error) {
                     alert(error.message);
                     document.getElementById('mainLoader').style.display = 'none';
-                    document.getElementById('generateBtn').innerText = 'Сгенерировать';
-                    document.getElementById('generateBtn').disabled = false;
-                }
-            }
+                    document.getElementById('previewText').style.display = 'block';
+                    this.innerText = dict.gen;
+                    this.disabled = }
         };
 
-        // 6. СОХРАНЕНИЕ В БАЗУ
+        // ==========================================
+        // 6. СОХРАНЕНИЕ
+        // ==========================================
         document.getElementById('saveBtn').onclick = async function() {
             const user = auth.currentUser;
-            if (!user) { alert("Войдите!"); return; }
-            const btn = this; btn.innerText = 'Сохранение...'; btn.disabled = true;
+            if (!user) { alert("Войдите в аккаунт!"); return; }
+
+            const btn = this; const originalText = btn.innerText;
+            btn.innerText = 'Сохранение...'; btn.disabled = true;
+
             try {
-                let fileUrl = '', fileExtension = '', blob;
-                if (currentTool === 'image') { fileUrl = document.getElementById('imageResult').src; fileExtension = 'png'; }
-                else if (currentTool === 'video') { fileUrl = document.getElementById('videoPlayer').src; fileExtension = document.getElementById('videoFormat').value; }
-                const response = await fetch(fileUrl);
-                blob = await response.blob();
+                let fileUrl = ''; let fileExtension = ''; let contentType = currentTool; let blob;
+
+                if (currentTool === 'image') {
+                    fileUrl = document.getElementById('imageResult').src;
+                    fileExtension = 'jpg';
+                    blob = await (await fetch(fileUrl)).blob();
+                } else if (currentTool === 'video') {
+                    fileUrl = document.getElementById('videoPlayer').src;
+                    fileExtension = 'mp4';
+                    blob = await (await fetch(fileUrl)).blob();
+                }
+
                 const filename = `ai_${Date.now()}.${fileExtension}`;
-                const storageRef = storage.ref(`users/${user.uid}/${filename}`);
-                const snapshot = await storageRef.put(blob);
+                const snapshot = await storage.ref(`users/${user.uid}/${filename}`).put(blob);
                 const downloadURL = await snapshot.ref.getDownloadURL();
-                await db.collection('projects').add({ userId: user.uid, type: currentTool, format: fileExtension, prompt: document.getElementById('aiPrompt').value, fileUrl: downloadURL, createdAt: firebase.firestore.FieldValue.serverTimestamp(), isDeleted: false });
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
-                btn.innerText = 'Сохранено!'; setTimeout(() => { btn.innerText = '💾 Сохранить проект'; btn.disabled = false; }, 2000);
-            } catch (error) { alert("Ошибка: " + error.message); btn.innerText = '💾 Сохранить проект'; btn.disabled = false; }
-        };
 
-        // 7. ГАЛЕРЕЯ
-        document.getElementById('openGalleryBtn').onclick = async () => {
-            document.getElementById('galleryOverlay').style.display = 'flex';
-            const grid = document.getElementById('galleryGrid'); grid.innerHTML = 'Загрузка...';
-            try {
-                const snapshot = await db.collection('projects').where('userId', '==', auth.currentUser.uid).get();
-                const projects = []; snapshot.forEach(doc => { if (doc.data().isDeleted !== true) projects.push({ id: doc.id, ...doc.data() }); });
-                grid.innerHTML = ''; if (projects.length === 0) { grid.innerHTML = '<div style="color:#888;">Пусто</div>'; return; }
-                projects.forEach(proj => {
-                    const item = document.createElement('div'); item.className = 'gallery-item';
-                    item.innerHTML = proj.type === 'image' ? `<img src="${proj.fileUrl}">` : `<video src="${proj.fileUrl}" muted loop onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-                    const delBtn = document.createElement('button'); delBtn.innerText = '🗑️'; delBtn.style.cssText = 'position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,0.8); border:none; color:#fff; padding:8px; border-radius:4px; cursor:pointer;';
-                    delBtn.onclick = async (e) => { e.stopPropagation(); await db.collection('projects').doc(proj.id).update({ isDeleted: true }); item.remove(); };
-                    item.appendChild(delBtn); grid.appendChild(item);
+                await db.collection('projects').add({
+                    userId: user.uid, type: contentType, format: fileExtension,
+                    prompt: document.getElementById('aiPrompt').value, fileUrl: downloadURL,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(), isDeleted: false 
                 });
-            } catch (error) { grid.innerHTML = `Ошибка: ${error.message}`; }
-        };
-        document.getElementById('closeGalleryBtn').onclick = () => document.getElementById('galleryOverlay').style.display = 'none';
 
-        // 8. КОРЗИНА
-        document.getElementById('openTrashBtn').onclick = async () => {
-            document.getElementById('trashOverlay').style.display = 'flex';
-            const grid = document.getElementById('trashGrid'); grid.innerHTML = 'Загрузка...';
-            try {
-                const snapshot = await db.collection('projects').where('userId', '==', auth.currentUser.uid).get();
-                const deleted = []; snapshot.forEach(doc => { if (doc.data().isDeleted === true) deleted.push({ id: doc.id, ...doc.data() }); });
-                grid.innerHTML = ''; if (deleted.length === 0) { grid.innerHTML = '<div style="color:#888;">Пусто</div>'; return; }
-                deleted.forEach(proj => {
-                    const item = document.createElement('div'); item.className = 'gallery-item';
-                    item.innerHTML = `<img src="${proj.fileUrl}" style="filter: grayscale(80%);">`;
-                    const actions = document.createElement('div'); actions.style.cssText = 'position:absolute; bottom:0; left:0; width:100%; display:flex; justify-content:space-between; padding:8px; background:rgba(0,0,0,0.8);';
-                    const restore = document.createElement('button'); restore.innerText = '↺'; restore.style.cssText = 'background:var(--accent); color:#000; border:none; border-radius:4px; padding:6px 12px; cursor:pointer;';
-                    restore.onclick = async () => { await db.collection('projects').doc(proj.id).update({ isDeleted: false }); item.remove(); };
-                    const del = document.createElement('button'); del.innerText = '✕'; del.style.cssText = 'background:#ef4444; color:#fff; border:none; border-radius:4px; padding:6px 12px; cursor:pointer;';
-                    del.onclick = async () => { if (!confirm('Удалить навсегда?')) return; await db.collection('projects').doc(proj.id).delete(); try { const f = storage.refFromURL(proj.fileUrl); await f.delete(); } catch(e){} item.remove(); };
-                    actions.appendChild(restore); actions.appendChild(del); item.appendChild(actions); grid.appendChild(item);
-                });
-            } catch (error) { grid.innerHTML = `Ошибка: ${error.message}`; }
-        };
-        document.getElementById('closeTrashBtn').onclick = () => document.getElementById('trashOverlay').style.display = 'none';
-
-        // 9. КАРТА И 3D
-        function initMap() {
-            if (map) return;
-            map = L.map('map').setView([55.751244, 37.618423], 15);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            map.pm.addControls({ position: 'topleft' });
-        }
-
-        document.getElementById('generate3dBtn').onclick = () => {
-            if (!map.pm.getGeomanDrawLayers().length) { alert("Выделите область!"); return; }
-            document.getElementById('mapContainer').style.display = 'none';
-            document.getElementById('threeContainer').style.display = 'block';
-            document.getElementById('directorPanel').style.display = 'flex';
-            generate3DScene();
-        };
-
-        document.getElementById('backToMapBtn').onclick = () => {
-            document.getElementById('threeContainer').style.display = 'none';
-            document.getElementById('mapContainer').style.display = 'block';
-            if (scene3D) { scene3D.clear(); }
-        };
-
-        function generate3DScene() {
-            const container = document.getElementById('canvas3d'); container.innerHTML = '';
-            scene3D = new THREE.Scene(); scene3D.background = new THREE.Color(0x222222);
-            camera3D = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer3D = new THREE.WebGLRenderer({ antialias: true }); renderer3D.setSize(window.innerWidth, window.innerHeight);
-            container.appendChild(renderer3D.domElement);
-
-            scene3D.add(new THREE.AmbientLight(0xffffff, 0.6));
-            const light = new THREE.DirectionalLight(0xffffff, 0.8); light.position.set(10, 20, 10); scene3D.add(light);
-
-            const geo = new THREE.BoxGeometry(20, 10, 20);
-            const mat = new THREE.MeshLambertMaterial({ color: 0x333333, side: THREE.DoubleSide });
-            const room = new THREE.Mesh(geo, mat); room.position.y = 5; scene3D.add(room);
-
-            camera3D.position.set(0, 5, 15); camera3D.lookAt(0, 5, 0);
-
-            function animate() { requestAnimationFrame(animate); renderer3D.render(scene3D, camera3D); }
-            animate();
-        }
-
-        document.getElementById('addActorBtn').onclick = () => {
-            objectCounter++;
-            const actorGroup = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2, 16), new THREE.MeshLambertMaterial({ color: 0x10b981 }));
-            body.position.y = 1; actorGroup.add(body);
-            const head = new THREE.Mesh(new THREE.SphereGeometry(0.6, 16, 16), new THREE.MeshLambertMaterial({ color: 0xffdbac }));
-            head.position.y = 2.5; actorGroup.add(head);
-            actorGroup.position.set((Math.random() - 0.5) * 10, 0, (Math.random() - 0.5) * 10);
-            actorGroup.userData = { id: `Actor_${objectCounter}` };
-            scene3D.add(actorGroup); sceneObjects[`Actor_${objectCounter}`] = actorGroup;
-        };
-
-        document.getElementById('playSceneBtn').onclick = async function() {
-            const prompt = document.getElementById('directorPrompt').value; if (!prompt) return;
-            const btn = this; btn.innerText = 'Думает...'; btn.disabled = true;
-            try {
-                const availableObjects = Object.keys(sceneObjects);
-                const response = await puter.ai.chat(`Ты режиссер. Объекты: ${availableObjects.join(', ')}. Запрос: "${prompt}". Верни ТОЛЬКО JSON массив действий. Пример: [{"object": "Actor_1", "target": "X:5, Z:5", "duration": 2000}]. Без лишнего текста.`);
-                const rawText = response.message?.content || response.text || response;
-                const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                const actions = JSON.parse(cleanJson);
-                
-                actions.forEach(act => {
-                    const targetObj = sceneObjects[act.object]; if (!targetObj) return;
-                    let targetPos;
-                    if (act.target && act.target.includes(':')) {
-                        const x = parseFloat(act.target.match(/X:(-?\d+\.?\d*)/)[1]);
-                        const z = parseFloat(act.target.match(/Z:(-?\d+\.?\d*)/)[1]);
-                        targetPos = { x, z };
-                    }
-                    if (targetPos) {
-                        const startPos = targetObj.position.clone(); const duration = act.duration || 2000; const startTime = Date.now();
-                        function animateMove() {
-                            const elapsed = Date.now() - startTime; const progress = Math.min(elapsed / duration, 1);
-                            targetObj.position.x = startPos.x + (targetPos.x - startPos.x) * progress;
-                            targetObj.position.z = startPos.z + (targetPos.z - startPos.z) * progress;
-                            if (progress < 1) requestAnimationFrame(animateMove);
-                        }
-                        animateMove();
-                    }
-                });
-            } catch (error) { alert("Ошибка режиссера: " + error.message); }
-            finally { btn.innerText = '▶ Играть'; btn.disabled = false; }
-        };
-
-        // 10. МУЗЫКА И ПРЕЛОАДЕР
-        const bgMusic = document.getElementById('bgMusic');
-        const musicBtn = document.getElementById('musicToggleBtn');
-        musicBtn.onclick = () => {
-            if (bgMusic.paused) {
-                bgMusic.play();
-                musicBtn.innerText = '🔊';
-                musicBtn.style.color = 'var(--accent)';
-            } else {
-                bgMusic.pause();
-                musicBtn.innerText = '🔇';
-                musicBtn.style.color = 'var(--text)';
+                btn.innerText = '✅ Сохранено!';
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+            } catch (error) {
+                alert("Ошибка: " + error.message);
+                btn.innerText = originalText; btn.disabled = false;
             }
         };
-
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const preloader = document.getElementById('preloader');
-                preloader.style.opacity = '0';
-                setTimeout(() => preloader.style.display = 'none', 500);
-            }, 1500);
-        });
     </script>
 </body>
 </html>
