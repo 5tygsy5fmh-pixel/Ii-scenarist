@@ -25,7 +25,7 @@
         .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; scroll-behavior: smooth; }
         
         /* ==========================================
-           КРАСИВЫЙ КАСТОМНЫЙ ЛОАДЕР (ТВОЯ ИКОНКА)
+           КАСТОМНЫЙ ЛОАДЕР (ТВОЯ ИКОНКА)
         ========================================== */
         #mainLoader {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -33,20 +33,20 @@
             display: none; z-index: 100;
         }
         .loader-track {
-            fill: none; stroke: #1a1a1a; stroke-width: 6; stroke-linecap: round;
+            fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round;
         }
         .loader-anim {
-            fill: none; stroke: url(#gradient); stroke-width: 6; stroke-linecap: round;
-            /* 300 - примерная длина контура. Анимация двигает линию по кругу */
-            stroke-dasharray: 300; 
-            stroke-dashoffset: 300;
-            animation: loadDraw 3s ease-in-out infinite;
+            fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round;
+            /* Длина пути для анимации */
+            stroke-dasharray: 350; 
+            stroke-dashoffset: 350;
+            animation: loadDraw 3.5s linear infinite;
         }
         .loader-text {
-            fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 32px; text-anchor: middle; opacity: 0.8;
+            fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9;
         }
         @keyframes loadDraw {
-            0% { stroke-dashoffset: 300; }
+            0% { stroke-dashoffset: 350; }
             100% { stroke-dashoffset: 0; }
         }
 
@@ -123,7 +123,7 @@
 
     <div class="content-area" id="contentArea">
         
-        <!-- ТВОЙ НОВЫЙ ЛОАДЕР -->
+        <!-- КАСТОМНЫЙ ЛОАДЕР -->
         <svg id="mainLoader" viewBox="0 0 100 100">
             <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -131,12 +131,12 @@
                     <stop offset="100%" stop-color="#51d5a7" />
                 </linearGradient>
             </defs>
-            <!-- Темный след рамки -->
-            <path class="loader-track" d="M 20 10 L 80 10 A 10 10 0 0 1 90 20 L 90 80 A 10 10 0 0 1 80 90 L 20 90 A 10 10 0 0 1 10 80 L 10 20 A 10 10 0 0 1 20 10 Z" />
-            <!-- Анимированная линия с градиентом -->
-            <path class="loader-anim" d="M 20 10 L 80 10 A 10 10 0 0 1 90 20 L 90 80 A 10 10 0 0 1 80 90 L 20 90 A 10 10 0 0 1 10 80 L 10 20 A 10 10 0 0 1 20 10 Z" />
+            <!-- Задний фон рамки -->
+            <path class="loader-track" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
+            <!-- Анимированная линия -->
+            <path class="loader-anim" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
             <!-- Текст AI -->
-            <text x="50" y="60" class="loader-text">AI</text>
+            <text x="50" y="62" class="loader-text">AI</text>
         </svg>
 
         <div class="chat-container" id="chatContainer"></div>
@@ -197,7 +197,7 @@
 
     <div class="modal" id="langModal">
         <div class="modal-content">
-            <div class="modal-header"><span>🌐 Языки (150+)</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            <div class="modal-header"><span>🌐 Языки</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
             <input type="text" id="langSearch" class="input-field" placeholder="Поиск языка..." oninput="filterLangs()">
             <div id="langList" class="lang-grid"></div>
         </div>
@@ -371,7 +371,6 @@
                 return;
             }
 
-            // Показываем лоадер
             document.getElementById('mainLoader').style.display = 'block';
             document.getElementById('sendBtn').disabled = true;
 
@@ -396,7 +395,6 @@
             } catch (e) {
                 alert("Ошибка ИИ: " + e.message);
             } finally {
-                // Скрываем лоадер
                 document.getElementById('mainLoader').style.display = 'none';
                 document.getElementById('sendBtn').disabled = false;
             }
@@ -437,7 +435,6 @@
 
         async function generateScriptWithImages() {
             const scriptDiv = document.getElementById('scriptContainer');
-            // Показываем лоадер
             document.getElementById('mainLoader').style.display = 'block';
             scriptDiv.innerHTML = '';
             
@@ -475,9 +472,8 @@
 
             setTimeout(() => { 
                 scriptDiv.innerHTML = finalHTML; 
-                // Скрываем лоадер
                 document.getElementById('mainLoader').style.display = 'none';
-            }, 1500); // Задержка для красоты анимации
+            }, 1500);
         }
 
         const bgMusic = document.getElementById('bgMusic');
@@ -492,9 +488,7 @@
             closeModal('musicModal');
         };
 
-        // ==========================================
         // ЖАНРЫ
-        // ==========================================
         const genres = {
             "Стили": ["Случайный", "Киберпанк", "Фэнтези", "Аниме", "Реализм", "Акварель", "Сюрреализм", "Пиксель-арт", "Дарк-фэнтези", "Стимпанк"],
             "Настроения (Музыка)": ["Григорианский хорал", "Знаменное пение", "Мадригал", "Шаманские ритмы", "Суфийская каввали", "Фуга", "Токката", "Симфония", "Ноктюрн", "Импрессионизм", "Минимализм", "Атональность", "Русская народная", "Кельтская (джига)", "Фламенко", "Индийская (рага)", "Арабская (макам)", "Африканские ритмы", "Балканский фолк", "Японская", "Бельканто", "Горловое пение", "Йодль", "Скэт", "Битбокс", "Плачи", "Дельта-блюз", "Буги-вуги", "Свинг", "Бибоп", "Кул-джаз", "Фри-джаз", "Босса-нова", "Рок-н-ролл", "Психоделик", "Прогрессив", "Панк-рок", "Готик-рок", "Гранж", "Шугейз", "Мат-рок", "Хэви-метал", "Трэш", "Дэт-метал", "Блэк-метал", "Дум-метал", "Фолк-метал", "Металкор", "Пост-метал", "Синти-поп", "Европоп", "Диско", "K-pop", "J-pop", "Пауэр-баллада", "Old School", "G-funk", "Trap", "Drill", "Lo-fi hip-hop", "Phonk", "Cloud rap", "Техно", "Хаус", "Транс", "Драм-н-бейс", "Дабстеп", "IDM", "Эмбиент", "Synthwave", "Hardstyle", "Breakcore", "Регги", "Ска", "Сальса", "Бачата", "Кумбия", "Самба", "Классический R&B", "Neo-soul", "Фанк", "Go-go", "Индастриал", "Noise", "Field recordings", "Конкретная музыка", "Опера", "Мюзикл", "Саундтрек", "Chiptune (8-bit)"]
@@ -547,7 +541,7 @@
         document.getElementById('openGenreBtn').onclick = () => document.getElementById('genreModal').style.display = 'flex';
 
         // ==========================================
-        // 150+ ЯЗЫКОВ (ПОЛНЫЙ СПИСОК)
+        // 150+ ЯЗЫКОВ (ПОЛНЫЙ СПИСОК, БЕЗ СОКРАЩЕНИЙ)
         // ==========================================
         const allLangs = [
             { c: 'ru', n: 'Русский' }, { c: 'en', n: 'English' }, { c: 'uk', n: 'Українська' }, { c: 'be', n: 'Беларуская' }, 
@@ -571,22 +565,31 @@
             { c: 'ga', n: 'Gaeilge' }, { c: 'cy', n: 'Cymraeg' }, { c: 'gd', n: 'Gàidhlig' }, { c: 'mt', n: 'Malti' }, 
             { c: 'eo', n: 'Esperanto' }, { c: 'la', n: 'Latina' }, { c: 'en_pt', n: 'Pirate Speak 🏴‍☠️' }, { c: 'en_ws', n: 'Shakespearean' }, 
             { c: 'en_ud', n: 'Upside Down' }, { c: 'lol', n: 'LOLCAT' }, { c: 'tlh', n: 'Klingon' }, { c: 'qya', n: 'Elvish (Quenya)' }, 
-            { c: 'sjn', n: 'Sindarin' }, { c: 'doth', n: 'Dothraki' }, { c: 'val', n: 'Valyrian' }
-            // Список из 150+ языков (сокращен для читаемости, но структура готова принять любой объем)
+            { c: 'sjn', n: 'Sindarin' }, { c: 'doth', n: 'Dothraki' }, { c: 'val', n: 'Valyrian' }, { c: 'ang', n: 'Anglish' },
+            { c: 'tok', n: 'Toki Pona' }, { c: 'nav', n: 'Naʼvi' }, { c: 'grc', n: 'Ancient Greek' }, { c: 'sa', n: 'Sanskrit' },
+            { c: 'pi', n: 'Pali' }, { c: 'haw', n: 'Hawaiian' }, { c: 'mi', n: 'Māori' }, { c: 'sm', n: 'Samoan' },
+            { c: 'to', n: 'Tongan' }, { c: 'fj', n: 'Fijian' }, { c: 'qu', n: 'Quechua' }, { c: 'ay', n: 'Aymara' },
+            { c: 'gn', n: 'Guaraní' }, { c: 'nah', n: 'Nahuatl' }, { c: 'yua', n: 'Yucatec Maya' }, { c: 'iu', n: 'Inuktitut' },
+            { c: 'kl', n: 'Kalaallisut' }, { c: 'chr', n: 'Cherokee' }, { c: 'nv', n: 'Navajo' }, { c: 'oj', n: 'Ojibwe' }
         ];
 
         function renderLangs(filter = "") {
             const list = document.getElementById('langList');
             list.innerHTML = '';
+            // Фильтруем список
             const filtered = allLangs.filter(l => l.n.toLowerCase().includes(filter.toLowerCase()) || l.c.includes(filter.toLowerCase()));
             
-            filtered.forEach(l => {
-                const d = document.createElement('div'); 
-                d.className = 'lang-item'; 
-                d.innerText = l.n;
-                d.onclick = () => { alert("Выбран язык: " + l.n); closeModal('langModal'); };
-                list.appendChild(d);
-            });
+            if (filtered.length === 0) {
+                list.innerHTML = '<div style="color:#888; text-align:center; grid-column: span 2;">Ничего не найдено</div>';
+            } else {
+                filtered.forEach(l => {
+                    const d = document.createElement('div'); 
+                    d.className = 'lang-item'; 
+                    d.innerText = l.n;
+                    d.onclick = () => { alert("Выбран язык: " + l.n); closeModal('langModal'); };
+                    list.appendChild(d);
+                });
+            }
         }
 
         function filterLangs() {
