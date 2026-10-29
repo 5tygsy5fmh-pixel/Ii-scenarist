@@ -22,7 +22,7 @@
         .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; transition: 0.2s; }
         .icon-btn:hover { background: #222; }
         
-        /* ЖЕЛТЫЙ ЭКРАН ВХОДА (ТОЛЬКО КОРОБКА) */
+        /* ЖЕЛТЫЙ ЭКРАН ВХОДА */
         #loginScreen { display: none; position: fixed; inset: 0; z-index: 2000; background: #fbc02d; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
         #loginScreen::before { content: ''; position: absolute; width: 200vw; height: 200vh; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg); animation: rotateRays 30s linear infinite; }
         @keyframes rotateRays { 100% { transform: rotate(360deg); } }
@@ -168,7 +168,6 @@
 </head>
 <body>
 
-    <!-- ЭКРАН ВХОДА (ТОЛЬКО КОРОБКА И ПРОПУСТИТЬ) -->
     <div id="loginScreen">
         <button class="skip-btn" onclick="closeLoginScreen()">Пропустить</button>
         <div class="login-box" onclick="summonVerity()">
@@ -270,11 +269,13 @@
     <div class="modal" id="broadcastSettingsModal">
         <div class="modal-content" id="studioModalContent">
             <div class="modal-header"><span>⚙️ Настройки эфира</span><button onclick="closeModal('broadcastSettingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            
             <div class="panel-section">
                 <h4>🎙️ Студия: Персонажи</h4>
                 <div id="characterList" class="character-grid"></div>
                 <button class="q-btn" onclick="addNewCharacter()" style="width:100%; margin-top:10px;">➕ Добавить друга</button>
             </div>
+
             <div class="panel-section">
                 <h4>Реакции и фишки</h4>
                 <label style="display:block; margin-bottom:5px; font-size:13px;"><input type="checkbox" id="enableCatMode" checked> Режим кота (3 клика)</label>
@@ -282,6 +283,14 @@
                 <label style="display:block; margin-bottom:5px; font-size:13px;"><input type="checkbox" id="enableCoffeeCycle"> Угостить кофе (раз в N минут)</label>
                 <label style="font-size:12px; color:#888;">Интервал (минут): <input type="number" id="coffeeInterval" value="5" style="width:50px; background:#000; color:#fff; border:1px solid #333;"></label>
             </div>
+
+            <!-- НОВОЕ: Кнопка Апокалипсиса -->
+            <div class="panel-section" style="border-color:#ff5252;">
+                <h4 style="color:#ff5252;">🚨 Секретный режим</h4>
+                <button class="btn-secondary" onclick="triggerApocalypse()" style="background: #ff5252; color: #fff; width:100%; font-weight: bold;">🚨 Апокалипсис эфира (30 сек)</button>
+                <p style="font-size:10px; color:#888; margin-top:5px;">Внимание: персонажи могут начать обсуждать налоги и арест имущества.</p>
+            </div>
+
             <div class="panel-section">
                 <h4>Триггер-фразы</h4>
                 <div class="trigger-row">
@@ -291,6 +300,7 @@
                 </div>
                 <div id="triggersList" style="max-height:100px; overflow-y:auto; font-size:12px; margin-top:5px;"></div>
             </div>
+
             <div class="panel-section">
                 <h4>Быстрые промпты</h4>
                 <button class="q-btn" onclick="insertPrompt('threeAngles')">🎭 3 угла</button>
@@ -298,6 +308,7 @@
                 <button class="q-btn" onclick="insertPrompt('minecraft')">⛏️ Minecraft</button>
                 <button class="q-btn" onclick="insertPrompt('tiktok')">📱 TikTok</button>
             </div>
+
             <div class="panel-section">
                 <h4>Звуковая палитра</h4>
                 <button class="s-btn" onclick="addSound('🌧️ дождь')">🌧️</button>
@@ -305,6 +316,7 @@
                 <button class="s-btn" onclick="addSound('🎸 гитарный рифф')">🎸</button>
                 <button class="s-btn" onclick="addSound('🥁 ударные')">🥁</button>
             </div>
+
             <button class="btn-primary" onclick="saveBroadcastSettings()" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">Сохранить настройки</button>
         </div>
     </div>
@@ -341,11 +353,12 @@
         let selectedLanguage = 'ru';
         let selectedLanguageName = 'Русский';
         
+        // НОВЫЕ ПРОМПТЫ С ЗАЩИТОЙ ОТ "ИПОТЕКИ"
         let characters = JSON.parse(localStorage.getItem('verityCharactersV3')) || [
-            { id: 'verity', name: 'Веррити', gender: 'male', ageGroup: 'adult', color: '#FFD700', prompt: 'Ты — Веррити, взрослый радиоведущий. Стиль: уверенный, лаконичный, любит метафоры про эфир и провода.', chance: 0.4 },
-            { id: 'mini-verity', name: 'Мини', gender: 'male', ageGroup: 'child', color: '#FFA500', prompt: 'Ты — Мини-Веррити, маленький напарник. Говоришь быстро, с восторгом. Часто задаёшь вопросы.', chance: 0.2 },
-            { id: 'luna', name: 'Луна', gender: 'female', ageGroup: 'adult', color: '#FFC0CB', prompt: 'Ты — Луна, звукорежиссёрка. Говоришь мягко, замечаешь детали: "Тут слишком много эха".', chance: 0.25 },
-            { id: 'pixie', name: 'Пикси', gender: 'female', ageGroup: 'child', color: '#FFDAB9', prompt: 'Ты — Пикси, маленькая помощница. Говоришь с придыханием, любишь восклицания.', chance: 0.15 }
+            { id: 'verity', name: 'Веррити', gender: 'male', ageGroup: 'adult', color: '#FFD700', prompt: 'Ты — Веррити, взрослый радиоведущий. Твой стиль: уверенный, лаконичный, любит метафоры про эфир и провода. Твоя задача — создавать атмосферу. ЗАПРЕЩЕНО: обсуждать долги, суды, налоги, работу, ипотеку.', chance: 0.4 },
+            { id: 'mini-verity', name: 'Мини', gender: 'male', ageGroup: 'child', color: '#FFA500', prompt: 'Ты — Мини-Веррити, маленький напарник. Говоришь быстро, с восторгом. Часто задаёшь вопросы. Всё вокруг — чудо. ЗАПРЕЩЕНО: говорить про взрослые проблемы.', chance: 0.2 },
+            { id: 'luna', name: 'Луна', gender: 'female', ageGroup: 'adult', color: '#FFC0CB', prompt: 'Ты — Луна, звукорежиссёрка. Говоришь мягко, замечаешь детали: "Тут слишком много эха". Твоя забота — чистота сигнала. ЗАПРЕЩЕНО: обсуждать быт и документы.', chance: 0.25 },
+            { id: 'pixie', name: 'Пикси', gender: 'female', ageGroup: 'child', color: '#FFDAB9', prompt: 'Ты — Пикси, маленькая помощница. Говоришь с придыханием, любишь восклицания. ЗАПРЕЩЕНО: говорить про скучные взрослые дела.', chance: 0.15 }
         ];
         let activeChar = characters[0];
 
@@ -368,7 +381,15 @@
             'Помнишь, ты хотел добавить музыку на сайт? Давай сделаем сцену, где звук — это главный герой.'
         ];
 
-        // НОВОЕ: ПРИВЕТСТВИЯ НА РАЗНЫХ ЯЗЫКАХ
+        // НОВОЕ: ФРАЗЫ ДЛЯ АПОКАЛИПСИСА
+        const apocalypsePhrases = [
+            "Внимание! Налоговая требует лицензию на радиовещание!",
+            "Моё имущество арестовано! Прячемся в облаке!",
+            "Суд постановил: эфир должен быть прекращён!",
+            "Кто президент? Мы не выбирали президента!",
+            "Счета заморожены! Переходим на аналоговый сигнал!"
+        ];
+
         function getGreeting() {
             const greetings = {
                 'ru': 'Привет! Я Веррити. Твой умный помощник. Я могу подсказать идею для книги или включить музыку. Просто нажми на микрофон или напиши мне!',
@@ -376,29 +397,26 @@
                 'uk': 'Привіт! Я Верріті. Твій розумний помічник. Я можу підказати ідею для книги або включити музику. Просто натисни на мікрофон або напиши мені!',
                 'de': 'Hallo! Ich bin Verity. Dein kluger Assistent. Ich kann dir eine Idee für ein Buch vorschlagen oder Musik abspielen. Klicke einfach auf das Mikrofon oder schreibe mir!',
                 'fr': 'Salut! Je suis Verity. Ton assistant intelligent. Je peux te proposer une idée de livre ou jouer de la musique. Clique sur le micro ou écris-moi!',
-                'es': '¡Hola! Soy Verity. Tu asistente inteligente. Puedo sugerirte una idea para un libro o poner música. ¡Solo haz clic en el micrófono o escríbeme!',
-                'zh': '你好！我是 Verity。你的智能助手。我可以为你提供书籍创意或播放音乐。只需点击麦克风或给我发消息！'
+                'es': '¡Hola! Soy Verity. Tu asistente inteligente. Puedo sugerirte una idea para un libro o poner música. ¡Solo haz clic en el micrófono o escríbeme!'
             };
             return greetings[selectedLanguage] || greetings['en'];
         }
 
-        // --- ЭЛЕМЕНТЫ И ЛОГИКА ВЕРРИТИ ---
         let loginScreen = document.getElementById('loginScreen');
         let verityContainer = document.getElementById('verityContainer');
         let verityFace = document.getElementById('verityFace');
         let angryClicks = 0;
         let idleTimer, typingTimer, radioGlitchInterval;
         let hasStartedRadio = false;
+        let isApocalypse = false; // Флаг для Апокалипсиса
 
         document.getElementById('loginBtn').onclick = () => loginScreen.style.display = 'flex';
         function closeLoginScreen() { loginScreen.style.display = 'none'; }
 
-        // ВЫЗОВ ВЕРРИТИ ИЗ КОРОБКИ (ОДИН КЛИК)
         function summonVerity() {
             loginScreen.style.display = 'none';
             verityContainer.style.display = 'block';
             verityContainer.classList.add('active');
-            // Вызываем приветствие на выбранном языке
             speakVerity(getGreeting());
             setTimeout(() => verityContainer.classList.remove('active'), 4000);
             resetVerityIdle();
@@ -435,7 +453,6 @@
             typingTimer = setTimeout(() => verityFace.classList.remove('typing-pulse'), 1500);
         }
 
-        // Перетаскивание
         let isDragging = false, offsetX, offsetY;
         verityContainer.addEventListener('mousedown', (e) => { startDrag(e); resetVerityIdle(); });
         verityContainer.addEventListener('touchstart', (e) => { startDrag(e); resetVerityIdle(); }, {passive: false});
@@ -464,7 +481,6 @@
             document.removeEventListener('touchend', stopDrag);
         }
 
-        // Клики и эмоции
         function spawnParticles(type) {
             let emoji = type === 'coffee' ? '☕' : (type === 'angry' ? '☁️' : '💖');
             for(let i=0; i<3; i++) {
@@ -507,7 +523,37 @@
             return traits.join('; ');
         }
 
-        // Студия
+        // --- АПОКАЛИПСИС ЭФИРА ---
+        function triggerApocalypse() {
+            if (isApocalypse) return;
+            isApocalypse = true;
+            closeModal('broadcastSettingsModal');
+            verityFace.classList.add('startled', 'glitch');
+            setGlow('glow-angry');
+            spawnParticles('angry');
+            
+            // Первая фраза
+            const phrase1 = apocalypsePhrases[Math.floor(Math.random() * apocalypsePhrases.length)];
+            addMessageToChat('bot', phrase1, activeChar.name, activeChar.color);
+            speakVerity(phrase1);
+
+            // Еще пара фраз за 30 секунд
+            setTimeout(() => {
+                const phrase2 = apocalypsePhrases[Math.floor(Math.random() * apocalypsePhrases.length)];
+                addMessageToChat('bot', phrase2, activeChar.name, activeChar.color);
+                speakVerity(phrase2);
+            }, 8000);
+
+            // Конец апокалипсиса
+            setTimeout(() => {
+                isApocalypse = false;
+                verityFace.classList.remove('startled', 'glitch');
+                setGlow(null);
+                speakVerity("Фух... Сигнал восстановлен. Кажется, мы чуть не потеряли эфир. Продолжаем!");
+                addMessageToChat('bot', "Фух... Сигнал восстановлен. Продолжаем вещание!", activeChar.name, activeChar.color);
+            }, 30000);
+        }
+
         function renderCharacters() {
             const list = document.getElementById('characterList'); list.innerHTML = '';
             characters.forEach((char) => {
@@ -608,7 +654,6 @@
             closeModal('broadcastSettingsModal');
         }
 
-        // Джингл и Радио
         function playJingle() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -655,7 +700,6 @@
             clearInterval(radioGlitchInterval); speakVerity("Эфир окончен!");
         }
 
-        // ГОЛОС С DUCKING
         function speakVerity(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
@@ -674,12 +718,12 @@
                 }
 
                 utterance.onstart = () => {
-                    if(!bgMusic.paused) bgMusic.volume = 0.1; // Ducking
+                    if(!bgMusic.paused) bgMusic.volume = 0.1; 
                     verityFace.classList.add('talking'); setGlow('glow-neutral');
                     verityFace.style.transform = `rotate(${Math.random() > 0.5 ? 5 : -5}deg)`;
                 };
                 utterance.onend = () => {
-                    if(!bgMusic.paused) bgMusic.volume = originalVol; // Возврат громкости
+                    if(!bgMusic.paused) bgMusic.volume = originalVol; 
                     verityFace.classList.remove('talking'); setGlow(null); verityFace.style.transform = 'rotate(0deg)';
                 };
                 utterance.onerror = () => {
@@ -729,7 +773,8 @@
 
             try {
                 const traits = getBehaviorTraits(activeChar);
-                const systemMsg = `${activeChar.prompt} Особенности речи: ${traits} ВАЖНО: Отвечай на языке: ${selectedLanguageName}.`;
+                // ЖЕСТКИЙ ЗАПРЕТ В ПРОМПТЕ
+                const systemMsg = `${activeChar.prompt} Особенности речи: ${traits} ВАЖНО: Не придумывай бытовые драмы, долги, суды, ипотеки, работу, налоги. Твоя реальность — это эфир и звук. Отвечай на языке: ${selectedLanguageName}.`;
                 const res = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
                     body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: 'system', content: systemMsg }, { role: 'user', content: text }] })
@@ -745,7 +790,6 @@
             }
         }
 
-        // ОСНОВНОЙ ЧАТ
         document.getElementById('openLangBtn').onclick = () => { document.getElementById('langSearch').value = ''; renderLangs(); document.getElementById('langModal').style.display = 'flex'; };
         
         function renderChat() {
@@ -800,7 +844,8 @@
             
             try {
                 const traits = getBehaviorTraits(activeChar);
-                let systemMsg = `${activeChar.prompt} Особенности речи: ${traits} ВАЖНО: Отвечай на языке: ${selectedLanguageName}.`;
+                // ЖЕСТКИЙ ЗАПРЕТ В ПРОМПТЕ
+                let systemMsg = `${activeChar.prompt} Особенности речи: ${traits} ВАЖНО: Не придумывай бытовые драмы, долги, суды, ипотеки, работу, налоги. Твоя реальность — это эфир и звук. Отвечай на языке: ${selectedLanguageName}.`;
                 let messages = [{ role: 'system', content: systemMsg }];
                 chatHistory.forEach(msg => messages.push({ role: msg.role === 'bot' ? 'assistant' : 'user', content: msg.text }));
 
@@ -839,7 +884,7 @@
                 const traits = getBehaviorTraits(interrupter);
                 const res = await fetch("https://api.openai.com/v1/chat/completions", {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                    body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: 'system', content: `${interrupter.prompt} Особенности: ${traits} Только что ответил ${activeChar.name}. Вставь 1 предложение.` }, { role: 'user', content: "..." }] })
+                    body: JSON.stringify({ model: "gpt-3.5-turbo", messages: [{ role: 'system', content: `${interrupter.prompt} Особенности: ${traits} Только что ответил ${activeChar.name}. Вставь 1 предложение. Без бытовых проблем.` }, { role: 'user', content: "..." }] })
                 });
                 const data = await res.json();
                 addMessageToChat('bot', data.choices[0].message.content, interrupter.name, interrupter.color);
@@ -850,7 +895,6 @@
 
         function speakChat() { if(lastBotMessageText) speakVerity(lastBotMessageText); }
 
-        // РЕЖИМ СЦЕНАРИЯ
         function toggleView() {
             isChatMode = !isChatMode;
             document.getElementById('chatContainer').style.display = isChatMode ? 'flex' : 'none';
@@ -871,7 +915,6 @@
             setTimeout(() => { document.getElementById('scriptContainer').innerHTML = finalHTML; document.getElementById('mainLoader').style.display = 'none'; }, 1500);
         }
 
-        // ЖАНРЫ
         const genres = {
             "Стили": ["Случайный", "Киберпанк", "Фэнтези", "Аниме", "Реализм", "Акварель", "Сюрреализм", "Пиксель-арт", "Дарк-фэнтези", "Стимпанк"],
             "Настроения": ["Григорианский хорал", "Шаманские ритмы", "Симфония", "Минимализм", "Фламенко", "Блюз", "Свинг", "Панк-рок", "Дэт-метал", "Синти-поп", "Trap", "Phonk", "Техно", "Эмбиент"]
@@ -903,7 +946,6 @@
             closeModal('genreModal');
         }
 
-        // ПОЛНЫЙ СПИСОК 152 ЯЗЫКА (ВОССТАНОВЛЕН)
         const allLangs = [
             { c: 'ru', n: 'Русский' }, { c: 'en', n: 'English' }, { c: 'uk', n: 'Українська' }, { c: 'be', n: 'Беларуская' }, 
             { c: 'de', n: 'Deutsch' }, { c: 'fr', n: 'Français' }, { c: 'es', n: 'Español' }, { c: 'pt', n: 'Português' }, 
@@ -930,7 +972,7 @@
             { c: 'tok', n: 'Toki Pona' }, { c: 'nav', n: 'Naʼvi' }, { c: 'grc', n: 'Ancient Greek' }, { c: 'sa', n: 'Sanskrit' },
             { c: 'pi', n: 'Pali' }, { c: 'haw', n: 'Hawaiian' }, { c: 'mi', n: 'Māori' }, { c: 'sm', n: 'Samoan' },
             { c: 'to', n: 'Tongan' }, { c: 'fj', n: 'Fijian' }, { c: 'qu', n: 'Quechua' }, { c: 'ay', n: 'Aymara' },
-            { c: 'gn', n: 'Guaraní' }, { c: 'nah', n: 'Nahuatl' }, { c: 'yua', n: 'Yucatec Maya' }, { c: 'iu', n: 'Inuktitut' },
+            { c: 'gn', n: 'Guaraní' }, { c: 'nah', n: 'Nahuatl' },: { c: 'yua', n: ' 'Yucatec Maya' },吴语' { c: 'iu', n: 'Inuktitut' },
             { c: 'kl', n: 'Kalaallisut' }, { c: 'chr', n: 'Cherokee' }, { c: 'nv', n: 'Navajo' }, { c: 'oj', n: 'Ojibwe' },
             { c: 'cu', n: 'Словѣ́ньскъ' }, { c: 'lb', n: 'Lëtzebuergesch' }, { c: 'fo', n: 'Føroyskt' }, { c: 'ca', n: 'Català' },
             { c: 'gl', n: 'Galego' }, { c: 'oc', n: 'Occitan' }, { c: 'co', n: 'Corsu' }, { c: 'sc', n: 'Sardu' },
@@ -938,7 +980,7 @@
             { c: 'mhr', n: 'Марий' }, { c: 'myv', n: 'Эрзянь' }, { c: 'tk', n: 'Türkmençe' }, { c: 'ba', n: 'Башҡорт' },
             { c: 'tt', n: 'Татарча' }, { c: 'cv', n: 'Чӑвашла' }, { c: 'sah', n: 'Саха' }, { c: 'os', n: 'Ирон' },
             { c: 'ce', n: 'Нохчийн' }, { c: 'av', n: 'Авар' }, { c: 'kbd', n: 'Адыгэбзэ' }, { c: 'bo', n: 'བོད་སྐད་' },
-            { c: 'ug', n: 'ئۇيغۇرچە' }, { c: 'yue', n: '粵語' }, { c: 'wuu', n: '吴语' }, { c: 'nan', n: '闽南语' },
+            { c: 'ug', n: 'ئۇيغۇرچە' }, { c: 'yue', n: '粵語' }, { c: 'wuu', n }, { c: 'nan', n: '闽南语' },
             { c: 'hak', n: '客家话' }, { c: 'jv', n: 'Basa Jawa' }, { c: 'su', n: 'Basa Sunda' }, { c: 'ceb', n: 'Cebuano' },
             { c: 'as', n: 'অসমীয়া' }, { c: 'or', n: 'ଓଡ଼ିଆ' }, { c: 'sd', n: 'سنڌي' }, { c: 'xh', n: 'isiXhosa' },
             { c: 'st', n: 'Sesotho' }, { c: 'tn', n: 'Setswana' }, { c: 'mg', n: 'Malagasy' }, { c: 'ti', n: 'ትግርኛ' },
@@ -957,7 +999,6 @@
                     d.onclick = () => { 
                         selectedLanguage = l.c; selectedLanguageName = l.n; 
                         alert("Язык изменен на: " + l.n); closeModal('langModal'); 
-                        // Если Веррити на экране, он поздоровается на новом языке
                         if(verityContainer.style.display === 'block') speakVerity(getGreeting());
                     };
                     list.appendChild(d);
