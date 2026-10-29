@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Studio PRO</title>
+    <title>Cometa AI Studio</title>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -21,13 +21,13 @@
         
         /* Шапка */
         .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #000; border-bottom: 1px solid #222; z-index: 10; }
-        .logo { font-weight: 900; font-size: 16px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo { font-weight: 900; font-size: 18px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-controls { display: flex; gap: 8px; align-items: center; }
         .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; }
         
         /* Зона предпросмотра */
         .preview-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .preview-placeholder { text-align: center; color: #444; font-size: 14px; font-weight: 600; padding: 20px; }
+        .preview-placeholder { text-align: center; color: #444; font-size: 14px; font-weight: 600; padding: 20px; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         /* Панель управления */
         .control-panel { background: #111; border-top: 1px solid #333; display: flex; flex-direction: column; }
@@ -45,12 +45,19 @@
         .btn-primary:active { transform: scale(0.98); }
         .btn-primary:disabled { opacity: 0.7; }
         
-        /* Модальные окна (Языки и Музыка) */
+        /* Модальные окна */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; border: 1px solid #333; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        
         .lang-item { padding: 12px; background: #111; border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 1px solid #222; }
         .lang-item:hover { border-color: #10b981; }
+        
+        /* Поля ввода в модалках */
+        .input-field { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 15px; font-size: 14px; }
+        
+        /* Помощник */
+        .help-box { background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; color: #ddd; display: none; border-radius: 4px; }
         
         /* Плеер */
         .audio-player { display: none; padding: 10px; background: #000; border-top: 1px solid #333; align-items: center; gap: 10px; }
@@ -64,12 +71,45 @@
 
     <!-- Шапка -->
     <div class="header">
-        <div class="logo">STUDIO PRO</div>
+        <div class="logo">Cometa AI</div>
         <div class="header-controls">
+            <button class="icon-btn" id="openKeyBtn" title="API Ключ">🔑</button>
             <button class="icon-btn" id="openLangBtn" title="Языки">🌐</button>
             <button class="icon-btn" id="openMusicBtn" title="Музыка">🎵</button>
-            <button class="icon-btn" id="openGalleryBtn" style="display: none;" title="Галерея">📁</button>
             <button class="user-btn" id="loginBtn" style="background: #111; border: 1px solid #333; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;">Войти</button>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА API КЛЮЧА -->
+    <div class="modal" id="keyModal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>🔑 Настройка ИИ</span>
+                <button onclick="closeKeyModal()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">✕</button>
+            </div>
+            
+            <p style="font-size: 13px; color: #aaa; margin-top: 0;">
+                Чтобы генерировать тексты, нашему ИИ нужен ваш личный ключ (API Key). Это как пароль. Он сохранится только в вашем браузере.
+            </p>
+
+            <input type="password" id="apiKeyInput" class="input-field" placeholder="Вставьте ваш API Key (sk-...)">
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="btn-primary" onclick="saveApiKey()" style="padding: 10px; font-size: 14px;">Сохранить</button>
+                <button class="btn-primary" onclick="toggleHelp()" style="background: #3b82f6; padding: 10px; font-size: 14px; flex: 0.5;">Помощь 🤖</button>
+            </div>
+
+            <!-- Умный помощник -->
+            <div class="help-box" id="helpBox">
+                <b>🤖 Привет! Я твой помощник.</b><br><br>
+                Не пугайся слова «API Key». Это просто длинный пароль от искусственного интеллекта.<br><br>
+                <b>Как его получить (бесплатно):</b><br>
+                1. Зайди на сайт <b>platform.openai.com</b> (или <b>openrouter.ai</b>).<br>
+                2. Зарегистрируйся.<br>
+                3. В настройках профиля найди раздел <b>API Keys</b>.<br>
+                4. Нажми «Create new secret key».<br>
+                5. Скопируй код (он начинается на <b>sk-...</b>) и вставь его в поле выше.
+            </div>
         </div>
     </div>
 
@@ -109,7 +149,7 @@
         <video id="videoPlayer" style="display:none; width:100%; height:100%; object-fit:contain;" controls></video>
         <img id="imageResult" style="display:none; width:100%; height:100%; object-fit:contain; padding: 10px;">
         
-        <div style="display: flex; gap: 10px; margin-top: 10px;" id="actionArea" style="display: none;">
+        <div style="display: flex; gap: 10px; margin-top: 10px; position: absolute; bottom: 20px;" id="actionArea">
             <button id="saveBtn" class="btn-primary" style="display:none; width: 150px; padding: 10px;">💾 Сохранить</button>
             <button id="readTextBtn" class="btn-primary" style="display:none; width: 150px; padding: 10px; background: #3b82f6;">🔊 Озвучить</button>
         </div>
@@ -149,7 +189,52 @@
         const db = firebase.firestore();
 
         // ==========================================
-        // 2. СИСТЕМА ЯЗЫКОВ
+        // 2. СИСТЕМА API КЛЮЧЕЙ
+        // ==========================================
+        const keyModal = document.getElementById('keyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const helpBox = document.getElementById('helpBox');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedKey = localStorage.getItem('cometa_api_key');
+            if (savedKey) {
+                keyModal.style.display = 'none';
+            } else {
+                keyModal.style.display = 'flex';
+            }
+        });
+
+        document.getElementById('openKeyBtn').onclick = () => {
+            const savedKey = localStorage.getItem('cometa_api_key');
+            if(savedKey) apiKeyInput.value = savedKey;
+            keyModal.style.display = 'flex';
+        };
+
+        function closeKeyModal() {
+            const savedKey = localStorage.getItem('cometa_api_key');
+            if (!savedKey) {
+                alert("Без ключа бот не сможет генерировать текст! Вы можете ввести его позже.");
+            }
+            keyModal.style.display = 'none';
+        }
+
+        function saveApiKey() {
+            const key = apiKeyInput.value.trim();
+            if (key.length < 10) {
+                alert("Ключ слишком короткий. Проверьте его.");
+                return;
+            }
+            localStorage.setItem('cometa_api_key', key);
+            alert("✅ Ключ успешно сохранен! Теперь ИИ готов к работе.");
+            keyModal.style.display = 'none';
+        }
+
+        function toggleHelp() {
+            helpBox.style.display = helpBox.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // ==========================================
+        // 3. СИСТЕМА ЯЗЫКОВ
         // ==========================================
         const languages = [
             { code: 'en', name: 'English' }, { code: 'ru', name: 'Русский' },
@@ -164,7 +249,6 @@
             en: { script: "✍️ Script", image: "🖼️ Image", video: "🎬 Video", gen: "Generate", thinking: "AI Arena thinking...", save: "💾 Save", read: "🔊 Read", placeholder: "Enter idea..." },
             ru: { script: "✍️ Сценарий", image: "🖼️ Фото", video: "🎬 Видео", gen: "Сгенерировать", thinking: "Арена ИИ думает...", save: "💾 Сохранить", read: "🔊 Озвучить", placeholder: "Напишите идею..." },
             uk: { script: "✍️ Сценарій", image: "🖼️ Фото", video: "🎬 Відео", gen: "Згенерувати", thinking: "Арена ШІ думає...", save: "💾 Зберегти", read: "🔊 Озвучити", placeholder: "Напишіть ідею..." }
-            // Остальные языки будут использовать английский как fallback для простоты
         };
 
         let currentLang = localStorage.getItem('studioLang') || 'ru';
@@ -180,7 +264,6 @@
             document.getElementById('readTextBtn').innerText = dict.read;
         }
 
-        // Отрисовка меню языков
         const langListEl = document.getElementById('langList');
         languages.forEach(l => {
             const div = document.createElement('div');
@@ -200,7 +283,7 @@
         applyLang();
 
         // ==========================================
-        // 3. МУЗЫКА (АУДИО-ПЛЕЕР И DUCKING)
+        // 4. МУЗЫКА (АУДИО-ПЛЕЕР И DUCKING)
         // ==========================================
         const bgMusic = document.getElementById('bgMusic');
         const audioPlayer = document.getElementById('audioPlayer');
@@ -220,20 +303,17 @@
             document.getElementById('musicModal').style.display = 'none';
         };
 
-        // УМНОЕ ОТКЛЮЧЕНИЕ МУЗЫКИ ПРИ ЧТЕНИИ ТЕКСТА (Ducking)
         let currentSpeakingText = "";
         
         function speakText() {
             if (!currentSpeakingText) return;
             if ('speechSynthesis' in window) {
-                // Сохраняем текущую громкость музыки и делаем её тише
                 const originalVolume = bgMusic.volume;
                 bgMusic.volume = 0.1; 
 
                 const utterance = new SpeechSynthesisUtterance(currentSpeakingText);
                 utterance.lang = currentLang === 'ru' ? 'ru-RU' : (currentLang === 'uk' ? 'uk-UA' : 'en-US');
                 
-                // Когда текст прочитан, возвращаем громкость
                 utterance.onend = () => { bgMusic.volume = originalVolume; };
                 utterance.onerror = () => { bgMusic.volume = originalVolume; };
                 
@@ -246,7 +326,7 @@
         document.getElementById('readTextBtn').onclick = speakText;
 
         // ==========================================
-        // 4. АВТОРИЗАЦИЯ
+        // 5. АВТОРИЗАЦИЯ
         // ==========================================
         document.getElementById('loginBtn').onclick = () => {
             if (auth.currentUser) auth.signOut();
@@ -258,23 +338,19 @@
 
         auth.onAuthStateChanged(user => {
             const btn = document.getElementById('loginBtn');
-            const galleryBtn = document.getElementById('openGalleryBtn');
             if (user) {
                 btn.innerText = user.displayName ? user.displayName.split(' ')[0] : 'Выйти';
                 btn.style.background = '#10b981';
-                galleryBtn.style.display = 'flex';
             } else {
                 btn.innerText = 'Войти';
                 btn.style.background = '#111';
-                galleryBtn.style.display = 'none';
             }
         });
 
         // ==========================================
-        // 5. ГЕНЕРАЦИЯ
+        // 6. ГЕНЕРАЦИЯ
         // ==========================================
         let currentTool = 'script';
-        const WORKER_URL = "https://твой-воркер.workers.dev"; // ВСТАВЬ СВОЙ URL
 
         function switchTool(tool, btn) {
             currentTool = tool;
@@ -293,6 +369,17 @@
             const prompt = document.getElementById('aiPrompt').value;
             if (!prompt) { alert("Введите текст!"); return; }
 
+            const dict = i18n[currentLang] || i18n['en'];
+            
+            if (currentTool === 'script') {
+                const apiKey = localStorage.getItem('cometa_api_key');
+                if (!apiKey) {
+                    alert("Пожалуйста, сначала введите ваш API Ключ в настройках (кнопка 🔑 в шапке).");
+                    document.getElementById('keyModal').style.display = 'flex';
+                    return;
+                }
+            }
+
             document.getElementById('mainLoader').style.display = 'block';
             document.getElementById('previewText').style.display = 'none';
             document.getElementById('videoPlayer').style.display = 'none';
@@ -300,26 +387,44 @@
             document.getElementById('saveBtn').style.display = 'none';
             document.getElementById('readTextBtn').style.display = 'none';
             
-            const dict = i18n[currentLang] || i18n['en'];
             this.innerText = dict.thinking;
             this.disabled = true;
 
             // --- СЦЕНАРИЙ ---
             if (currentTool === 'script') {
                 try {
-                    const response = await fetch(WORKER_URL, {
+                    const apiKey = localStorage.getItem('cometa_api_key');
+                    
+                    const response = await fetch("https://api.openai.com/v1/chat/completions", {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ prompt: prompt, toolType: 'script' })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "gpt-3.5-turbo", 
+                            messages: [
+                                { role: "system", content: "Ты профессиональный сценарист. Пиши краткие, увлекательные сценарии." },
+                                { role: "user", content: prompt }
+                            ]
+                        })
                     });
+
+                    if (!response.ok) {
+                        if(response.status === 401) throw new Error("Неверный API Ключ. Проверьте его в настройках (🔑).");
+                        throw new Error("Ошибка сервера ИИ. Возможно, закончились лимиты на вашем ключе.");
+                    }
+
                     const data = await response.json();
-                    currentSpeakingText = data.text;
+                    const botText = data.choices[0].message.content;
+                    currentSpeakingText = botText;
                     
                     document.getElementById('previewText').style.display = 'block';
-                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: #ddd; overflow-y:auto; max-height: 100%; padding: 15px;">${data.text.replace(/\n/g, '<br>')}</div>`;
+                    document.getElementById('previewText').innerHTML = `<div style="text-align:left; font-size:14px; line-height:1.6; color: #ddd; overflow-y:auto; max-height: 100%; padding: 15px;">${botText.replace(/\n/g, '<br>')}</div>`;
                     document.getElementById('readTextBtn').style.display = 'block';
+                    
                 } catch (error) {
-                    alert("Ошибка: " + error.message);
+                    alert(error.message);
                     document.getElementById('previewText').style.display = 'block';
                 } finally {
                     document.getElementById('mainLoader').style.display = 'none';
@@ -327,27 +432,64 @@
                     this.disabled = false;
                 }
             } 
-            // --- ФОТО ---
+            // --- ФОТО (с защитой от Load failed) ---
             else if (currentTool === 'image') {
                 const encodedPrompt = encodeURIComponent(prompt);
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 100000)}`;
-                const imgElement = document.getElementById('imageResult');
+                const seed = Math.floor(Math.random() * 100000);
                 
-                imgElement.onload = () => {
-                    document.getElementById('mainLoader').style.display = 'none';
-                    imgElement.style.display = 'block';
-                    document.getElementById('saveBtn').style.display = 'block';
-                    this.innerText = dict.gen;
-                    this.disabled = false;
-                };
-                imgElement.onerror = () => {
-                    alert("Ошибка загрузки картинки.");
+                const models = ['flux', 'turbo', 'default'];
+                let lastError = null;
+                let success = false;
+
+                for (const model of models) {
+                    try {
+                        let imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${seed}`;
+                        if (model !== 'default') imageUrl += `&model=${model}`;
+
+                        const response = await fetch(imageUrl);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                        const blob = await response.blob();
+                        if (blob.size < 1000) throw new Error('Пустой ответ');
+
+                        const objectUrl = URL.createObjectURL(blob);
+                        const imgElement = document.getElementById('imageResult');
+                        
+                        imgElement.src = objectUrl;
+                        imgElement.style.display = 'block';
+                        document.getElementById('mainLoader').style.display = 'none';
+                        document.getElementById('saveBtn').style.display = 'block';
+                        
+                        success = true;
+                        break;
+                    } catch (err) {
+                        console.warn(`Модель ${model} не сработала:`, err);
+                        lastError = err;
+                        await new Promise(r => setTimeout(r, 1000));
+                    }
+                }
+
+                if (!success) {
                     document.getElementById('mainLoader').style.display = 'none';
                     document.getElementById('previewText').style.display = 'block';
+                    document.getElementById('previewText').innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <div style="font-size: 40px; margin-bottom: 10px;">🎨</div>
+                            <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 10px;">Сервис картинок перегружен</div>
+                            <div style="color: #aaa; font-size: 13px; margin-bottom: 20px;">
+                                Pollinations.ai временно не отвечает. Это не ошибка вашего ключа.<br>Попробуйте еще раз через минуту.
+                            </div>
+                            <button class="btn-primary" onclick="document.getElementById('generateBtn').click()" style="background: #3b82f6; width: auto; padding: 10px 20px;">
+                                🔄 Повторить
+                            </button>
+                        </div>
+                    `;
                     this.innerText = dict.gen;
                     this.disabled = false;
-                };
-                imgElement.src = imageUrl;
+                    return;
+                }
+                this.innerText = dict.gen;
+                this.disabled = false;
             }
             // --- ВИДЕО ---
             else if (currentTool === 'video') {
@@ -361,12 +503,11 @@
                             const canvas = document.createElement('canvas');
                             canvas.width = 1920; canvas.height = 1080;
                             const ctx = canvas.getContext('2d');
-                            ctx.imageSmoothingEnabled = true; ctx false.imageSmoothingQuality = 'high';
-                           ;
- ctx.drawImage(img,                0, 0, canvas.width }
-, canvas.height);
+                            ctx.imageSmoothingEnabled = true; 
+                            ctx.imageSmoothingQuality = 'high';
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                             
-                                       const videoElement = await puter.ai.txt2vid(prompt, {
+                            const videoElement = await puter.ai.txt2vid(prompt, {
                                 model: "google/veo-2.0", input_reference: canvas.toDataURL('image/jpeg', 0.95), duration: 5, size: "1280x720" 
                             });
 
@@ -377,8 +518,8 @@
                             
                             document.getElementById('mainLoader').style.display = 'none';
                             document.getElementById('saveBtn').style.display = 'block';
-                            document.getElementById('generateBtn').innerText = dict.gen;
-                            document.getElementById('generateBtn').disabled = false;
+                            this.innerText = dict.gen;
+                            this.disabled = false;
                         } catch (innerError) { throw new Error("Ошибка видео: " + innerError.message); }
                     };
                     img.onerror = () => { throw new Error("Ошибка загрузки картинки."); };
@@ -388,11 +529,13 @@
                     document.getElementById('mainLoader').style.display = 'none';
                     document.getElementById('previewText').style.display = 'block';
                     this.innerText = dict.gen;
-                    this.disabled = }
+                    this.disabled = false;
+                }
+            }
         };
 
         // ==========================================
-        // 6. СОХРАНЕНИЕ
+        // 7. СОХРАНЕНИЕ
         // ==========================================
         document.getElementById('saveBtn').onclick = async function() {
             const user = auth.currentUser;
@@ -412,6 +555,9 @@
                     fileUrl = document.getElementById('videoPlayer').src;
                     fileExtension = 'mp4';
                     blob = await (await fetch(fileUrl)).blob();
+                } else {
+                    btn.innerText = originalText; btn.disabled = false;
+                    return; 
                 }
 
                 const filename = `ai_${Date.now()}.${fileExtension}`;
