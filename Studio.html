@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cometa AI Studio</title>
     
-    <!-- Firebase (можно удалить, если не нужен) -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -23,97 +23,82 @@
         .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; transition: 0.2s; }
         .icon-btn:hover { background: #222; }
         
-        /* ЖЕЛТЫЙ ЭКРАН ВХОДА С ЛУЧАМИ */
-        #loginScreen {
-            display: none; position: fixed; inset: 0; z-index: 2000;
-            background: #fbc02d; /* Желтый фон */
-            align-items: center; justify-content: center; flex-direction: column;
-            overflow: hidden;
-        }
-        /* Белые лучи из центра */
-        #loginScreen::before {
-            content: ''; position: absolute; width: 200vw; height: 200vh;
-            background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg);
-            animation: rotateRays 30s linear infinite;
-        }
+        /* ЖЕЛТЫЙ ЭКРАН ВХОДА */
+        #loginScreen { display: none; position: fixed; inset: 0; z-index: 2000; background: #fbc02d; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
+        #loginScreen::before { content: ''; position: absolute; width: 200vw; height: 200vh; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg); animation: rotateRays 30s linear infinite; }
         @keyframes rotateRays { 100% { transform: rotate(360deg); } }
         
-        .login-box {
-            position: relative; z-index: 2; width: 260px; height: 260px;
-            background: rgba(255,255,255,0.95); border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            text-align: center; padding: 20px; cursor: pointer;
-        }
+        .login-box { position: relative; z-index: 2; width: 260px; height: 260px; background: rgba(255,255,255,0.95); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px; cursor: pointer; }
         .login-box h2 { color: #333; margin: 0 0 10px 0; font-size: 26px; font-weight: 900; }
         .login-box p { color: #555; font-size: 14px; line-height: 1.4; font-weight: 600; }
-        
-        .skip-btn {
-            position: absolute; top: 20px; right: 20px; z-index: 2;
-            background: rgba(0,0,0,0.2); color: #000; border: none; padding: 10px 20px;
-            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px;
-        }
+        .skip-btn { position: absolute; top: 20px; right: 20px; z-index: 2; background: rgba(0,0,0,0.2); color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 14px; }
 
-        /* ВЕРРИТИ (АССИСТЕНТ) */
-        #verityContainer {
-            display: none; position: fixed; z-index: 3000;
-            width: 50px; height: 50px; cursor: grab; touch-action: none;
-        }
+        /* ВЕРРИТИ */
+        #verityContainer { display: none; position: fixed; z-index: 3000; width: 50px; height: 50px; cursor: grab; touch-action: none; }
         #verityContainer:active { cursor: grabbing; }
         
         .verity-face {
             width: 50px; height: 50px; background: #ffd21e; border-radius: 50%;
             position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: background 0.3s;
+            transition: background 0.3s, opacity 0.3s, transform 0.3s, box-shadow 0.3s;
         }
         .verity-eye { width: 6px; height: 6px; background: #000; border-radius: 50%; position: absolute; top: 16px; transition: 0.3s; }
         .verity-eye.left { left: 13px; }
         .verity-eye.right { right: 13px; }
+        .verity-mouth { width: 16px; height: 6px; background: #000; border-radius: 0 0 10px 10px; position: absolute; bottom: 12px; transition: height 0.2s; }
         
-        .verity-mouth {
-            width: 16px; height: 6px; background: #000; border-radius: 0 0 10px 10px;
-            position: absolute; bottom: 12px; transition: height 0.2s;
-        }
-        
-        /* Эмоции Веррити */
         .verity-face.angry { background: #ff5252; }
         .verity-face.angry .verity-eye { top: 20px; transform: rotate(20deg); }
         .verity-face.angry .verity-eye.right { transform: rotate(-20deg); }
         .verity-face.angry .verity-mouth { height: 3px; border-radius: 10px 10px 0 0; bottom: 15px; width: 20px; }
         
         .verity-face.blush { background: #ffb8b8; }
-        .verity-face.blush::after {
-            content: ''; position: absolute; width: 30px; height: 10px; background: rgba(255,0,0,0.3);
-            border-radius: 50%; bottom: 8px; filter: blur(3px);
-        }
+        .verity-face.blush::after { content: ''; position: absolute; width: 30px; height: 10px; background: rgba(255,0,0,0.3); border-radius: 50%; bottom: 8px; filter: blur(3px); }
         
         .verity-face.talking .verity-mouth { animation: talk 0.2s infinite alternate; }
         @keyframes talk { 0% { height: 6px; } 100% { height: 14px; } }
 
-        /* Кнопки под шариком */
-        .verity-controls {
-            position: absolute; top: 55px; left: -15px; display: flex; gap: 10px; opacity: 0; transition: 0.3s;
-        }
+        .verity-face.sleeping { opacity: 0.6; transform: scale(0.95); animation: breathe 4s ease-in-out infinite; }
+        @keyframes breathe { 0%, 100% { transform: scale(0.95); } 50% { transform: scale(1.0); } }
+        
+        .verity-face.startled { animation: shake 0.4s; background: #ff5252; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+        .verity-face.typing-pulse { animation: pulse-interest 1.5s infinite; }
+        @keyframes pulse-interest { 0% { box-shadow: 0 0 0 0 rgba(255, 210, 30, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 210, 30, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 210, 30, 0); } }
+        
+        /* КОТ */
+        .verity-face.cat-mode { background: #ffb8b8; border-radius: 10px 10px 20px 20px; }
+        .verity-face.cat-mode::before, .verity-face.cat-mode::after { content: ''; position: absolute; top: -10px; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #ffb8b8; z-index: -1;}
+        .verity-face.cat-mode::before { left: 5px; transform: rotate(-15deg); }
+        .verity-face.cat-mode::after { right: 5px; transform: rotate(15deg); }
+
+        /* СБОЙ СИГНАЛА */
+        .verity-face.glitch { animation: glitchAnim 0.2s infinite; background: #555; }
+        @keyframes glitchAnim { 0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 40% { transform: translate(-3px, -3px); } 60% { transform: translate(3px, 3px); } 80% { transform: translate(3px, -3px); } 100% { transform: translate(0); } }
+
+        .verity-face.glow-neutral { box-shadow: 0 0 20px 5px rgba(255, 210, 30, 0.6); }
+        .verity-face.glow-blush { box-shadow: 0 0 20px 5px rgba(255, 100, 100, 0.6); }
+        .verity-face.glow-angry { box-shadow: 0 0 20px 8px rgba(255, 0, 0, 0.8); }
+        .verity-face.glow-noir { box-shadow: 0 0 20px 5px rgba(50, 50, 150, 0.8); }
+
+        .particle { position: absolute; pointer-events: none; font-size: 16px; animation: floatUp 1s ease-out forwards; z-index: 4000; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 100% { opacity: 0; transform: translateY(-40px) scale(1.2); } }
+
+        .verity-controls { position: absolute; top: 55px; left: -35px; display: flex; gap: 8px; opacity: 0; transition: 0.3s; }
         #verityContainer:hover .verity-controls, #verityContainer.active .verity-controls { opacity: 1; }
-        .v-btn {
-            width: 30px; height: 30px; background: #111; border: 1px solid #10b981; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
+        .v-btn { width: 30px; height: 30px; background: #111; border: 1px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
 
         /* ЛОАДЕР */
         .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-        #mainLoader {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 140px; height: 140px; display: none; z-index: 100;
-        }
+        #mainLoader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; display: none; z-index: 100; }
         .loader-track { fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round; }
         .loader-anim { fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 350; stroke-dashoffset: 350; animation: loadDraw 3.5s linear infinite; }
         .loader-text { fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9; }
         @keyframes loadDraw { 0% { stroke-dashoffset: 350; } 100% { stroke-dashoffset: 0; } }
 
-        /* ЧАТ И ИНТЕРФЕЙС */
+        /* ЧАТ */
         .chat-container { padding: 15px; display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
         .message-row { display: flex; flex-direction: column; width: 100%; }
         .message-row.user { align-items: flex-end; }
@@ -121,6 +106,10 @@
         .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 15px; line-height: 1.5; position: relative; word-wrap: break-word; }
         .message-row.user .message-bubble { background: #3b82f6; color: #fff; border-bottom-right-radius: 4px; }
         .message-row.bot .message-bubble { background: #222; color: #eee; border-bottom-left-radius: 4px; }
+        
+        /* ИМЯ ПЕРСОНАЖА В ЧАТЕ */
+        .speaker-name { font-size: 11px; margin-bottom: 3px; font-weight: bold; display: block; }
+
         .message-actions { margin-top: 5px; font-size: 12px; color: #888; cursor: pointer; }
         .message-actions span:hover { color: #10b981; }
 
@@ -134,14 +123,20 @@
         .script-container img { width: 100%; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .script-container p { margin-bottom: 15px; }
 
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ И ВВОД */
         .control-panel { background: #111; border-top: 1px solid #333; padding: 10px 15px; }
-        .input-wrapper { display: flex; gap: 10px; align-items: flex-end; max-width: 800px; margin: 0 auto; }
-        textarea { flex: 1; height: 50px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 14px; font-size: 15px; resize: none; outline: none; }
-        .send-btn { width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .input-wrapper { display: flex; gap: 10px; align-items: flex-end; max-width: 800px; margin: 0 auto; position: relative;}
         
+        .reset-btn { position: absolute; left: 10px; top: 15px; background: none; border: none; color: #666; font-size: 16px; cursor: pointer; z-index: 5; }
+        .reset-btn:hover { color: #fff; }
+
+        textarea { flex: 1; height: 50px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 14px 14px 14px 35px; font-size: 15px; resize: none; outline: none; }
+        .send-btn { width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
         /* МОДАЛКИ */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; border: 1px solid #333; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); transition: background 0.5s; }
+        /* НОВОЕ: Динамический фон для студии */
+        .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; border: 1px solid #333; transition: background 0.5s, border-color 0.5s; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
         .input-field { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 15px; font-size: 14px; }
         
@@ -157,11 +152,40 @@
         .audio-player { display: none; padding: 10px; background: #000; border-top: 1px solid #333; align-items: center; gap: 10px; }
         .btn-primary { flex: 1; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
         .btn-secondary { flex: 1; padding: 12px; background: #333; border: none; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
+
+        /* ПАНЕЛЬ ЭФИРА И СТУДИЯ */
+        .panel-section { margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .panel-section h4 { margin: 0 0 8px 0; color: #aaa; font-size: 14px; }
+        .trigger-row { display: flex; gap: 5px; margin-bottom: 5px; }
+        .trigger-row input { flex: 1; background: #333; border: 1px solid #555; color: #fff; padding: 6px; border-radius: 4px; font-size: 12px; }
+        .add-trigger-btn { background: #ff9800; color: #000; border: none; cursor: pointer; padding: 0 10px; border-radius: 4px; font-weight: bold; }
+        .q-btn { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; margin: 2px; }
+        .s-btn { background: #222; border: 1px solid #444; padding: 4px 8px; border-radius: 6px; font-size: 16px; cursor: pointer; margin: 2px; }
+
+        /* НОВОЕ: СТИЛИ СТУДИИ (ЧИСТЫЕ КРУЖКИ) */
+        .character-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 15px; margin-bottom: 15px; margin-top: 10px; }
+        .char-avatar { 
+            width: 65px; height: 65px; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: 900; 
+            color: #000; 
+            cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            position: relative; 
+            font-size: 11px; 
+            text-align: center;
+            padding: 0 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+        }
+        .char-avatar:hover { transform: scale(1.1); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .char-avatar.active { border: 3px solid #fff; box-shadow: 0 0 20px currentColor; }
     </style>
 </head>
 <body>
 
-    <!-- ЭКРАН ВХОДА -->
     <div id="loginScreen">
         <button class="skip-btn" onclick="closeLoginScreen()">Пропустить</button>
         <div class="login-box" onclick="handleDoubleTap(event)">
@@ -170,7 +194,6 @@
         </div>
     </div>
 
-    <!-- АССИСТЕНТ VERITY -->
     <div id="verityContainer" style="top: 70%; left: 80%;">
         <div class="verity-face" id="verityFace">
             <div class="verity-eye left"></div>
@@ -180,23 +203,20 @@
         <div class="verity-controls">
             <div class="v-btn" onclick="startVoiceInput()" title="Голос">🎤</div>
             <div class="v-btn" onclick="openVerityChat()" title="Текст">💬</div>
+            <div class="v-btn" onclick="playRadio()" title="Радио">📻</div>
         </div>
     </div>
 
-    <!-- ШАПКА -->
     <div class="header">
         <div class="logo">Cometa AI</div>
         <div class="header-controls">
-            <button class="icon-btn" id="openSettingsBtn">⚙️</button>
-            <button class="icon-btn" id="openGenreBtn">🎨</button>
+            <button class="icon-btn" id="openBroadcastSettingsBtn" title="Студия и Настройки">⚙️</button>
             <button class="icon-btn" id="openLangBtn">🌐</button>
-            <button class="icon-btn" id="openMusicBtn">🎵</button>
             <button class="icon-btn" id="loginBtn" style="width: auto; padding: 0 10px; border-radius: 20px; font-weight: bold;">Войти</button>
         </div>
     </div>
 
     <div class="content-area" id="contentArea">
-        <!-- ЛОАДЕР -->
         <svg id="mainLoader" viewBox="0 0 100 100">
             <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -215,66 +235,76 @@
     <div class="audio-player" id="audioPlayer">
         <audio id="bgMusic" loop></audio>
         <span style="font-size: 12px; color: #10b981;" id="musicTitle">Фон играет</span>
-        <button onclick="document.getElementById('bgMusic').pause()" style="background:none; border:none; color:#fff; cursor:pointer;">⏸</button>
+        <button onclick="stopRadio()" style="background:none; border:none; color:#fff; cursor:pointer;">⏸</button>
     </div>
 
     <div class="control-panel">
         <div class="input-wrapper">
-            <textarea id="aiPrompt" placeholder="Напиши сообщение..." rows="1" onkeypress="handleEnter(event)"></textarea>
+            <button class="reset-btn" onclick="document.getElementById('aiPrompt').value = ''; document.getElementById('aiPrompt').focus();" title="Очистить">🔄</button>
+            <textarea id="aiPrompt" placeholder="Напиши сообщение..." rows="1" onkeypress="handleEnter(event)" oninput="handleTyping()"></textarea>
             <button class="send-btn" onclick="speakChat()" style="background: #3b82f6;">🔊</button>
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 
-    <!-- МОДАЛКИ -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>⚙️ Настройки</span><button onclick="closeModal('settingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            <p style="font-size: 13px; color: #aaa; margin-top: 0;">Характер бота (System Prompt):</p>
-            <textarea id="systemPromptInput" class="input-field" style="height: 80px;"></textarea>
-            <button class="btn-primary" onclick="saveSettings()">Сохранить характер</button>
-            <hr style="border-color:#333; margin: 15px 0;">
-            <p style="font-size: 13px; color: #aaa;">Управление чатом:</p>
-            <button class="btn-secondary" onclick="toggleView()" style="background: #3b82f6; width: 100%;">📜 Режим сценария</button>
-            <button class="btn-secondary" onclick="clearChat()" style="background: #ef4444; width: 100%;">🗑️ Очистить чат</button>
-            <button class="btn-secondary" onclick="openRewindModal()" style="background: #f59e0b; color: #000; width: 100%;">⏳ Начать отсюда</button>
-            <hr style="border-color:#333; margin: 15px 0;">
-            <p style="font-size: 12px; color: #888;">API Ключ (OpenAI):</p>
-            <input type="password" id="apiKeyInput" class="input-field" placeholder="sk-...">
-            <button class="btn-primary" onclick="saveApiKey()" style="background:#3b82f6;">Обновить Ключ</button>
+    <!-- ПАНЕЛЬ НАСТРОЕК И СТУДИИ -->
+    <div class="modal" id="broadcastSettingsModal">
+        <div class="modal-content" id="studioModalContent">
+            <div class="modal-header"><span>⚙️ Настройки эфира</span><button onclick="closeModal('broadcastSettingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            
+            <div class="panel-section">
+                <h4>🎙️ Студия: Персонажи</h4>
+                <div id="characterList" class="character-grid"></div>
+                <button class="q-btn" onclick="addNewCharacter()" style="width:100%; margin-top:10px;">➕ Добавить друга</button>
+            </div>
+
+            <div class="panel-section">
+                <h4>Реакции и фишки</h4>
+                <label style="display:block; margin-bottom:5px; font-size:13px;"><input type="checkbox" id="enableCatMode" checked> Режим кота (3 клика)</label>
+                <label style="display:block; margin-bottom:5px; font-size:13px;"><input type="checkbox" id="enableGlitch" checked> Сбой эфира (рандомный)</label>
+                <label style="display:block; margin-bottom:5px; font-size:13px;"><input type="checkbox" id="enableCoffeeCycle"> Угостить кофе (раз в N минут)</label>
+                <label style="font-size:12px; color:#888;">Интервал (минут): <input type="number" id="coffeeInterval" value="5" style="width:50px; background:#000; color:#fff; border:1px solid #333;"></label>
+            </div>
+
+            <div class="panel-section">
+                <h4>Триггер-фразы (Как в Алисе)</h4>
+                <div class="trigger-row">
+                    <input type="text" id="triggerInput" placeholder="Если скажут...">
+                    <input type="text" id="responseInput" placeholder="Ответить...">
+                    <button class="add-trigger-btn" onclick="addTrigger()">+</button>
+                </div>
+                <div id="triggersList" style="max-height:100px; overflow-y:auto; font-size:12px; margin-top:5px;"></div>
+            </div>
+
+            <div class="panel-section">
+                <h4>Быстрые промпты</h4>
+                <button class="q-btn" onclick="insertPrompt('threeAngles')">🎭 3 угла</button>
+                <button class="q-btn" onclick="insertPrompt('radioPlay')">🎙️ Радиоспектакль</button>
+                <button class="q-btn" onclick="insertPrompt('minecraft')">⛏️ Minecraft</button>
+                <button class="q-btn" onclick="insertPrompt('tiktok')">📱 TikTok</button>
+            </div>
+
+            <div class="panel-section">
+                <h4>Звуковая палитра</h4>
+                <button class="s-btn" onclick="addSound('🌧️ дождь')">🌧️</button>
+                <button class="s-btn" onclick="addSound('🚪 скрип двери')">🚪</button>
+                <button class="s-btn" onclick="addSound('🎸 гитарный рифф')">🎸</button>
+                <button class="s-btn" onclick="addSound('🥁 ударные')">🥁</button>
+            </div>
+
+            <button class="btn-primary" onclick="saveBroadcastSettings()" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">Сохранить настройки</button>
         </div>
     </div>
 
-    <div class="modal" id="rewindModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>⏳ Начать отсюда</span><button onclick="closeModal('rewindModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            <div id="rewindList" style="display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto;"></div>
-        </div>
-    </div>
-
-    <div class="modal" id="genreModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>🎨 Стиль иллюстраций</span><button onclick="closeModal('genreModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            <div id="genreContainer"></div>
-        </div>
-    </div>
-
+    <!-- МОДАЛКИ ЯЗЫКОВ -->
     <div class="modal" id="langModal">
         <div class="modal-content">
-            <div class="modal-header"><span>🌐 Языки (152)</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+            <div class="modal-header"><span>🌐 Языки</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
             <input type="text" id="langSearch" class="input-field" placeholder="Поиск языка..." oninput="filterLangs()">
             <div id="langList" class="lang-grid"></div>
         </div>
     </div>
-
-    <div class="modal" id="musicModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>🎧 Фоновая музыка</span><button onclick="closeModal('musicModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-            <input type="file" id="musicInput" accept="audio/*" style="margin-bottom: 15px; color: #aaa;">
-            <div id="musicList" style="color: #888;">Музыка не загружена.</div>
-        </div>
-    </div>
-
+    
     <div class="modal" id="verityChatModal">
         <div class="modal-content" style="background: #2a2a2a;">
             <div class="modal-header"><span>💬 Чат с Verity</span><button onclick="closeModal('verityChatModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
@@ -297,6 +327,34 @@
         let chatHistory = [];
         let isChatMode = true;
         let lastBotMessageText = "";
+        
+        let selectedLanguage = localStorage.getItem('cometa_language') || 'ru';
+        let selectedLanguageName = localStorage.getItem('cometa_language_name') || 'Русский';
+
+        // НОВОЕ: МУЛЬТИАГЕНТНАЯ СИСТЕМА (Семья Веррити V3 - Чистая версия)
+        let characters = JSON.parse(localStorage.getItem('verityCharactersV3')) || [
+            { id: 'verity', name: 'Веррити', gender: 'male', ageGroup: 'adult', color: '#FFD700', prompt: 'Ты — Веррити, взрослый радиоведущий. Стиль: уверенный, лаконичный, любит метафоры про эфир и провода. Говоришь спокойно, без лишней суеты.', chance: 0.4 },
+            { id: 'mini-verity', name: 'Мини', gender: 'male', ageGroup: 'child', color: '#FFA500', prompt: 'Ты — Мини-Веррити, маленький напарник. Говоришь быстро, с восторгом, всё кажется тебе огромным и интересным. Часто задаёшь вопросы: "А это что?", "А можно я?"', chance: 0.2 },
+            { id: 'luna', name: 'Луна', gender: 'female', ageGroup: 'adult', color: '#FFC0CB', prompt: 'Ты — Луна, взрослая звукорежиссёрка. Стиль: мягкий, внимательный, любишь порядок в звуке. Говоришь чуть тише, замечаешь детали: "Тут слишком много эха", "Давай сделаем тише, чтобы слышно было шёпот".', chance: 0.25 },
+            { id: 'pixie', name: 'Пикси', gender: 'female', ageGroup: 'child', color: '#FFDAB9', prompt: 'Ты — Пикси, маленькая помощница. Говоришь с придыханием, всё делаешь вприпрыжку. Любишь восклицания: "Ой, смотри!", "Это так красиво!", "Давай добавим звёздочки!"', chance: 0.15 }
+        ];
+        
+        let activeChar = characters[0];
+
+        let broadcastSettings = JSON.parse(localStorage.getItem('verityBroadcastSettings')) || {
+            catMode: true,
+            glitchMode: true,
+            coffeeEnabled: false,
+            coffeeInterval: 5,
+            triggers: [
+                { phrase: "алиса", response: "Эй, тут радиоведущим работаю я! Но если хочешь, могу включить её плейлист... Шучу, не могу." },
+                { phrase: "кот", response: "Я только притворялся котом. Но мяукнуть могу, если очень надо." },
+                { phrase: "спасибо", response: "Всегда пожалуйста! Обращайся, если что." }
+            ]
+        };
+
+        let coffeeCycleInterval;
+        let soundBuffer = [];
 
         // --- ЭКРАН ЛОГИНА И VERITY ---
         let loginScreen = document.getElementById('loginScreen');
@@ -304,11 +362,15 @@
         let verityFace = document.getElementById('verityFace');
         let tapTimer = 0;
         let angryClicks = 0;
+        let idleTimer;
+        let typingTimer;
         
+        let radioGlitchInterval;
+        let hasStartedRadio = false;
+
         document.getElementById('loginBtn').onclick = () => loginScreen.style.display = 'flex';
         function closeLoginScreen() { loginScreen.style.display = 'none'; }
 
-        // Двойной тап
         function handleDoubleTap(e) {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - tapTimer;
@@ -316,17 +378,41 @@
                 loginScreen.style.display = 'none';
                 verityContainer.style.display = 'block';
                 verityContainer.classList.add('active');
-                speakVerity("Привет! Я Веррити. Твой умный помощник. Я могу подсказать идею для книги или включить музыку. Просто нажми на микрофон или напиши мне!");
+                speakVerity("Я тут. Не обещаю, что всё будет логично, но точно будет по-человечески.");
                 setTimeout(() => verityContainer.classList.remove('active'), 4000);
+                resetVerityIdle();
             }
             tapTimer = currentTime;
+        }
+
+        function resetVerityIdle() {
+            clearTimeout(idleTimer);
+            if (verityFace.classList.contains('sleeping')) {
+                verityFace.classList.remove('sleeping');
+                speakVerity("Ой, я не спал! Я просто прикрыл глаза.");
+            }
+            idleTimer = setTimeout(() => {
+                if (verityContainer.style.display === 'block') {
+                    verityFace.classList.add('sleeping');
+                    speakVerity("Знаешь, тишина — тоже музыка. Если хочешь, можем просто послушать дождь.");
+                }
+            }, 180000);
+        }
+
+        function handleTyping() {
+            resetVerityIdle();
+            verityFace.classList.add('typing-pulse');
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                verityFace.classList.remove('typing-pulse');
+            }, 1500);
         }
 
         // Перетаскивание Verity
         let isDragging = false;
         let offsetX, offsetY;
-        verityContainer.addEventListener('mousedown', startDrag);
-        verityContainer.addEventListener('touchstart', startDrag, {passive: false});
+        verityContainer.addEventListener('mousedown', (e) => { startDrag(e); resetVerityIdle(); });
+        verityContainer.addEventListener('touchstart', (e) => { startDrag(e); resetVerityIdle(); }, {passive: false});
         
         function startDrag(e) {
             isDragging = false;
@@ -358,36 +444,360 @@
             document.removeEventListener('touchend', stopDrag);
         }
 
-        // Клики по Verity
+        // --- ЧАСТИЦЫ И ЭМОЦИИ ---
+        function spawnParticles(type) {
+            let emoji = '💖';
+            if (type === 'coffee') emoji = '☕';
+            else if (type === 'angry') emoji = '☁️';
+            
+            for(let i=0; i<3; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.innerText = emoji;
+                p.style.left = (Math.random() * 40) + 'px';
+                p.style.top = (Math.random() * 20) + 'px';
+                verityContainer.appendChild(p);
+                setTimeout(() => p.remove(), 1000);
+            }
+        }
+
+        function setGlow(className) {
+            verityFace.classList.remove('glow-neutral', 'glow-blush', 'glow-angry', 'glow-noir');
+            if(className) verityFace.classList.add(className);
+        }
+
         verityFace.addEventListener('click', () => {
             if(isDragging) return;
+            resetVerityIdle();
             angryClicks++;
-            if(angryClicks > 5) {
+            
+            if(angryClicks === 3) {
+                if (broadcastSettings.catMode) {
+                    verityFace.classList.add('cat-mode');
+                    speakVerity("Мяу! Я не кот... Но иногда хочется.");
+                    setTimeout(() => verityFace.classList.remove('cat-mode'), 2000);
+                } else {
+                    speakVerity("Хи-хи! Щекотно.");
+                }
+            } else if(angryClicks > 5) {
                 verityFace.classList.add('angry');
-                speakVerity("Прекрати меня тыкать! Это больно! Я ухожу.");
+                setGlow('glow-angry');
+                spawnParticles('angry');
+                speakVerity("Прекрати меня тыкать! Я не игрушка, я бывший системный модуль!");
                 setTimeout(() => { 
                     verityFace.classList.remove('angry'); 
+                    setGlow(null);
                     angryClicks = 0; 
-                    verityContainer.style.display = 'none'; // Уходит
+                    verityContainer.style.display = 'none'; 
                     setTimeout(() => { verityContainer.style.display = 'block'; speakVerity("Ладно, я вернулся. Больше так не делай."); }, 5000);
                 }, 2000);
             } else {
                 speakVerity("Хи-хи! Щекотно.");
                 verityFace.classList.add('blush');
-                setTimeout(() => verityFace.classList.remove('blush'), 1000);
+                setGlow('glow-blush');
+                spawnParticles('blush');
+                setTimeout(() => { verityFace.classList.remove('blush'); setGlow(null); }, 1000);
             }
         });
 
-        // --- ГОЛОС VERITY ---
+        // --- НОВАЯ ЛОГИКА ПОВЕДЕНИЯ (ПОЛ И ВОЗРАСТ) ---
+        function getBehaviorTraits(char) {
+            const traits = [];
+            
+            if (char.ageGroup === 'child') {
+                traits.push('говорит быстро, с восторгом, задаёт много вопросов, использует уменьшительно-ласкательные формы, фразы короткие и эмоциональные');
+            } else if (char.ageGroup === 'adult') {
+                traits.push('говорит размеренно, уверенно, формулирует мысли полно, может давать советы или объяснять');
+            }
+            
+            if (char.gender === 'male') {
+                traits.push('интонация чуть ниже, любит аналогии с техникой, строительством, движением: "как мотор", "как мост"');
+            } else if (char.gender === 'female') {
+                traits.push('интонация чуть мягче, любит аналогии с природой, тканями, светом: "как шёлк", "как ветерок"');
+            }
+            
+            return traits.join('; ');
+        }
+
+        // --- СТУДИЯ ПЕРСОНАЖЕЙ (ЧИСТЫЙ ДИЗАЙН) ---
+        function renderCharacters() {
+            const list = document.getElementById('characterList');
+            list.innerHTML = '';
+            
+            characters.forEach((char) => {
+                const el = document.createElement('div');
+                el.className = `char-avatar ${char.id === activeChar.id ? 'active' : ''}`;
+                el.style.background = char.color;
+                el.style.color = '#000'; 
+                
+                // ТОЛЬКО имя. Никаких значков пола/возраста.
+                el.innerHTML = `<span>${char.name}</span>`;
+                
+                el.addEventListener('click', () => {
+                    activeChar = char;
+                    verityFace.style.background = char.color; 
+                    renderCharacters(); 
+                    
+                    // НОВОЕ: Плавная смена фона студии под цвет персонажа
+                    const studioModal = document.getElementById('studioModalContent');
+                    studioModal.style.background = `linear-gradient(145deg, #1a1a2e, ${char.color}22)`; 
+                    studioModal.style.borderColor = char.color;
+                    
+                    speakVerity(`Привет! Сегодня в эфире я — ${char.name}. Чем могу помочь?`);
+                });
+                
+                list.appendChild(el);
+            });
+        }
+
+        function addNewCharacter() {
+            const name = prompt('Имя нового персонажа:');
+            if(!name) return;
+            const color = prompt('Цвет (hex, например #9c27b0):', '#9c27b0') || '#9c27b0';
+            const promptText = prompt('Его характер (промпт):', 'Он просто хочет поболтать.') || 'Он просто хочет поболтать.';
+            
+            characters.push({
+                id: name.toLowerCase().replace(/\s+/g, '-'),
+                name,
+                gender: 'male', // Дефолтные значения
+                ageGroup: 'adult',
+                color,
+                prompt: promptText,
+                chance: 0.1
+            });
+            
+            localStorage.setItem('verityCharactersV3', JSON.stringify(characters));
+            renderCharacters();
+            alert(`Персонаж ${name} добавлен в студию!`);
+        }
+
+        // --- ПАНЕЛЬ НАСТРОЕК ---
+        document.getElementById('openBroadcastSettingsBtn').onclick = () => {
+            document.getElementById('enableCatMode').checked = broadcastSettings.catMode;
+            document.getElementById('enableGlitch').checked = broadcastSettings.glitchMode;
+            document.getElementById('enableCoffeeCycle').checked = broadcastSettings.coffeeEnabled;
+            document.getElementById('coffeeInterval').value = broadcastSettings.coffeeInterval;
+            
+            // Применяем цвет текущего активного персонажа к фону студии
+            const studioModal = document.getElementById('studioModalContent');
+            studioModal.style.background = `linear-gradient(145deg, #1a1a2e, ${activeChar.color}22)`;
+            studioModal.style.borderColor = activeChar.color;
+            
+            renderCharacters(); 
+            renderTriggersUI();
+            document.getElementById('broadcastSettingsModal').style.display = 'flex';
+        };
+
+        function renderTriggersUI() {
+            const list = document.getElementById('triggersList');
+            list.innerHTML = '';
+            broadcastSettings.triggers.forEach((t, index) => {
+                const div = document.createElement('div');
+                div.style.cssText = "display:flex; justify-content:space-between; margin-bottom:4px; background:#222; padding:4px; border-radius:4px;";
+                div.innerHTML = `<span>"${t.phrase}" &rarr; "${t.response.substring(0, 20)}..."</span> <span style="color:red; cursor:pointer;" onclick="removeTrigger(${index})">✕</span>`;
+                list.appendChild(div);
+            });
+        }
+
+        function addTrigger() {
+            const phrase = document.getElementById('triggerInput').value.trim();
+            const response = document.getElementById('responseInput').value.trim();
+            if(phrase && response) {
+                broadcastSettings.triggers.push({ phrase, response });
+                document.getElementById('triggerInput').value = '';
+                document.getElementById('responseInput').value = '';
+                renderTriggersUI();
+            }
+        }
+
+        function removeTrigger(index) {
+            broadcastSettings.triggers.splice(index, 1);
+            renderTriggersUI();
+        }
+
+        function saveBroadcastSettings() {
+            broadcastSettings.catMode = document.getElementById('enableCatMode').checked;
+            broadcastSettings.glitchMode = document.getElementById('enableGlitch').checked;
+            broadcastSettings.coffeeEnabled = document.getElementById('enableCoffeeCycle').checked;
+            broadcastSettings.coffeeInterval = parseInt(document.getElementById('coffeeInterval').value) || 5;
+            
+            localStorage.setItem('verityBroadcastSettings', JSON.stringify(broadcastSettings));
+            alert('Настройки эфира сохранены!');
+            closeModal('broadcastSettingsModal');
+            updateCoffeeCycle();
+        }
+
+        function updateCoffeeCycle() {
+            clearInterval(coffeeCycleInterval);
+            if (broadcastSettings.coffeeEnabled) {
+                coffeeCycleInterval = setInterval(() => {
+                    if (Math.random() > 0.5 && verityContainer.style.display === 'block') {
+                        speakVerity("Слушай, день длинный... Не найдётся виртуального кофе? С ним даже нуар светлее.");
+                        spawnParticles('coffee');
+                    }
+                }, broadcastSettings.coffeeInterval * 60000);
+            }
+        }
+
+        // --- ТРИГГЕРЫ ---
+        function checkTriggers(text) {
+            const lowerText = text.toLowerCase();
+            for (const trigger of broadcastSettings.triggers) {
+                if (lowerText.includes(trigger.phrase.toLowerCase())) {
+                    return trigger.response;
+                }
+            }
+            return null;
+        }
+
+        // --- ЗВУКИ И ПРОМПТЫ ---
+        function addSound(sound) {
+            const input = document.getElementById('aiPrompt');
+            input.value += (input.value ? " " : "") + sound;
+            input.focus();
+            soundBuffer.push(sound);
+            if(soundBuffer.length >= 3) {
+                input.value = `Создай сцену со звуками: ${soundBuffer.join(', ')}. Опиши атмосферу.`;
+                soundBuffer = []; 
+                speakVerity("О, отличный набор звуков! Я собрала для тебя идею.");
+            }
+            closeModal('broadcastSettingsModal');
+        }
+
+        function insertPrompt(type) {
+            const input = document.getElementById('aiPrompt');
+            if (type === 'threeAngles') {
+                input.value = `[СЫЩИК]: \n[ЗЛОДЕЙ]: \n[ПРОХОЖИЙ]: \n---\nСтиль: нуар.`;
+                speakVerity("Три угла! Заполни реплики.");
+            } else if (type === 'radioPlay') {
+                input.value = `[ЗВУК: дождь]\n[ГОЛОС: ]\n[ЗВУК: ]\n---\nСтиль: нуар.`;
+                speakVerity("Радиоспектакль!");
+            } else if (type === 'minecraft') {
+                input.value = `Биом: [Название]. Особенность: [Деталь]. Задача: [Действие]. Опиши сцену в стиле Minecraft.`;
+                speakVerity("Режим Майнкрафта активирован.");
+            } else if (type === 'tiktok') {
+                input.value = `Разбей эту сцену на 4 коротких пункта (по 10-15 слов) для TikTok/Reels.`;
+                speakVerity("Готовим сценарий для TikTok!");
+            }
+            closeModal('broadcastSettingsModal');
+        }
+
+        // --- ДЖИНГЛ И РАДИО ---
+        function playJingle() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2);
+                osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.4);
+                
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + 0.8);
+            } catch(e) { console.warn("Джингл не сработал"); }
+        }
+
+        const radioTracks = [
+            { name: 'Noir Rain', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', genre: 'Нуар', comment: 'О, этот трек... Дождь, тени и один честный вопрос. Мне нравится.' },
+            { name: 'Stoner Drive', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', genre: 'Стоунер', comment: 'Тяжелые риффы! Врубаю на полную!' },
+            { name: 'Ambient Space', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', genre: 'Эмбиент', comment: 'Тихо... Давай просто послушаем.' }
+        ];
+
+        const glitchComments = [
+            "Ой, это я слишком сильно крутанул ручку. Сейчас всё будет.",
+            "Помехи... Секунду, настраиваю антенну!",
+            "Кажется, сигнал потерялся где-то в облаках. Ловлю!"
+        ];
+
+        function playRadio() {
+            resetVerityIdle();
+            playJingle(); 
+            
+            if (!hasStartedRadio) {
+                hasStartedRadio = true;
+                const intro = `Привет, друг. Сегодня в моём эфире тема: “Город после дождя”. Меня зовут ${activeChar.name}. Готов слушать?`;
+                addMessageToChat('bot', intro, activeChar.name, activeChar.color);
+                speakVerity(intro);
+            } else {
+                speakVerity("О, снова в эфире! Врубаю!");
+            }
+            
+            const track = radioTracks[Math.floor(Math.random() * radioTracks.length)];
+            const bgMusic = document.getElementById('bgMusic');
+            
+            bgMusic.src = track.url;
+            bgMusic.volume = 0.4;
+            bgMusic.play();
+            
+            document.getElementById('audioPlayer').style.display = 'flex';
+            document.getElementById('musicTitle').innerText = track.name + " (" + track.genre + ")";
+            
+            clearInterval(radioGlitchInterval);
+            if(broadcastSettings.glitchMode) {
+                radioGlitchInterval = setInterval(() => {
+                    if(Math.random() > 0.7) { 
+                        verityFace.classList.add('glitch');
+                        speakVerity(glitchComments[Math.floor(Math.random() * glitchComments.length)]);
+                        setTimeout(() => verityFace.classList.remove('glitch'), 2000);
+                    }
+                }, 15000);
+            }
+            
+            if (hasStartedRadio && track.comment) {
+                setTimeout(() => { speakVerity(track.comment); }, 1500);
+            }
+        }
+
+        function stopRadio() {
+            document.getElementById('bgMusic').pause();
+            document.getElementById('audioPlayer').style.display = 'none';
+            clearInterval(radioGlitchInterval);
+            speakVerity("Эфир окончен. До новых встреч!");
+        }
+
+        // --- ГОЛОС ---
         function speakVerity(text) {
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Останавливаем прошлую речь
+                window.speechSynthesis.cancel(); 
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ru-RU';
-                utterance.pitch = 1.4; // Детский/милый голос
-                utterance.onstart = () => verityFace.classList.add('talking');
-                utterance.onend = () => verityFace.classList.remove('talking');
-                utterance.onerror = () => verityFace.classList.remove('talking');
+                utterance.lang = selectedLanguage === 'ru' ? 'ru-RU' : (selectedLanguage === 'en' ? 'en-US' : selectedLanguage); 
+                
+                const hour = new Date().getHours();
+                const isNight = hour >= 23 || hour < 6;
+                
+                if (isNight) {
+                    utterance.pitch = 0.8; utterance.volume = 0.4; utterance.rate = 0.9;
+                } else {
+                    // Настраиваем тон под возраст и пол активного персонажа
+                    if (activeChar.ageGroup === 'child') utterance.pitch = 1.6;
+                    else if (activeChar.gender === 'female') utterance.pitch = 1.3;
+                    else utterance.pitch = 1.0;
+                }
+
+                utterance.onstart = () => {
+                    verityFace.classList.add('talking');
+                    setGlow('glow-neutral');
+                    verityFace.style.transform = `rotate(${Math.random() > 0.5 ? 5 : -5}deg)`;
+                };
+                utterance.onend = () => {
+                    verityFace.classList.remove('talking');
+                    setGlow(null);
+                    verityFace.style.transform = 'rotate(0deg)';
+                };
+                utterance.onerror = () => {
+                    verityFace.classList.remove('talking');
+                    setGlow(null);
+                    verityFace.style.transform = 'rotate(0deg)';
+                };
                 window.speechSynthesis.speak(utterance);
             }
         }
@@ -397,10 +807,10 @@
             if (!SpeechRecognition) { alert("Ваш браузер не поддерживает микрофон."); return; }
             
             const recognition = new SpeechRecognition();
-            recognition.lang = 'ru-RU';
+            recognition.lang = selectedLanguage === 'ru' ? 'ru-RU' : (selectedLanguage === 'en' ? 'en-US' : selectedLanguage);
             recognition.interimResults = false;
             
-            recognition.onstart = () => speakVerity("Я слушаю...");
+            recognition.onstart = () => { speakVerity("Я слушаю..."); resetVerityIdle(); };
             recognition.onresult = (event) => {
                 const text = event.results[0][0].transcript;
                 processVerityRequest(text);
@@ -410,6 +820,7 @@
 
         function openVerityChat() {
             document.getElementById('verityChatModal').style.display = 'flex';
+            resetVerityIdle();
         }
 
         function sendVerityText() {
@@ -419,9 +830,10 @@
             document.getElementById('verityChatHistory').innerHTML += `<div style="background:#3b82f6; padding:8px; border-radius:8px; align-self:flex-end; font-size:13px; color:#fff; max-width:80%;">${text}</div>`;
             input.value = '';
             processVerityRequest(text);
+            resetVerityIdle();
         }
 
-        // --- ЛОГИКА VERITY (Музыка и Идеи) ---
+        // --- ЛОГИКА ОТВЕТА (С УЧЕТОМ ПОЛА И ВОЗРАСТА) ---
         async function processVerityRequest(text) {
             const chatHistoryBox = document.getElementById('verityChatHistory');
             chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
@@ -429,111 +841,59 @@
             chatHistoryBox.innerHTML += `<div id="${loadingId}" style="font-size:12px; color:#aaa; font-style:italic;">Verity думает...</div>`;
             chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
 
-            // Проверка на музыку (голосовое управление)
-            const lowerText = text.toLowerCase();
-            if (lowerText.includes('включи музыку') || lowerText.includes('поставь песню')) {
-                const songName = text.replace(/включи музыку|поставь песню/gi, '').trim();
-                playMusicByVoice(songName);
+            const customResponse = checkTriggers(text);
+            if (customResponse) {
                 document.getElementById(loadingId).remove();
-                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">Включаю музыку! 🎵</div>`;
-                speakVerity("С удовольствием! Включаю музыку.");
-                return;
-            }
-            if (lowerText.includes('выключи музыку')) {
-                document.getElementById('bgMusic').pause();
-                document.getElementById(loadingId).remove();
-                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">Музыка выключена. ⏸</div>`;
-                speakVerity("Музыка выключена.");
+                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${customResponse}</div>`;
+                speakVerity(customResponse);
                 return;
             }
 
-            // Обращение к OpenAI
             const apiKey = localStorage.getItem('cometa_api_key');
-            if(apiKey) {
-                try {
-                    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-                        body: JSON.stringify({ 
-                            model: "gpt-3.5-turbo", 
-                            messages: [
-                                { role: 'system', content: "Ты - Веррити, маленький желтый шарик-помощник на сайте Cometa AI. Ты умеешь придумывать идеи для книг, музыки, сценариев. Отвечай кратко, мило, с эмодзи. Если тебя просят идею, сгенерируй качественный промпт для нейросети." },
-                                { role: 'user', content: text }
-                            ] 
-                        })
-                    });
-                    const data = await res.json();
-                    const reply = data.choices[0].message.content;
-                    
-                    document.getElementById(loadingId).remove();
-                    chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${reply}</div>`;
-                    chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
-                    
-                    speakVerity(reply);
-                    verityFace.classList.add('blush');
-                    setTimeout(() => verityFace.classList.remove('blush'), 2000);
-                    
-                } catch(e) { 
-                    document.getElementById(loadingId).remove();
-                    speakVerity("Ой, у меня заклинило мозги. Проверь API ключ."); 
-                }
-            } else {
-                // Если ключа нет
-                setTimeout(() => {
-                    document.getElementById(loadingId).remove();
-                    let reply = "";
-                    if(text.includes('идея') || text.includes('идею')) {
-                        reply = "Вот идея промпта: 'Напиши рассказ про осенний лес, где деревья шепчутся о прошлом'. Скопируй и вставь в чат!";
-                        verityFace.classList.add('blush');
-                        // Подсветка кнопки (как ты просил)
-                        const promptArea = document.getElementById('aiPrompt');
-                        promptArea.style.borderColor = '#10b981';
-                        promptArea.style.boxShadow = '0 0 10px #10b981';
-                        setTimeout(() => { promptArea.style.borderColor = '#333'; promptArea.style.boxShadow = 'none'; }, 3000);
-                    } else {
-                        reply = "Я бы с радостью ответила, но хозяин не дал мне API ключ. Добавь его в настройках (⚙️)!";
-                        verityFace.classList.add('angry');
-                    }
-                    chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${reply}</div>`;
-                    speakVerity(reply);
-                    setTimeout(() => verityFace.classList.remove('blush', 'angry'), 3000);
-                }, 1000);
+            if (!apiKey) {
+                document.getElementById(loadingId).remove();
+                speakVerity("Я бы с радостью ответила, но хозяин не дал мне API ключ. Добавь его в настройках (⚙️)!");
+                return;
+            }
+
+            try {
+                const traits = getBehaviorTraits(activeChar);
+                const systemMsg = `${activeChar.prompt} Особенности речи и поведения: ${traits} ВАЖНО: Отвечай строго на языке: ${selectedLanguageName}.`;
+
+                const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({ 
+                        model: "gpt-3.5-turbo", 
+                        messages: [
+                            { role: 'system', content: systemMsg },
+                            { role: 'user', content: text }
+                        ] 
+                    })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+                
+                document.getElementById(loadingId).remove();
+                chatHistoryBox.innerHTML += `<div style="background:#444; padding:8px; border-radius:8px; align-self:flex-start; font-size:13px; color:#fff; max-width:80%;">${reply}</div>`;
+                chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+                
+                speakVerity(reply);
+                verityFace.classList.add('blush'); setGlow('glow-blush');
+                setTimeout(() => { verityFace.classList.remove('blush'); setGlow(null); }, 2000);
+                
+            } catch(e) { 
+                document.getElementById(loadingId).remove();
+                verityFace.classList.add('startled');
+                speakVerity("Ой, кажется, я запуталась в проводах... Дай мне пару секунд, я всё пересоберу.");
+                setTimeout(() => verityFace.classList.remove('startled'), 2000);
             }
         }
 
-        // Включение музыки (демо-трек)
-        function playMusicByVoice(songName) {
-            const bgMusic = document.getElementById('bgMusic');
-            // Используем демо-трек, так как нет реального API
-            const randomMusic = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
-            bgMusic.src = randomMusic;
-            document.getElementById('audioPlayer').style.display = 'flex';
-            document.getElementById('musicTitle').innerText = songName || "Случайный трек";
-            bgMusic.volume = 0.5;
-            bgMusic.play();
-        }
-
-        // --- ОСНОВНОЙ ЧАТ (COMETA) ---
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('systemPromptInput').value = systemPrompt;
-            document.getElementById('apiKeyInput').value = localStorage.getItem('cometa_api_key') || '';
-            if (!localStorage.getItem('cometa_api_key')) document.getElementById('settingsModal').style.display = 'flex';
-            addMessageToChat('bot', "Привет! Я Cometa AI. Настрой меня в ⚙️ и давай начнем!");
-        });
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function saveSettings() {
-            systemPrompt = document.getElementById('systemPromptInput').value;
-            localStorage.setItem('cometa_system_prompt', systemPrompt);
-            alert("Характер сохранен!"); closeModal('settingsModal');
-        }
-        
-        function saveApiKey() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (key.length > 10) { localStorage.setItem('cometa_api_key', key); alert("Ключ сохранен!"); }
-        }
-        document.getElementById('openSettingsBtn').onclick = () => document.getElementById('settingsModal').style.display = 'flex';
+        // --- ОСНОВНОЙ ЧАТ ---
+        document.getElementById('openLangBtn').onclick = () => { 
+            document.getElementById('langSearch').value = ''; renderLangs(); document.getElementById('langModal').style.display = 'flex'; 
+        };
 
         function renderChat() {
             const container = document.getElementById('chatContainer');
@@ -543,7 +903,13 @@
                 row.className = `message-row ${msg.role}`;
                 const bubble = document.createElement('div');
                 bubble.className = 'message-bubble';
-                bubble.innerHTML = msg.text.replace(/\n/g, '<br>');
+                
+                if (msg.role === 'bot' && msg.speaker) {
+                    bubble.innerHTML = `<span class="speaker-name" style="color:${msg.color}">${msg.speaker}</span>${msg.text.replace(/\n/g, '<br>')}`;
+                } else {
+                    bubble.innerHTML = msg.text.replace(/\n/g, '<br>');
+                }
+                
                 row.appendChild(bubble);
                 if (index === chatHistory.length - 1) {
                     const actions = document.createElement('div');
@@ -556,80 +922,68 @@
             document.getElementById('contentArea').scrollTop = document.getElementById('contentArea').scrollHeight;
         }
 
-        function addMessageToChat(role, text) {
-            chatHistory.push({ role, text });
-            if(role === 'bot') lastBotMessageText = text;
-            renderChat();
+        function addMessageToChat(role, text, speaker = null, color = null) { 
+            chatHistory.push({ role, text, speaker, color }); 
+            if(role === 'bot') lastBotMessageText = text; 
+            renderChat(); 
         }
 
         function editMessage(index) {
             const msg = chatHistory[index];
             const rows = document.getElementById('chatContainer').querySelectorAll('.message-row');
-            rows[index].innerHTML = `
-                <textarea class="edit-textarea" id="editInput-${index}">${msg.text}</textarea>
-                <div class="edit-buttons">
-                    <button class="btn-small btn-save" onclick="saveEditedMessage(${index})">Сохранить</button>
-                    <button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button>
-                </div>`;
+            rows[index].innerHTML = `<textarea class="edit-textarea" id="editInput-${index}">${msg.text}</textarea><div class="edit-buttons"><button class="btn-small btn-save" onclick="saveEditedMessage(${index})">Сохранить</button><button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button></div>`;
         }
 
-        function saveEditedMessage(index) {
-            chatHistory[index].text = document.getElementById('editInput-'+index).value;
-            if(chatHistory[index].role === 'bot') lastBotMessageText = chatHistory[index].text;
-            renderChat();
+        function saveEditedMessage(index) { 
+            chatHistory[index].text = document.getElementById('editInput-'+index).value; 
+            if(chatHistory[index].role === 'bot') lastBotMessageText = chatHistory[index].text; 
+            renderChat(); 
         }
-
-        function clearChat() { 
-            chatHistory = []; 
-            addMessageToChat('bot', 'Чат очищен.'); 
-            closeModal('settingsModal'); 
-        }
-
-        function openRewindModal() {
-            closeModal('settingsModal');
-            const list = document.getElementById('rewindList');
-            list.innerHTML = '';
-            chatHistory.forEach((msg, index) => {
-                const div = document.createElement('div');
-                div.className = 'lang-item';
-                const shortText = msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text;
-                div.innerHTML = `<strong>${msg.role === 'user' ? 'Вы' : 'ИИ'}:</strong> ${shortText}`;
-                div.onclick = () => rewindTo(index);
-                list.appendChild(div);
-            });
-            document.getElementById('rewindModal').style.display = 'flex';
-        }
-
-        async function rewindTo(index) {
-            closeModal('rewindModal');
-            const msg = chatHistory[index];
-            if (msg.role === 'user') {
-                chatHistory = chatHistory.slice(0, index + 1);
-                renderChat(); sendToAPI(); 
-            } else if (msg.role === 'bot') {
-                chatHistory = chatHistory.slice(0, index);
-                renderChat(); if (chatHistory.length > 0) sendToAPI(); 
-            }
-        }
-
+        
         function handleEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
         function sendMessage() {
             const input = document.getElementById('aiPrompt');
-            if (!input.value.trim()) return;
-            addMessageToChat('user', input.value.trim());
+            const text = input.value.trim();
+            if (!text) return;
+
+            if (text === text.toUpperCase() && text.length > 3 || text.split('!').length > 2) {
+                verityFace.classList.add('startled');
+                speakVerity("Тише, я же прямо тут!");
+                setTimeout(() => verityFace.classList.remove('startled'), 1000);
+            }
+            resetVerityIdle();
+
+            const customResponse = checkTriggers(text);
+            if (customResponse) {
+                addMessageToChat('user', text);
+                input.value = '';
+                setTimeout(() => {
+                    addMessageToChat('bot', customResponse, activeChar.name, activeChar.color);
+                    speakVerity(customResponse);
+                }, 500);
+                return; 
+            }
+
+            addMessageToChat('user', text);
             input.value = '';
             sendToAPI();
         }
 
         async function sendToAPI() {
             const apiKey = localStorage.getItem('cometa_api_key');
-            if (!apiKey) { alert("Введите API ключ!"); document.getElementById('settingsModal').style.display = 'flex'; return; }
+            if (!apiKey) { alert("Введите API ключ в настройках!"); return; }
 
             document.getElementById('mainLoader').style.display = 'block';
+            if(verityFace) {
+                verityFace.style.transform = 'rotate(-5deg)';
+                setGlow('glow-neutral');
+            }
             
             try {
-                let messages = [{ role: 'system', content: systemPrompt }];
+                const traits = getBehaviorTraits(activeChar);
+                let systemMsg = `${activeChar.prompt} Особенности речи: ${traits} ВАЖНО: Отвечай на языке: ${selectedLanguageName}.`;
+                let messages = [{ role: 'system', content: systemMsg }];
                 chatHistory.forEach(msg => messages.push({ role: msg.role === 'bot' ? 'assistant' : 'user', content: msg.text }));
 
                 const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -640,132 +994,95 @@
                 
                 if (!res.ok) throw new Error("Ошибка API");
                 const data = await res.json();
-                addMessageToChat('bot', data.choices[0].message.content);
+                const reply = data.choices[0].message.content;
+                
+                addMessageToChat('bot', reply, activeChar.name, activeChar.color);
 
-            } catch (e) { alert("Ошибка ИИ: " + e.message); } 
-            finally { document.getElementById('mainLoader').style.display = 'none'; }
+                // ШАНС НА ПЕРЕБИВАНИЕ (20%)
+                if (Math.random() < 0.2 && characters.length > 1) {
+                    setTimeout(() => triggerInterruption(), 2000);
+                }
+
+            } catch (e) { 
+                if(verityContainer.style.display === 'block') {
+                    verityFace.classList.add('startled');
+                    speakVerity("Ой, кажется, я запуталась в проводах... Дай мне пару секунд, я всё пересоберу.");
+                    setTimeout(() => verityFace.classList.remove('startled'), 2000);
+                } else {
+                    alert("Ошибка ИИ: " + e.message);
+                }
+            } 
+            finally { 
+                document.getElementById('mainLoader').style.display = 'none'; 
+                if(verityFace) { verityFace.style.transform = 'rotate(0deg)'; setGlow(null); }
+            }
+        }
+
+        // --- НОВОЕ: ПЕРЕБИВАНИЕ С УЧЕТОМ ХАРАКТЕРА ---
+        async function triggerInterruption() {
+            const others = characters.filter(c => c.id !== activeChar.id);
+            if(others.length === 0) return;
+            
+            const interrupter = others[Math.floor(Math.random() * others.length)];
+            const apiKey = localStorage.getItem('cometa_api_key');
+            if(!apiKey) return;
+
+            const oldColor = verityFace.style.background;
+            verityFace.style.background = interrupter.color;
+            verityFace.style.transform = 'scale(0.9)';
+            setTimeout(() => verityFace.style.transform = 'scale(1)', 100);
+
+            try {
+                const traits = getBehaviorTraits(interrupter);
+                const res = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                    body: JSON.stringify({ 
+                        model: "gpt-3.5-turbo", 
+                        messages: [
+                            { role: 'system', content: `${interrupter.prompt} Твои особенности: ${traits} Только что ответил ${activeChar.name}. Вставь короткую реплику (1 предложение), чтобы прокомментировать это. Не начинай с "Я думаю".` },
+                            { role: 'user', content: "..." }
+                        ] 
+                    })
+                });
+                const data = await res.json();
+                const reply = data.choices[0].message.content;
+                
+                addMessageToChat('bot', reply, interrupter.name, interrupter.color);
+                speakVerity(reply);
+                
+            } catch(e) { console.warn("Перебивание не удалось"); }
+
+            setTimeout(() => { verityFace.style.background = oldColor; }, 3000);
         }
 
         function speakChat() { if(lastBotMessageText) speakVerity(lastBotMessageText); }
 
-        function toggleView() {
-            isChatMode = !isChatMode;
-            document.getElementById('chatContainer').style.display = isChatMode ? 'flex' : 'none';
-            document.getElementById('scriptContainer').style.display = isChatMode ? 'none' : 'block';
-            if (!isChatMode) generateScriptWithImages();
-            closeModal('settingsModal');
-        }
-
-        async function generateScriptWithImages() {
-            document.getElementById('mainLoader').style.display = 'block';
-            let finalHTML = '';
-            const stylePrompt = selectedGenre !== "Случайный" ? `, стиль: ${selectedGenre}` : '';
-            chatHistory.forEach((msg, i) => {
-                finalHTML += `<p><strong>${msg.role === 'user' ? 'Вы:' : 'ИИ:'}</strong> ${msg.text}</p>`;
-                if ((i + 1) % 10 === 0 || i === 0) {
-                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(msg.text.substring(0, 100) + stylePrompt)}?width=1024&height=1024&nologo=true`;
-                    finalHTML += `<img src="${imgUrl}">`;
-                }
-            });
-            setTimeout(() => { document.getElementById('scriptContainer').innerHTML = finalHTML; document.getElementById('mainLoader').style.display = 'none'; }, 1500);
-        }
-
-        // --- ЖАНРЫ И ЯЗЫКИ ---
-        const genres = {
-            "Стили": ["Случайный", "Киберпанк", "Фэнтези", "Аниме", "Реализм", "Акварель", "Сюрреализм", "Пиксель-арт", "Дарк-фэнтези", "Стимпанк"],
-            "Настроения": ["Григорианский хорал", "Шаманские ритмы", "Симфония", "Минимализм", "Фламенко", "Блюз", "Свинг", "Панк-рок", "Дэт-метал", "Синти-поп", "Trap", "Phonk", "Техно", "Эмбиент", "Регги", "Фанк", "Индастриал", "Chiptune"]
-        };
-        function renderGenres() {
-            const container = document.getElementById('genreContainer');
-            for (const [cat, items] of Object.entries(genres)) {
-                const div = document.createElement('div'); div.className = 'genre-category'; div.innerText = cat;
-                const list = document.createElement('div'); list.className = 'genre-list';
-                items.forEach(i => {
-                    const item = document.createElement('div'); item.className = 'genre-item'; item.innerText = i;
-                    item.onclick = () => { selectedGenre = i; closeModal('genreModal'); alert("Стиль: " + i); };
-                    list.appendChild(item);
-                });
-                div.onclick = () => list.style.display = list.style.display === 'block' ? 'none' : 'block';
-                container.appendChild(div); container.appendChild(list);
-            }
-        }
-        renderGenres();
-        document.getElementById('openGenreBtn').onclick = () => document.getElementById('genreModal').style.display = 'flex';
-
-        const allLangs = [
-            { c: 'ru', n: 'Русский' }, { c: 'en', n: 'English' }, { c: 'uk', n: 'Українська' }, { c: 'be', n: 'Беларуская' }, 
-            { c: 'de', n: 'Deutsch' }, { c: 'fr', n: 'Français' }, { c: 'es', n: 'Español' }, { c: 'pt', n: 'Português' }, 
-            { c: 'it', n: 'Italiano' }, { c: 'pl', n: 'Polski' }, { c: 'cs', n: 'Čeština' }, { c: 'sk', n: 'Slovenčina' }, 
-            { c: 'bg', n: 'Български' }, { c: 'sr', n: 'Српски' }, { c: 'hr', n: 'Hrvatski' }, { c: 'sl', n: 'Slovenščina' }, 
-            { c: 'mk', n: 'Македонски' }, { c: 'ro', n: 'Română' }, { c: 'hu', n: 'Magyar' }, { c: 'el', n: 'Ελληνικά' }, 
-            { c: 'tr', n: 'Türkçe' }, { c: 'az', n: 'Azərbaycan' }, { c: 'kk', n: 'Қазақ' }, { c: 'uz', n: 'Oʻzbek' }, 
-            { c: 'ky', n: 'Кыргызча' }, { c: 'tg', n: 'Тоҷикӣ' }, { c: 'hy', n: 'Հայերեն' }, { c: 'ka', n: 'ქართული' }, 
-            { c: 'zh', n: '简体中文' }, { c: 'zh_tw', n: '繁體中文' }, { c: 'ja', n: '日本語' }, { c: 'ko', n: '한국어' }, 
-            { c: 'vi', n: 'Tiếng Việt' }, { c: 'th', n: 'ไทย' }, { c: 'id', n: 'Bahasa Indonesia' }, { c: 'ms', n: 'Bahasa Melayu' }, 
-            { c: 'tl', n: 'Tagalog' }, { c: 'my', n: 'မြန်မာ' }, { c: 'km', n: 'ខ្មែរ' }, { c: 'lo', n: 'ລາວ' }, 
-            { c: 'mn', n: 'Монгол' }, { c: 'hi', n: 'हिन्दी' }, { c: 'bn', n: 'বাংলা' }, { c: 'pa', n: 'ਪੰਜਾਬੀ' }, 
-            { c: 'gu', n: 'ગુજરાતી' }, { c: 'mr', n: 'मराठी' }, { c: 'ta', n: 'தமிழ்' }, { c: 'te', n: 'తెలుగు' }, 
-            { c: 'kn', n: 'ಕನ್ನಡ' }, { c: 'ml', n: 'മലയാളം' }, { c: 'si', n: 'සිංහල' }, { c: 'ne', n: 'नेपाली' }, 
-            { c: 'ar', n: 'العربية' }, { c: 'he', n: 'עברית' }, { c: 'fa', n: 'فارسی' }, { c: 'ur', n: 'اردو' }, 
-            { c: 'ps', n: 'پښتو' }, { c: 'ku', n: 'Kurdî' }, { c: 'am', n: 'አማርኛ' }, { c: 'so', n: 'Soomaali' }, 
-            { c: 'sw', n: 'Kiswahili' }, { c: 'yo', n: 'Yorùbá' }, { c: 'ig', n: 'Igbo' }, { c: 'ha', n: 'Hausa' }, 
-            { c: 'zu', n: 'isiZulu' }, { c: 'af', n: 'Afrikaans' }, { c: 'nl', n: 'Nederlands' }, { c: 'sv', n: 'Svenska' }, 
-            { c: 'da', n: 'Dansk' }, { c: 'no', n: 'Norsk' }, { c: 'fi', n: 'Suomi' }, { c: 'is', n: 'Íslenska' }, 
-            { c: 'ga', n: 'Gaeilge' }, { c: 'cy', n: 'Cymraeg' }, { c: 'gd', n: 'Gàidhlig' }, { c: 'mt', n: 'Malti' }, 
-            { c: 'eo', n: 'Esperanto' }, { c: 'la', n: 'Latina' }, { c: 'en_pt', n: 'Pirate Speak 🏴‍☠️' }, { c: 'en_ws', n: 'Shakespearean' }, 
-            { c: 'en_ud', n: 'Upside Down' }, { c: 'lol', n: 'LOLCAT' }, { c: 'tlh', n: 'Klingon' }, { c: 'qya', n: 'Elvish (Quenya)' }, 
-            { c: 'sjn', n: 'Sindarin' }, { c: 'doth', n: 'Dothraki' }, { c: 'val', n: 'Valyrian' }, { c: 'ang', n: 'Anglish' },
-            { c: 'tok', n: 'Toki Pona' }, { c: 'nav', n: 'Naʼvi' }, { c: 'grc', n: 'Ancient Greek' }, { c: 'sa', n: 'Sanskrit' },
-            { c: 'pi', n: 'Pali' }, { c: 'haw', n: 'Hawaiian' }, { c: 'mi', n: 'Māori' }, { c: 'sm', n: 'Samoan' },
-            { c: 'to', n: 'Tongan' }, { c: 'fj', n: 'Fijian' }, { c: 'qu', n: 'Quechua' }, { c: 'ay', n: 'Aymara' },
-            { c: 'gn', n: 'Guaraní' }, { c: 'nah', n: 'Nahuatl' }, { c: 'yua', n: 'Yucatec Maya' }, { c: 'iu', n: 'Inuktitut' },
-            { c: 'kl', n: 'Kalaallisut' }, { c: 'chr', n: 'Cherokee' }, { c: 'nv', n: 'Navajo' }, { c: 'oj', n: 'Ojibwe' },
-            { c: 'cu', n: 'Словѣ́ньскъ' }, { c: 'lb', n: 'Lëtzebuergesch' }, { c: 'fo', n: 'Føroyskt' }, { c: 'ca', n: 'Català' },
-            { c: 'gl', n: 'Galego' }, { c: 'oc', n: 'Occitan' }, { c: 'co', n: 'Corsu' }, { c: 'sc', n: 'Sardu' },
-            { c: 'rm', n: 'Rumantsch' }, { c: 'fur', n: 'Furlan' }, { c: 'kv', n: 'Коми' }, { c: 'udm', n: 'Удмурт' },
-            { c: 'mhr', n: 'Марий' }, { c: 'myv', n: 'Эрзянь' }, { c: 'tk', n: 'Türkmençe' }, { c: 'ba', n: 'Башҡорт' },
-            { c: 'tt', n: 'Татарча' }, { c: 'cv', n: 'Чӑвашла' }, { c: 'sah', n: 'Саха' }, { c: 'os', n: 'Ирон' },
-            { c: 'ce', n: 'Нохчийн' }, { c: 'av', n: 'Авар' }, { c: 'kbd', n: 'Адыгэбзэ' }, { c: 'bo', n: 'བོད་སྐད་' },
-            { c: 'ug', n: 'ئۇيغۇرچە' }, { c: 'yue', n: '粵語' }, { c: 'wuu', n: '吴语' }, { c: 'nan', n: '闽南语' },
-            { c: 'hak', n: '客家话' }, { c: 'jv', n: 'Basa Jawa' }, { c: 'su', n: 'Basa Sunda' }, { c: 'ceb', n: 'Cebuano' },
-            { c: 'as', n: 'অসমীয়া' }, { c: 'or', n: 'ଓଡ଼ିଆ' }, { c: 'sd', n: 'سنڌي' }, { c: 'xh', n: 'isiXhosa' },
-            { c: 'st', n: 'Sesotho' }, { c: 'tn', n: 'Setswana' }, { c: 'mg', n: 'Malagasy' }, { c: 'ti', n: 'ትግርኛ' },
-            { c: 'om', n: 'Oromoo' }, { c: 'wo', n: 'Wolof' }, { c: 'ty', n: 'Reo Tahiti' }, { c: 'cr', n: 'Cree' },
-            { c: 'ia', n: 'Interlingua' }, { c: 'vo', n: 'Volapük' }, { c: 'jbo', n: 'Lojban' }, { c: 'lfn', n: 'Lingua Franca Nova' },
-            { c: 'afh', n: 'Afrihili' }
-        ];
-
+        // --- СПИСОК ЯЗЫКОВ ---
+        const allLangs = [{ c: 'ru', n: 'Русский' }, { c: 'en', n: 'English' }, { c: 'uk', n: 'Українська' }, { c: 'de', n: 'Deutsch' }, { c: 'fr', n: 'Français' }, { c: 'es', n: 'Español' }, { c: 'zh', n: '简体中文' }, { c: 'ja', n: '日本語' }, { c: 'ko', n: '한국어' }, { c: 'pl', n: 'Polski' }, { c: 'tr', n: 'Türkçe' }, { c: 'pt', n: 'Português' }, { c: 'en_pt', n: 'Pirate Speak' }, { c: 'en_ws', n: 'Shakespearean' }, { c: 'en_ud', n: 'Upside Down' }, { c: 'lol', n: 'LOLCAT' }, { c: 'tlh', n: 'Klingon' }, { c: 'qya', n: 'Elvish (Quenya)' }, { c: 'sjn', n: 'Sindarin' }];
         function renderLangs(filter = "") {
             const list = document.getElementById('langList');
             list.innerHTML = '';
             const filtered = allLangs.filter(l => l.n.toLowerCase().includes(filter.toLowerCase()) || l.c.includes(filter.toLowerCase()));
-            if (filtered.length === 0) list.innerHTML = '<div style="color:#888; text-align:center; grid-column: span 2;">Ничего не найдено</div>';
-            else {
-                filtered.forEach(l => {
-                    const d = document.createElement('div'); d.className = 'lang-item'; d.innerText = l.n;
-                    d.onclick = () => { alert("Выбран язык: " + l.n); closeModal('langModal'); };
-                    list.appendChild(d);
-                });
-            }
+            filtered.forEach(l => {
+                const d = document.createElement('div'); d.className = 'lang-item'; d.innerText = l.n;
+                d.onclick = () => { 
+                    selectedLanguage = l.c; selectedLanguageName = l.n;
+                    localStorage.setItem('cometa_language', l.c); localStorage.setItem('cometa_language_name', l.n);
+                    alert("Язык изменен на: " + l.n); closeModal('langModal'); 
+                    if(verityContainer.style.display === 'block') speakVerity("Язык изменен! Теперь я говорю на " + l.n);
+                };
+                list.appendChild(d);
+            });
         }
         function filterLangs() { renderLangs(document.getElementById('langSearch').value); }
         renderLangs();
-        document.getElementById('openLangBtn').onclick = () => { 
-            document.getElementById('langSearch').value = ''; renderLangs(); document.getElementById('langModal').style.display = 'flex'; 
-        };
 
-        // Загрузка своей музыки
-        document.getElementById('openMusicBtn').onclick = () => document.getElementById('musicModal').style.display = 'flex';
-        document.getElementById('musicInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if(!file) return;
-            const bgMusic = document.getElementById('bgMusic');
-            bgMusic.src = URL.createObjectURL(file);
-            document.getElementById('audioPlayer').style.display = 'flex';
-            document.getElementById('musicTitle').innerText = file.name;
-            bgMusic.play();
-            closeModal('musicModal');
-        };
+        // Инициализация при загрузке
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCoffeeCycle();
+            addMessageToChat('bot', "Привет! Я Cometa AI. Настрой меня в ⚙️ и давай начнем!");
+        });
     </script>
 </body>
 </html>
