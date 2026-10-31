@@ -15,7 +15,6 @@
         .header-controls { display: flex; gap: 6px; align-items: center; }
         .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; }
         
-        /* ЭКРАН ВХОДА И ЛОАДЕР */
         #loginScreen { display: none; position: fixed; inset: 0; z-index: 2000; background: #fbc02d; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
         #loginScreen::before { content: ''; position: absolute; width: 200vw; height: 200vh; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg); animation: rotateRays 30s linear infinite; }
         @keyframes rotateRays { 100% { transform: rotate(360deg); } }
@@ -29,14 +28,12 @@
         .broken-glass-svg { width: 50px; height: 50px; fill: #3e2723; }
         .skip-btn { position: absolute; top: 20px; right: 20px; z-index: 2; background: rgba(0,0,0,0.2); color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
-        /* ТВОЙ ЛОАДЕР */
         #mainLoader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; display: none; z-index: 100; }
         .loader-track { fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round; }
         .loader-anim { fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 350; stroke-dashoffset: 350; animation: loadDraw 3.5s linear infinite; }
         .loader-text { fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9; }
         @keyframes loadDraw { 0% { stroke-dashoffset: 350; } 100% { stroke-dashoffset: 0; } }
 
-        /* ВЕРРИТИ */
         #verityContainer { display: none; position: fixed; z-index: 3000; width: 50px; height: 50px; cursor: grab; touch-action: none; }
         .verity-face { width: 50px; height: 50px; background: #ffd21e; border-radius: 50%; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.3s, transform 0.3s; }
         .verity-eye { width: 6px; height: 6px; background: #000; border-radius: 50%; position: absolute; top: 16px; }
@@ -50,10 +47,8 @@
         #verityContainer:hover .verity-controls, #verityContainer.active .verity-controls { opacity: 1; }
         .v-btn { width: 30px; height: 30px; background: #111; border: 1px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px; }
 
-        /* ОСНОВНОЙ КОНТЕНТ */
         .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; padding-bottom: 20px; }
         
-        /* МЕНЮ НАСТРОЙКИ РОЛИ */
         #setupScreen { display: flex; flex-direction: column; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; height: 100%; justify-content: center; }
         .setup-title { font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; color: #10b981; }
         .setup-group { margin-bottom: 15px; }
@@ -62,7 +57,6 @@
         .setup-group textarea:focus { border-color: #3b82f6; }
         .btn-start { width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* ЧАТ */
         #chatContainer { display: none; padding: 15px; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
         .message-row { display: flex; flex-direction: column; width: 100%; margin-bottom: 10px; }
         .message-row.user { align-items: flex-end; }
@@ -71,14 +65,12 @@
         .message-row.user .message-bubble { background: #3b82f6; color: #fff; border-bottom-right-radius: 4px; }
         .message-row.bot .message-bubble { background: #222; color: #eee; border-bottom-left-radius: 4px; }
         .message-actions { margin-top: 5px; font-size: 12px; color: #888; cursor: pointer; display: none; }
-        .message-row.bot .message-actions { display: block; } /* Кнопка только под ботом */
+        .message-row.bot .message-actions { display: block; }
 
-        /* КНИГА */
         #bookContainer { display: none; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
         #bookContainer img { width: 100%; border-radius: 12px; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         #bookContainer p { line-height: 1.6; margin-bottom: 15px; color: #ddd; }
 
-        /* НИЖНЯЯ ПАНЕЛЬ */
         .control-panel { background: #111; border-top: 1px solid #333; padding: 10px 15px; }
         .tool-tabs { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; }
         .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -93,7 +85,6 @@
         textarea { flex: 1; height: 50px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 14px; font-size: 15px; resize: none; outline: none; }
         .send-btn { width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* МОДАЛКИ */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
         .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; border: 1px solid #333; }
         .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
@@ -139,7 +130,6 @@
 
     <div class="content-area" id="contentArea">
         
-        <!-- ЛОАДЕР -->
         <svg id="mainLoader" viewBox="0 0 100 100">
             <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -151,7 +141,6 @@
             <text x="50" y="62" class="loader-text">AI</text>
         </svg>
 
-        <!-- МЕНЮ НАСТРОЙКИ -->
         <div id="setupScreen">
             <div class="setup-title">Настройка роли</div>
             <div class="setup-group">
@@ -176,14 +165,12 @@
             <button class="tab-btn" onclick="switchTool('music', this)">🎼 Музыка</button>
         </div>
 
-        <!-- ЧАТ -->
         <div class="sub-tools active" id="sub-tools-chat">
             <button class="sub-btn" onclick="insertPrompt('threeAngles')">🎭 3 угла</button>
             <button class="sub-btn" onclick="resetToSetup()" style="color:#ef4444; border-color:#ef4444;">🗑️ Очистить чат</button>
             <button class="sub-btn" onclick="convertToBook()">📖 Перевести в книгу</button>
         </div>
 
-        <!-- ПИСАТЕЛЬ -->
         <div class="sub-tools" id="sub-tools-writer">
             <button class="sub-btn" onclick="generatePrompt('writer', 'Фэнтези')">🐉 Фэнтези</button>
             <button class="sub-btn" onclick="generatePrompt('writer', 'Детектив')">🕵️ Детектив</button>
@@ -192,7 +179,6 @@
             <button class="sub-btn" onclick="generatePrompt('writer', 'Любовный роман')">❤️ Роман</button>
         </div>
 
-        <!-- МУЗЫКА -->
         <div class="sub-tools" id="sub-tools-music">
             <button class="sub-btn" onclick="generatePrompt('music', 'Рок')">🎸 Рок</button>
             <button class="sub-btn" onclick="generatePrompt('music', 'Поп')">🎤 Поп</button>
@@ -209,18 +195,19 @@
 
     <div class="modal" id="apiSettingsModal">
         <div class="modal-content">
-            <div class="modal-header"><span>🔑 API Ключ (NVIDIA)</span><button onclick="closeModal('apiSettingsModal')" style="background:none;border:none;color:#fff;">✕</button></div>
-            <input type="password" id="apiKeyInput" class="input-field" placeholder="nvapi-...">
+            <div class="modal-header"><span>🔑 API Ключ (Mistral)</span><button onclick="closeModal('apiSettingsModal')" style="background:none;border:none;color:#fff;">✕</button></div>
+            <input type="password" id="apiKeyInput" class="input-field" placeholder="Вставьте ключ Mistral...">
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <button class="btn-primary" onclick="saveApiKey()" style="margin:0;">Сохранить</button>
                 <button class="btn-secondary" onclick="toggleHelp()" style="margin:0; flex:0.5; background:#3b82f6;">Помощь 🤖</button>
             </div>
             <div class="help-box" id="helpBox">
-                <b>Где взять ключ NVIDIA?</b><br><br>
-                1. Зайди на <b>build.nvidia.com</b>.<br>
+                <b>Где взять ключ Mistral?</b><br><br>
+                1. Зайди на <b>console.mistral.ai</b>.<br>
                 2. Войди через Google.<br>
-                3. В правом верхнем углу нажми <b>API Keys</b>.<br>
-                4. Создай ключ и скопируй его (начинается на <b>nvapi-</b>).
+                3. В левом меню выбери <b>API Keys</b>.<br>
+                4. Создай ключ и скопируй его.<br><br>
+                <i>Ключ показывается один раз — сохрани его сразу.</i>
             </div>
         </div>
     </div>
@@ -228,14 +215,16 @@
     <div class="modal" id="langModal">
         <div class="modal-content">
             <div class="modal-header"><span>🌐 Языки</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;">✕</button></div>
+            <div style="font-size:12px; color:#888; margin-bottom:10px;">Модель уверенно отвечает на ~30 языках. Экзотические — может ответить на английском.</div>
             <div id="langList" class="lang-grid"></div>
         </div>
     </div>
 
     <script>
         window.onerror = function(msg) { console.warn("Ошибка JS: ", msg); return true; };
-        let chatHistory = [];
+        let chatHistory = []; // { role: 'bot'|'user', text: '...' }
         let selectedLanguage = 'ru';
+        let selectedLangName = 'Русский';
         let systemPrompt = "";
         let firstGreeting = "";
 
@@ -290,15 +279,17 @@
             document.removeEventListener('touchend', stopDrag);
         }
 
+        // ИСПРАВЛЕНИЕ: обрезка длинного текста для озвучки (250 символов)
         function speakVerity(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); 
-                const u = new SpeechSynthesisUtterance(text);
-                u.lang = selectedLanguage === 'ru' ? 'ru-RU' : 'en-US'; 
-                u.onstart = () => verityFace.classList.add('talking');
-                u.onend = () => verityFace.classList.remove('talking');
-                window.speechSynthesis.speak(u);
-            }
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const shortText = text.length > 250 ? text.slice(0, 250) + '...' : text;
+            const u = new SpeechSynthesisUtterance(shortText);
+            u.lang = selectedLanguage === 'ru' ? 'ru-RU' : 'en-US';
+            u.onstart = () => verityFace.classList.add('talking');
+            u.onend = () => verityFace.classList.remove('talking');
+            u.onerror = () => verityFace.classList.remove('talking');
+            window.speechSynthesis.speak(u);
         }
 
         function startVoiceInput() {
@@ -307,7 +298,7 @@
             const r = new SR();
             r.lang = selectedLanguage === 'ru' ? 'ru-RU' : 'en-US';
             r.onstart = () => { speakVerity("Я слушаю..."); resetIdle(); };
-            r.onresult = (e) => { 
+            r.onresult = (e) => {
                 const text = e.results[0][0].transcript;
                 document.getElementById('aiPrompt').value = text;
                 sendMessage();
@@ -320,13 +311,12 @@
             btn.classList.add('active');
             document.querySelectorAll('.sub-tools').forEach(t => t.classList.remove('active'));
             document.getElementById(`sub-tools-${tool}`).classList.add('active');
-            
+
+            document.getElementById('bookContainer').style.display = 'none';
+
             if (tool === 'chat' && chatHistory.length === 0) {
                 document.getElementById('setupScreen').style.display = 'flex';
                 document.getElementById('chatContainer').style.display = 'none';
-            } else if (tool === 'chat' && chatHistory.length > 0) {
-                document.getElementById('setupScreen').style.display = 'none';
-                document.getElementById('chatContainer').style.display = 'flex';
             } else {
                 document.getElementById('setupScreen').style.display = 'none';
                 document.getElementById('chatContainer').style.display = 'flex';
@@ -337,10 +327,10 @@
             systemPrompt = document.getElementById('setupBackground').value.trim();
             firstGreeting = document.getElementById('setupGreeting').value.trim();
             if(!firstGreeting) firstGreeting = "Привет! Я готов к общению. О чем поговорим?";
-            
+
             chatHistory = [];
             addMessageToChat('bot', firstGreeting);
-            
+
             document.getElementById('setupScreen').style.display = 'none';
             document.getElementById('chatContainer').style.display = 'flex';
             speakVerity(firstGreeting);
@@ -373,28 +363,28 @@
             i.focus();
         }
 
-        document.getElementById('openApiSettingsBtn').onclick = () => { 
+        document.getElementById('openApiSettingsBtn').onclick = () => {
             document.getElementById('apiKeyInput').value = localStorage.getItem('cometa_api_key') || '';
-            document.getElementById('apiSettingsModal').style.display = 'flex'; 
+            document.getElementById('apiSettingsModal').style.display = 'flex';
         };
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
+
         function toggleHelp() {
             const h = document.getElementById('helpBox');
             h.style.display = h.style.display === 'block' ? 'none' : 'block';
         }
 
-        function saveApiKey() { 
-            const key = document.getElementById('apiKeyInput').value.trim(); 
-            if (key.length > 10) { 
-                localStorage.setItem('cometa_api_key', key); 
-                alert("Ключ сохранен!"); 
-                closeModal('apiSettingsModal'); 
-            } 
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key.length > 10) {
+                localStorage.setItem('cometa_api_key', key);
+                alert("Ключ сохранен!");
+                closeModal('apiSettingsModal');
+            }
         }
 
-        document.getElementById('openLangBtn').onclick = () => { 
-            document.getElementById('langModal').style.display = 'flex'; 
+        document.getElementById('openLangBtn').onclick = () => {
+            document.getElementById('langModal').style.display = 'flex';
         };
 
         function renderChat() {
@@ -404,7 +394,7 @@
                 const b = document.createElement('div'); b.className = 'message-bubble';
                 b.innerHTML = m.text.replace(/\n/g, '<br>');
                 r.appendChild(b);
-                
+
                 if (m.role === 'bot' && i === chatHistory.length - 1) {
                     const a = document.createElement('div'); a.className = 'message-actions';
                     a.innerHTML = `<span onclick="editMessage(${i})">✏️ Редактировать</span>`;
@@ -415,25 +405,26 @@
             document.getElementById('contentArea').scrollTop = document.getElementById('contentArea').scrollHeight;
         }
 
-        function addMessageToChat(role, text) { 
-            chatHistory.push({ role, text }); 
-            renderChat(); 
+        function addMessageToChat(role, text) {
+            chatHistory.push({ role, text });
+            renderChat();
         }
 
         function editMessage(i) {
-            const m = chatHistory[i]; 
+            const m = chatHistory[i];
             const r = document.getElementById('chatContainer').querySelectorAll('.message-row');
             r[i].innerHTML = `<textarea class="input-field" id="editInput-${i}" style="min-height:80px; margin-bottom:5px;">${m.text}</textarea><div style="display:flex; gap:10px;"><button class="btn-primary" onclick="saveEditedMessage(${i})" style="padding:5px 10px;">Сохранить</button><button class="btn-secondary" onclick="renderChat()" style="padding:5px 10px;">Отмена</button></div>`;
         }
-        
-        function saveEditedMessage(i) { 
-            chatHistory[i].text = document.getElementById('editInput-' + i).value; 
-            renderChat(); 
+
+        function saveEditedMessage(i) {
+            chatHistory[i].text = document.getElementById('editInput-' + i).value;
+            renderChat();
         }
 
+        // ИСПРАВЛЕНИЕ: добавлены loading="lazy" и onerror для картинок
         function convertToBook() {
             if(chatHistory.length === 0) { alert("Чат пуст."); return; }
-            
+
             document.getElementById('chatContainer').style.display = 'none';
             document.getElementById('setupScreen').style.display = 'none';
             const bookDiv = document.getElementById('bookContainer');
@@ -442,40 +433,40 @@
             document.getElementById('mainLoader').style.display = 'block';
 
             let bookHTML = `<h2 style="text-align:center; color:#10b981; margin-bottom:20px;">Твоя история</h2>`;
-            
+
             chatHistory.forEach((m, i) => {
                 if(m.role === 'bot') {
                     bookHTML += `<p style="font-style:italic;">${m.text}</p>`;
                 } else {
                     bookHTML += `<p style="color:#aaa;">— ${m.text}</p>`;
                 }
-                
+
                 if (i > 0 && i % 3 === 0) {
                     const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(m.text.substring(0, 100))}?width=1024&height=1024&nologo=true`;
-                    bookHTML += `<img src="${imgUrl}">`;
+                    bookHTML += `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">`;
                 }
             });
-            
-            setTimeout(() => { 
-                bookDiv.innerHTML = bookHTML; 
+
+            setTimeout(() => {
+                bookDiv.innerHTML = bookHTML;
                 document.getElementById('mainLoader').style.display = 'none';
             }, 1500);
         }
 
+        // ИСПРАВЛЕНИЕ: URL Mistral + .map() для правильных ролей assistant/user
         async function sendMessage() {
-            const i = document.getElementById('aiPrompt'); 
-            const t = i.value.trim(); 
+            const i = document.getElementById('aiPrompt');
+            const t = i.value.trim();
             if (!t) return;
-            
-            resetIdle();
-            addMessageToChat('user', t); 
-            i.value = ''; 
-            
-            const key = localStorage.getItem('cometa_api_key'); 
-            if (!key) { 
-                alert("Введите API ключ (🔑)!"); 
-                document.getElementById('apiSettingsModal').style.display = 'flex'; 
-                return; 
+resetIdle();
+            addMessageToChat('user', t);
+            i.value = '';
+
+            const key = localStorage.getItem('cometa_api_key');
+            if (!key) {
+                alert("Введите API ключ (🔑)!");
+                document.getElementById('apiSettingsModal').style.display = 'flex';
+                return;
             }
 
             document.getElementById('mainLoader').style.display = 'block';
@@ -483,60 +474,98 @@
 
             try {
                 let sysMsg = systemPrompt ? systemPrompt : "Ты полезный ИИ-помощник.";
-                sysMsg += ` Отвечай на языке: ${selectedLanguage === 'ru' ? 'Русский' : 'English'}.`;
+                sysMsg += ` Отвечай на языке: ${selectedLangName}.`;
 
-                const res = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` }, 
-                    body: JSON.stringify({ 
-                        model: "meta/llama-3.1-70b-instruct", 
-                        messages: [
-                            { role: 'system', content: sysMsg },
-                            ...chatHistory
-                        ] 
-                    }) 
+                // ИСПРАВЛЕНИЕ: .map() — bot->assistant, text->content
+                const messages = [
+                    { role: 'system', content: sysMsg },
+                    ...chatHistory.map(m => ({
+                        role: m.role === 'bot' ? 'assistant' : 'user',
+                        content: m.text
+                    }))
+                ];
+
+                const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}`
+                    },
+                    body: JSON.stringify({
+                        model: "mistral-large-latest",
+                        max_tokens: 1024, // защита от "превышения длины"
+                        messages: messages
+                    })
                 });
-                
-                if (!res.ok) throw new Error("Ошибка сети или ключа");
-                const data = await res.json(); 
+
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData?.message || `HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
                 if (data.error) throw new Error(data.error.message);
-                
+
                 const reply = data.choices[0].message.content;
                 addMessageToChat('bot', reply);
                 speakVerity(reply);
 
-            } catch (e) { 
-                addMessageToChat('bot', `Ошибка: ${e.message}`); 
-                speakVerity("Ой, я запуталась в проводах."); 
-            } finally { 
+            } catch (e) {
+                addMessageToChat('bot', `Ошибка: ${e.message}`);
+                speakVerity("Ой, я запуталась в проводах.");
+            } finally {
                 document.getElementById('mainLoader').style.display = 'none';
-                document.getElementById('verityFace').style.transform = 'rotate(0deg)'; 
+                document.getElementById('verityFace').style.transform = 'rotate(0deg)';
             }
         }
 
         function playRadio() {
             let bgMusic = document.getElementById('bgMusic');
-            if(!bgMusic) {
+            if (!bgMusic) {
                 const audio = document.createElement('audio');
-                audio.id = 'bgMusic'; audio.loop = true;
+                audio.id = 'bgMusic';
+                audio.loop = true;
                 document.body.appendChild(audio);
                 bgMusic = document.getElementById('bgMusic');
             }
             bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
             bgMusic.volume = 0.3;
-            bgMusic.play();
+            bgMusic.play().catch(() => {
+                speakVerity("Не могу включить эфир — браузер блокирует звук.");
+            });
             speakVerity("Включаю эфир! Тема сегодняшнего дня: Город после дождя.");
         }
 
+        // Языки: оставил ~30 основных + пометка про экзотические
         const langs = [
-            {c:'ru', n:'Русский'}, {c:'en', n:'English'}, {c:'uk', n:'Українська'}, {c:'be', n:'Беларуская'}, {c:'de', n:'Deutsch'}, {c:'fr', n:'Français'}, {c:'es', n:'Español'}, {c:'pt', n:'Português'}, {c:'it', n:'Italiano'}, {c:'pl', n:'Polski'}, {c:'cs', n:'Čeština'}, {c:'sk', n:'Slovenčina'}, {c:'bg', n:'Български'}, {c:'sr', n:'Српски'}, {c:'hr', n:'Hrvatski'}, {c:'sl', n:'Slovenščina'}, {c:'mk', n:'Македонски'}, {c:'ro', n:'Română'}, {c:'hu', n:'Magyar'}, {c:'el', n:'Ελληνικά'}, {c:'tr', n:'Türkçe'}, {c:'az', n:'Azərbaycan'}, {c:'kk', n:'Қазақ'}, {c:'uz', n:'Oʻzbek'}, {c:'ky', n:'Кыргызча'}, {c:'tg', n:'Тоҷикӣ'}, {c:'hy', n:'Հայերեն'}, {c:'ka', n:'ქართული'}, {c:'zh', n:'简体中文'}, {c:'zh_tw', n:'繁體中文'}, {c:'ja', n:'日本語'}, {c:'ko', n:'한국어'}, {c:'vi', n:'Tiếng Việt'}, {c:'th', n:'ไทย'}, {c:'id', n:'Bahasa Indonesia'}, {c:'ms', n:'Bahasa Melayu'}, {c:'tl', n:'Tagalog'}, {c:'my', n:'မြန်မာ'}, {c:'km', n:'ខ្មែរ'}, {c:'lo', n:'ລາວ'}, {c:'mn', n:'Монгол'}, {c:'hi', n:'हिन्दी'}, {c:'bn', n:'বাংলা'}, {c:'pa', n:'ਪੰਜਾਬੀ'}, {c:'gu', n:'ગુજરાતી'}, {c:'mr', n:'मराठी'}, {c:'ta', n:'தமிழ்'}, {c:'te', n:'తెలుగు'}, {c:'kn', n:'ಕನ್ನಡ'}, {c:'ml', n:'മലയാളം'}, {c:'si', n:'සිංහල'}, {c:'ne', n:'नेपाली'}, {c:'ar', n:'العربية'}, {c:'he', n:'עברית'}, {c:'fa', n:'فارسی'}, {c:'ur', n:'اردو'}, {c:'ps', n:'پښتو'}, {c:'ku', n:'Kurdî'}, {c:'am', n:'አማርኛ'}, {c:'so', n:'Soomaali'}, {c:'sw', n:'Kiswahili'}, {c:'yo', n:'Yorùbá'}, {c:'ig', n:'Igbo'}, {c:'ha', n:'Hausa'}, {c:'zu', n:'isiZulu'}, {c:'af', n:'Afrikaans'}, {c:'nl', n:'Nederlands'}, {c:'sv', n:'Svenska'}, {c:'da', n:'Dansk'}, {c:'no', n:'Norsk'}, {c:'fi', n:'Suomi'}, {c:'is', n:'Íslenska'}, {c:'ga', n:'Gaeilge'}, {c:'cy', n:'Cymraeg'}, {c:'gd', n:'Gàidhlig'}, {c:'mt', n:'Malti'}, {c:'eo', n:'Esperanto'}, {c:'la', n:'Latina'}, {c:'en_pt', n:'Pirate Speak 🏴‍☠️'}, {c:'en_ws', n:'Shakespearean'}, {c:'en_ud', n:'Upside Down'}, {c:'lol', n:'LOLCAT'}, {c:'tlh', n:'Klingon'}, {c:'qya', n:'Elvish (Quenya)'}, {c:'sjn', n:'Sindarin'}, {c:'doth', n:'Dothraki'}, {c:'val', n:'Valyrian'}, {c:'ang', n:'Anglish'}, {c:'tok', n:'Toki Pona'}, {c:'nav', n:'Naʼvi'}, {c:'grc', n:'Ancient Greek'}, {c:'sa', n:'Sanskrit'}, {c:'pi', n:'Pali'}, {c:'haw', n:'Hawaiian'}, {c:'mi', n:'Māori'}, {c:'sm', n:'Samoan'}, {c:'to', n:'Tongan'}, {c:'fj', n:'Fijian'}, {c:'qu', n:'Quechua'}, {c:'ay', n:'Aymara'}, {c:'gn', n:'Guaraní'}, {c:'nah', n:'Nahuatl'}, {c:'yua', n:'Yucatec Maya'}, {c:'iu', n:'Inuktitut'}, {c:'kl', n:'Kalaallisut'}, {c:'chr', n:'Cherokee'}, {c:'nv', n:'Navajo'}, {c:'oj', n:'Ojibwe'}, {c:'cu', n:'Словѣ́ньскъ'}, {c:'lb', n:'Lëtzebuergesch'}, {c:'fo', n:'Føroyskt'}, {c:'ca', n:'Català'}, {c:'gl', n:'Galego'}, {c:'oc', n:'Occitan'}, {c:'co', n:'Corsu'}, {c:'sc', n:'Sardu'}, {c:'rm', n:'Rumantsch'}, {c:'fur', n:'Furlan'}, {c:'kv', n:'Коми'}, {c:'udm', n:'Удмурт'}, {c:'mhr', n:'Марий'}, {c:'myv', n:'Эрзянь'}, {c:'tk', n:'Türkmençe'}, {c:'ba', n:'Башҡорт'}, {c:'tt', n:'Татарча'}, {c:'cv', n:'Чӑвашла'}, {c:'sah', n:'Саха'}, {c:'os', n:'Ирон'}, {c:'ce', n:'Нохчийн'}, {c:'av', n:'Авар'}, {c:'kbd', n:'Адыгэбзэ'}, {c:'bo', n:'བོད་སྐད་'}, {c:'ug', n:'ئۇيغۇرچە'}, {c:'yue', n:'粵語'}, {c:'wuu', n:'吴语'}, {c:'nan', n:'闽南语'}, {c:'hak', n:'客家话'}, {c:'jv', n:'Basa Jawa'}, {c:'su', n:'Basa Sunda'}, {c:'ceb', n:'Cebuano'}, {c:'as', n:'অসমীয়া'}, {c:'or', n:'ଓଡ଼ିଆ'}, {c:'sd', n:'سنڌي'}, {c:'xh', n:'isiXhosa'}, {c:'st', n:'Sesotho'}, {c:'tn', n:'Setswana'}, {c:'mg', n:'Malagasy'}, {c:'ti', n:'ትግርኛ'}, {c:'om', n:'Oromoo'}, {c:'wo', n:'Wolof'}, {c:'ty', n:'Reo Tahiti'}, {c:'cr', n:'Cree'}, {c:'ia', n:'Interlingua'}, {c:'vo', n:'Volapük'}, {c:'jbo', n:'Lojban'}, {c:'lfn', n:'Lingua Franca Nova'}, {c:'afh', n:'Afrihili'}
+            {c:'ru', n:'Русский'}, {c:'en', n:'English'}, {c:'uk', n:'Українська'},
+            {c:'be', n:'Беларуская'}, {c:'de', n:'Deutsch'}, {c:'fr', n:'Français'},
+            {c:'es', n:'Español'}, {c:'pt', n:'Português'}, {c:'it', n:'Italiano'},
+            {c:'pl', n:'Polski'}, {c:'cs', n:'Čeština'}, {c:'sk', n:'Slovenčina'},
+            {c:'bg', n:'Български'}, {c:'sr', n:'Српски'}, {c:'hr', n:'Hrvatski'},
+            {c:'ro', n:'Română'}, {c:'hu', n:'Magyar'}, {c:'el', n:'Ελληνικά'},
+            {c:'tr', n:'Türkçe'}, {c:'az', n:'Azərbaycan'}, {c:'kk', n:'Қазақ'},
+            {c:'uz', n:'Oʻzbek'}, {c:'hy', n:'Հայերեն'}, {c:'ka', n:'ქართული'},
+            {c:'zh', n:'简体中文'}, {c:'ja', n:'日本語'}, {c:'ko', n:'한국어'},
+            {c:'vi', n:'Tiếng Việt'}, {c:'th', n:'ไทย'}, {c:'id', n:'Bahasa Indonesia'},
+            {c:'hi', n:'हिन्दी'}, {c:'ar', n:'العربية'}, {c:'he', n:'עברית'},
+            {c:'fa', n:'فارسی'}, {c:'nl', n:'Nederlands'}, {c:'sv', n:'Svenska'},
+            {c:'da', n:'Dansk'}, {c:'no', n:'Norsk'}, {c:'fi', n:'Suomi'},
+            {c:'eo', n:'Esperanto'}, {c:'la', n:'Latina'}
         ];
+
         const langList = document.getElementById('langList');
         langs.forEach(l => {
-            const d = document.createElement('div'); d.className = 'lang-item'; d.innerText = l.n;
+            const d = document.createElement('div');
+            d.className = 'lang-item';
+            d.innerText = l.n;
+            if (l.c === selectedLanguage) d.style.borderColor = '#10b981';
             d.onclick = () => {
                 selectedLanguage = l.c;
-                alert("Язык изменен на: " + l.n);
+                selectedLangName = l.n;
+                document.querySelectorAll('.lang-item').forEach(el => el.style.borderColor = '#222');
+                d.style.borderColor = '#10b981';
+                speakVerity("Язык изменен на " + l.n);
                 closeModal('langModal');
             };
             langList.appendChild(d);
