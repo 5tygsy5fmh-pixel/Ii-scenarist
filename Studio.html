@@ -411,8 +411,7 @@
                 document.getElementById('mainLoader').style.display = 'none';
             }, 1500);
         }
-
-        async function sendMessage() {
+async function sendMessage() {
             const i = document.getElementById('aiPrompt');
             const t = i.value.trim();
             if (!t) return;
@@ -432,7 +431,9 @@
             document.getElementById('verityFace').style.transform = 'rotate(-5deg)';
 
             try {
-sysMsg += ` Відповідай мовою: ${selectedLangName}.`;
+                // ИСПРАВЛЕНИЕ: Добавлено объявление sysMsg
+                let sysMsg = systemPrompt ? systemPrompt : "Ти корисний ШІ-помічник.";
+                sysMsg += ` Відповідай мовою: ${selectedLangName}.`;
 
                 const messages = [
                     { role: 'system', content: sysMsg },
@@ -450,7 +451,7 @@ sysMsg += ` Відповідай мовою: ${selectedLangName}.`;
                     },
                     body: JSON.stringify({
                         model: "mistral-large-latest",
-                        max_tokens: 1024, // Защита от ошибки превышения длины
+                        max_tokens: 1024,
                         messages: messages
                     })
                 });
@@ -492,3 +493,45 @@ sysMsg += ` Відповідай мовою: ${selectedLangName}.`;
             });
             speakVerity("Вмикаю ефір! Тема сьогоднішнього дня: Місто після дощу.");
         }
+
+        const langs = [
+            {c:'uk', n:'Українська'}, {c:'ru', n:'Русский'}, {c:'en', n:'English'}, 
+            {c:'be', n:'Беларуская'}, {c:'de', n:'Deutsch'}, {c:'fr', n:'Français'}, 
+            {c:'es', n:'Español'}, {c:'pt', n:'Português'}, {c:'it', n:'Italiano'}, 
+            {c:'pl', n:'Polski'}, {c:'cs', n:'Čeština'}, {c:'sk', n:'Slovenčina'}, 
+            {c:'bg', n:'Български'}, {c:'sr', n:'Српски'}, {c:'hr', n:'Hrvatski'}, 
+            {c:'ro', n:'Română'}, {c:'hu', n:'Magyar'}, {c:'el', n:'Ελληνικά'}, 
+            {c:'tr', n:'Türkçe'}, {c:'az', n:'Azərbaycan'}, {c:'kk', n:'Қазақ'}, 
+            {c:'uz', n:'Oʻzbek'}, {c:'hy', n:'Հայերեն'}, {c:'ka', n:'ქართული'}, 
+            {c:'zh', n:'简体中文'}, {c:'ja', n:'日本語'}, {c:'ko', n:'한국어'}, 
+            {c:'vi', n:'Tiếng Việt'}, {c:'th', n:'ไทย'}, {c:'id', n:'Bahasa Indonesia'}, 
+            {c:'hi', n:'हिन्दी'}, {c:'ar', n:'العربية'}, {c:'he', n:'עברית'}, 
+            {c:'fa', n:'فارسی'}, {c:'nl', n:'Nederlands'}, {c:'sv', n:'Svenska'}, 
+            {c:'da', n:'Dansk'}, {c:'no', n:'Norsk'}, {c:'fi', n:'Suomi'}, 
+            {c:'eo', n:'Esperanto'}, {c:'la', n:'Latina'}
+        ];
+
+        const langList = document.getElementById('langList');
+        langs.forEach(l => {
+            const d = document.createElement('div');
+            d.className = 'lang-item';
+            d.innerText = l.n;
+            if (l.c === selectedLanguage) d.classList.add('active');
+            d.onclick = () => {
+                selectedLanguage = l.c;
+                selectedLangName = l.n;
+                document.querySelectorAll('.lang-item').forEach(el => el.classList.remove('active'));
+                d.classList.add('active');
+                speakVerity("Мову змінено на " + l.n);
+                closeModal('langModal');
+            };
+            langList.appendChild(d);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('setupScreen').style.display = 'flex';
+            document.getElementById('chatContainer').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
