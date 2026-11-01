@@ -1,537 +1,399 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cometa AI Studio</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
-        body { margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
-        * { box-sizing: border-box; }
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: #000; border-bottom: 1px solid #222; z-index: 10; }
-        .logo { font-weight: 900; font-size: 18px; background: linear-gradient(90deg, #10b981, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header-controls { display: flex; gap: 6px; align-items: center; }
-        .icon-btn { background: #111; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; }
-        
-        #loginScreen { display: none; position: fixed; inset: 0; z-index: 2000; background: #fbc02d; align-items: center; justify-content: center; flex-direction: column; overflow: hidden; }
-        #loginScreen::before { content: ''; position: absolute; width: 200vw; height: 200vh; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.4) 0deg 15deg, transparent 15deg 30deg); animation: rotateRays 30s linear infinite; }
-        @keyframes rotateRays { 100% { transform: rotate(360deg); } }
-        .login-box { position: relative; z-index: 2; width: 280px; height: 200px; background: #dca25c; border: 12px solid #3e2723; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .box-inner { width: 100%; height: 100%; display: flex; position: relative; overflow: hidden; }
-        .box-left { width: 50%; height: 100%; background: #e8c452; border-right: 4px solid #b87e3a; display: flex; align-items: center; justify-content: center; }
-        .box-right { width: 50%; height: 100%; background: #dca25c; display: flex; align-items: center; justify-content: center; position: relative; }
-        .red-mark-top { position: absolute; top: 15px; right: 15px; width: 30px; height: 20px; border-top: 4px solid #e57373; border-right: 4px solid #e57373; border-radius: 0 5px 0 0; }
-        .red-mark-bottom { position: absolute; bottom: 15px; right: 15px; width: 30px; height: 20px; border-bottom: 4px solid #e57373; border-right: 4px solid #e57373; border-radius: 0 0 5px 0; }
-        .red-exclamation { font-size: 40px; font-weight: 900; color: #e57373; margin-right: 20px; }
-        .broken-glass-svg { width: 50px; height: 50px; fill: #3e2723; }
-        .skip-btn { position: absolute; top: 20px; right: 20px; z-index: 2; background: rgba(0,0,0,0.2); color: #000; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
-
-        #mainLoader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; display: none; z-index: 100; }
-        .loader-track { fill: none; stroke: #151515; stroke-width: 8; stroke-linecap: round; }
-        .loader-anim { fill: none; stroke: url(#gradient); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 350; stroke-dashoffset: 350; animation: loadDraw 3.5s linear infinite; }
-        .loader-text { fill: #fff; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 36px; text-anchor: middle; opacity: 0.9; }
-        @keyframes loadDraw { 0% { stroke-dashoffset: 350; } 100% { stroke-dashoffset: 0; } }
-
-        #verityContainer { display: none; position: fixed; z-index: 3000; width: 50px; height: 50px; cursor: grab; touch-action: none; }
-        .verity-face { width: 50px; height: 50px; background: #ffd21e; border-radius: 50%; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.3s, transform 0.3s; }
-        .verity-eye { width: 6px; height: 6px; background: #000; border-radius: 50%; position: absolute; top: 16px; }
-        .verity-eye.left { left: 13px; } .verity-eye.right { right: 13px; }
-        .verity-mouth { width: 16px; height: 6px; background: #000; border-radius: 0 0 10px 10px; position: absolute; bottom: 12px; transition: height 0.2s; }
-        .verity-face.talking .verity-mouth { animation: talk 0.2s infinite alternate; }
-        @keyframes talk { 0% { height: 6px; } 100% { height: 14px; } }
-        .verity-face.sleeping { opacity: 0.6; transform: scale(0.95); }
-        .verity-controls { position: absolute; top: 55px; left: -35px; display: flex; gap: 8px; opacity: 0; transition: 0.3s; }
-        #verityContainer:hover .verity-controls, #verityContainer.active .verity-controls { opacity: 1; }
-        .v-btn { width: 30px; height: 30px; background: #111; border: 1px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; font-size: 14px; }
-
-        .content-area { flex: 1; background: #0a0a0a; display: flex; flex-direction: column; overflow-y: auto; position: relative; padding-bottom: 20px; }
-        #setupScreen { display: flex; flex-direction: column; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; height: 100%; justify-content: center; }
-        .setup-title { font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; color: #10b981; }
-        .setup-group { margin-bottom: 15px; }
-        .setup-group label { display: block; font-size: 13px; color: #aaa; margin-bottom: 5px; font-weight: bold; }
-        .setup-group textarea { width: 100%; height: 80px; background: #111; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 12px; font-size: 14px; resize: none; outline: none; }
-        .setup-group textarea:focus { border-color: #3b82f6; }
-        .btn-start { width: 100%; padding: 15px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 12px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-
-        #chatContainer { display: none; padding: 15px; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; width: 100%; }
-        .message-row { display: flex; flex-direction: column; width: 100%; margin-bottom: 10px; }
-        .message-row.user { align-items: flex-end; }
-        .message-row.bot { align-items: flex-start; }
-        .message-bubble { max-width: 85%; padding: 12px 16px; border-radius: 16px; font-size: 15px; line-height: 1.5; word-wrap: break-word; }
-        .message-row.user .message-bubble { background: #3b82f6; color: #fff; border-bottom-right-radius: 4px; }
-        .message-row.bot .message-bubble { background: #222; color: #eee; border-bottom-left-radius: 4px; }
-        .message-actions { margin-top: 5px; font-size: 12px; color: #888; cursor: pointer; display: none; }
-        .message-row.bot .message-actions { display: block; }
-
-        #bookContainer { display: none; padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
-        #bookContainer img { width: 100%; border-radius: 12px; margin: 15px 0; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #bookContainer p { line-height: 1.6; margin-bottom: 15px; color: #ddd; }
-
-        .control-panel { background: #111; border-top: 1px solid #333; padding: 10px 15px; }
-        .tool-tabs { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; }
-        .tab-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-        .tab-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-        .sub-tools { display: none; gap: 8px; margin-bottom: 10px; overflow-x: auto; }
-        .sub-tools.active { display: flex; }
-        .sub-btn { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; white-space: nowrap; }
-        .sub-btn:hover { background: #333; }
-        .input-wrapper { display: flex; gap: 10px; align-items: flex-end; max-width: 800px; margin: 0 auto; }
-        textarea { flex: 1; height: 50px; background: #000; border: 1px solid #333; border-radius: 12px; color: #fff; padding: 14px; font-size: 15px; resize: none; outline: none; }
-        .send-btn { width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 4000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
-        .modal-content { background: #1a1a2e; border-radius: 16px; padding: 20px; width: 100%; max-width: 450px; max-height: 85vh; overflow-y: auto; border: 1px solid #333; }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .input-field { width: 100%; padding: 12px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; margin-bottom: 15px; font-size: 14px; }
-        .btn-primary { width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: #fff; font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px; }
-        .btn-secondary { width: 100%; padding: 12px; background: #333; border: none; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; }
-        .help-box { background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; padding: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; color: #ddd; display: none; border-radius: 4px; }
-        .lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .lang-item { padding: 10px; background: #111; border-radius: 8px; cursor: pointer; border: 1px solid #222; font-size: 13px; text-align: center; }
-        .lang-item.active { border-color: #10b981; background: #11221e; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cometa AI Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+body{margin:0;padding:0;background:#050505;color:#fff;font-family:'Inter',sans-serif;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+*{box-sizing:border-box}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;background:#000;border-bottom:1px solid #222;z-index:10}
+.logo{font-weight:900;font-size:18px;background:linear-gradient(90deg,#10b981,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-controls{display:flex;gap:6px;align-items:center}
+.icon-btn{background:#111;border:1px solid #333;color:#fff;padding:8px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:34px;height:34px;transition:.2s}
+.icon-btn:hover{background:#222}
+#loginScreen{display:none;position:fixed;inset:0;z-index:2000;background:#fbc02d;align-items:center;justify-content:center;flex-direction:column;overflow:hidden}
+#loginScreen::before{content:'';position:absolute;width:200vw;height:200vh;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.4) 0deg 15deg,transparent 15deg 30deg);animation:rotateRays 30s linear infinite}
+@keyframes rotateRays{100%{transform:rotate(360deg)}}
+.login-box{position:relative;z-index:2;width:280px;height:200px;background:#dca25c;border:12px solid #3e2723;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s}
+.login-box:active{transform:scale(.95)}
+.box-inner{width:100%;height:100%;display:flex;position:relative;overflow:hidden}
+.box-left{width:50%;height:100%;background:#e8c452;border-right:4px solid #b87e3a;display:flex;align-items:center;justify-content:center}
+.box-right{width:50%;height:100%;background:#dca25c;display:flex;align-items:center;justify-content:center;position:relative}
+.red-mark-top{position:absolute;top:15px;right:15px;width:30px;height:20px;border-top:4px solid #e57373;border-right:4px solid #e57373;border-radius:0 5px 0 0}
+.red-mark-bottom{position:absolute;bottom:15px;right:15px;width:30px;height:20px;border-bottom:4px solid #e57373;border-right:4px solid #e57373;border-radius:0 0 5px 0}
+.red-exclamation{font-size:40px;font-weight:900;color:#e57373;margin-right:20px}
+.broken-glass-svg{width:50px;height:50px;fill:#3e2723}
+.skip-btn{position:absolute;top:20px;right:20px;z-index:2;background:rgba(0,0,0,.2);color:#000;border:none;padding:10px 20px;border-radius:20px;font-weight:bold;cursor:pointer;font-size:14px}
+#verityContainer{display:none;position:fixed;z-index:3000;width:50px;height:50px;cursor:grab;touch-action:none}
+.verity-face{width:50px;height:50px;background:#ffd21e;border-radius:50%;position:relative;box-shadow:0 4px 10px rgba(0,0,0,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background .3s,opacity .3s,transform .3s,box-shadow .3s}
+.verity-eye{width:6px;height:6px;background:#000;border-radius:50%;position:absolute;top:16px;transition:.3s}
+.verity-eye.left{left:13px}.verity-eye.right{right:13px}
+.verity-mouth{width:16px;height:6px;background:#000;border-radius:0 0 10px 10px;position:absolute;bottom:12px;transition:height .2s}
+.verity-face.talking .verity-mouth{animation:talk .2s infinite alternate}
+@keyframes talk{0%{height:6px}100%{height:14px}}
+.verity-face.sleeping{opacity:.6;transform:scale(.95);animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(.95)}50%{transform:scale(1)}}
+.verity-face.angry{background:#ff5252!important}
+.verity-face.angry .verity-eye{top:20px;transform:rotate(20deg)}
+.verity-face.angry .verity-eye.right{transform:rotate(-20deg)}
+.verity-face.angry .verity-mouth{height:3px;border-radius:10px 10px 0 0;bottom:15px;width:20px}
+.verity-face.blush{background:#ffb8b8!important}
+.verity-face.blush::after{content:'';position:absolute;width:30px;height:10px;background:rgba(255,0,0,.3);border-radius:50%;bottom:8px;filter:blur(3px)}
+.verity-face.startled{animation:shake .4s;background:#ff5252!important}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.verity-face.typing-pulse{animation:pulse-interest 1.5s infinite}
+@keyframes pulse-interest{0%{box-shadow:0 0 0 0 rgba(255,210,30,.7)}70%{box-shadow:0 0 0 15px rgba(255,210,30,0)}100%{box-shadow:0 0 0 0 rgba(255,210,30,0)}}
+.verity-face.cat-mode{background:#ffb8b8!important;border-radius:10px 10px 20px 20px}
+.verity-face.cat-mode::before,.verity-face.cat-mode::after{content:'';position:absolute;top:-10px;width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:15px solid #ffb8b8;z-index:-1}
+.verity-face.cat-mode::before{left:5px;transform:rotate(-15deg)}
+.verity-face.cat-mode::after{right:5px;transform:rotate(15deg)}
+.verity-face.glitch{animation:glitchAnim .2s infinite;background:#555!important}
+@keyframes glitchAnim{0%{transform:translate(0)}20%{transform:translate(-3px,3px)}40%{transform:translate(-3px,-3px)}60%{transform:translate(3px,3px)}80%{transform:translate(3px,-3px)}100%{transform:translate(0)}}
+.verity-face.glow-neutral{box-shadow:0 0 20px 5px rgba(255,210,30,.6)}
+.verity-face.glow-blush{box-shadow:0 0 20px 5px rgba(255,100,100,.6)}
+.verity-face.glow-angry{box-shadow:0 0 20px 8px rgba(255,0,0,.8)}
+.particle{position:absolute;pointer-events:none;font-size:16px;animation:floatUp 1s ease-out forwards;z-index:4000}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(.5)}100%{opacity:0;transform:translateY(-40px) scale(1.2)}}
+.verity-controls{position:absolute;top:55px;left:-35px;display:flex;gap:8px;opacity:0;transition:.3s}
+#verityContainer:hover .verity-controls,#verityContainer.active .verity-controls{opacity:1}
+.v-btn{width:30px;height:30px;background:#111;border:1px solid #10b981;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.5)}
+.content-area{flex:1;background:#0a0a0a;display:flex;flex-direction:column;overflow-y:auto;position:relative;scroll-behavior:smooth}
+#mainLoader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:140px;display:none;z-index:100}
+.loader-track{fill:none;stroke:#151515;stroke-width:8;stroke-linecap:round}
+.loader-anim{fill:none;stroke:url(#gradient);stroke-width:8;stroke-linecap:round;stroke-dasharray:350;stroke-dashoffset:350;animation:loadDraw 3.5s linear infinite}
+.loader-text{fill:#fff;font-family:'Inter',sans-serif;font-weight:900;font-size:36px;text-anchor:middle;opacity:.9}
+@keyframes loadDraw{0%{stroke-dashoffset:350}100%{stroke-dashoffset:0}}
+.chat-container{padding:15px;display:flex;flex-direction:column;gap:15px;max-width:800px;margin:0 auto;width:100%}
+.message-row{display:flex;flex-direction:column;width:100%}
+.message-row.user{align-items:flex-end}
+.message-row.bot{align-items:flex-start}
+.message-bubble{max-width:85%;padding:12px 16px;border-radius:16px;font-size:15px;line-height:1.5;position:relative;word-wrap:break-word}
+.message-row.user .message-bubble{background:#3b82f6;color:#fff;border-bottom-right-radius:4px}
+.message-row.bot .message-bubble{background:#222;color:#eee;border-bottom-left-radius:4px}
+.speaker-name{font-size:11px;margin-bottom:3px;font-weight:bold;display:block}
+.message-actions{margin-top:5px;font-size:12px;color:#888;cursor:pointer}
+.edit-textarea{width:100%;background:#000;border:1px solid #10b981;color:#fff;padding:10px;border-radius:8px;font-size:14px;resize:vertical;min-height:80px;margin-bottom:5px}
+.edit-buttons{display:flex;gap:10px}
+.btn-small{padding:5px 10px;border-radius:6px;border:none;cursor:pointer;font-weight:bold;font-size:12px}
+.btn-save{background:#10b981;color:#000}.btn-cancel{background:#444;color:#fff}
+.script-container{padding:20px;max-width:800px;margin:0 auto;width:100%;display:none;font-size:16px;line-height:1.6;color:#ddd}
+.script-container img{width:100%;border-radius:12px;margin:20px 0;box-shadow:0 4px 15px rgba(0,0,0,.5)}
+.control-panel{background:#111;border-top:1px solid #333;padding:10px 15px}
+.quick-tools{display:flex;gap:8px;margin-bottom:10px;overflow-x:auto}
+.tool-btn{background:#1a1a1a;border:1px solid #333;color:#ccc;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;white-space:nowrap}
+.tool-btn:hover{border-color:#10b981;color:#fff}
+.input-wrapper{display:flex;gap:10px;align-items:flex-end;max-width:800px;margin:0 auto;position:relative}
+.reset-btn{position:absolute;left:10px;top:15px;background:none;border:none;color:#666;font-size:16px;cursor:pointer}
+textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:12px;color:#fff;padding:14px 14px 14px 35px;font-size:15px;resize:none;outline:none}
+.send-btn{width:50px;height:50px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:12px;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:4000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+.modal-content{background:#1a1a2e;border-radius:16px;padding:20px;width:100%;max-width:450px;max-height:85vh;overflow-y:auto;border:1px solid #333}
+.modal-header{display:flex;justify-content:space-between;margin-bottom:15px;font-size:18px;font-weight:bold}
+.input-field{width:100%;padding:12px;background:#000;border:1px solid #333;border-radius:8px;color:#fff;margin-bottom:15px;font-size:14px}
+.genre-category{padding:14px;background:#111;border-radius:10px;margin-bottom:10px;cursor:pointer;border:1px solid #333;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+.genre-list{display:none;margin-top:-5px;margin-bottom:15px;padding:10px;background:#0a0a0a;border-radius:0 0 10px 10px;border:1px solid #333;border-top:none}
+.genre-item{padding:10px 12px;background:#1a1a1a;border-radius:6px;margin-bottom:6px;font-size:14px;cursor:pointer;color:#ccc}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lang-item{padding:10px;background:#111;border-radius:8px;cursor:pointer;border:1px solid #222;font-size:13px;text-align:center}
+.lang-item:hover{border-color:#10b981}
+.audio-player{display:none;padding:10px;background:#000;border-top:1px solid #333;align-items:center;gap:10px}
+.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px}
+.btn-secondary{width:100%;padding:12px;background:#333;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px}
+.panel-section{margin-bottom:15px;border-bottom:1px solid #333;padding-bottom:10px}
+.panel-section h4{margin:0 0 8px 0;color:#aaa;font-size:14px}
+.trigger-row{display:flex;gap:5px;margin-bottom:5px}
+.trigger-row input{flex:1;background:#333;border:1px solid #555;color:#fff;padding:6px;border-radius:4px;font-size:12px}
+.add-trigger-btn{background:#ff9800;color:#000;border:none;cursor:pointer;padding:0 10px;border-radius:4px;font-weight:bold}
+.q-btn{background:#1a1a1a;border:1px solid #333;color:#ccc;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;margin:2px}
+.s-btn{background:#222;border:1px solid #444;padding:4px 8px;border-radius:6px;font-size:16px;cursor:pointer;margin:2px}
+.character-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:15px;margin-bottom:15px;margin-top:10px}
+.char-avatar{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;font-size:11px;text-align:center;padding:0 4px;text-transform:uppercase;letter-spacing:.5px;line-height:1.1}
+.char-avatar:hover{transform:scale(1.1);box-shadow:0 0 15px rgba(255,255,255,.2)}
+.char-avatar.active{border:3px solid #fff;box-shadow:0 0 20px currentColor}
+</style>
 </head>
 <body>
+<div id="loginScreen">
+<button class="skip-btn" onclick="closeLoginScreen()">Пропустить</button>
+<div class="login-box" onclick="summonVerity()">
+<div class="box-inner">
+<div class="box-left">
+<svg class="broken-glass-svg" viewBox="0 0 24 24"><path d="M6 2h12l-1 10a5 5 0 0 1-10 0L6 2z"/><path d="M12 12v8"/><path d="M8 22h8"/><path d="M8 6l8 6" stroke="#e8c452" stroke-width="2"/></svg>
+</div>
+<div class="box-right">
+<div class="red-mark-top"></div><div class="red-exclamation">!</div><div class="red-mark-bottom"></div>
+</div>
+</div>
+</div>
+</div>
+<div id="verityContainer" style="top:70%;left:80%;">
+<div class="verity-face" id="verityFace"><div class="verity-eye left"></div><div class="verity-eye right"></div><div class="verity-mouth"></div></div>
+<div class="verity-controls"><div class="v-btn" onclick="startVoiceInput()">🎤</div><div class="v-btn" onclick="openVerityChat()">💬</div><div class="v-btn" onclick="openMusicModal()">📻</div></div>
+</div>
+<div class="header">
+<div class="logo">Cometa AI</div>
+<div class="header-controls">
+<button class="icon-btn" id="openApiSettingsBtn">🔑</button>
+<button class="icon-btn" id="openGenreBtn">🎨</button>
+<button class="icon-btn" id="openBroadcastSettingsBtn">⚙️</button>
+<button class="icon-btn" id="openLangBtn">🌐</button>
+<button class="icon-btn" id="loginBtn" style="width:auto;padding:0 10px;border-radius:20px;font-weight:bold;font-size:12px;">Войти</button>
+</div>
+</div>
+<div class="content-area" id="contentArea">
+<svg id="mainLoader" viewBox="0 0 100 100">
+<defs><linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4b74ff"/><stop offset="100%" stop-color="#51d5a7"/></linearGradient></defs>
+<path class="loader-track" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z"/>
+<path class="loader-anim" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z"/>
+<text x="50" y="62" class="loader-text">AI</text>
+</svg>
+<div class="chat-container" id="chatContainer"></div>
+<div class="script-container" id="scriptContainer"></div>
+</div>
+<div class="audio-player" id="audioPlayer">
+<audio id="bgMusic" loop></audio>
+<span style="font-size:12px;color:#10b981;" id="musicTitle">Фон играет</span>
+<button onclick="stopRadio()" style="background:none;border:none;color:#fff;cursor:pointer;">⏸</button>
+</div>
+<div class="control-panel">
+<div class="quick-tools">
+<button class="tool-btn" onclick="setPrompt('Напиши интересный сценарий для короткого фильма про...')">✍️ Писатель</button>
+<button class="tool-btn" onclick="setPrompt('Сгенерируй промпт для создания музыки в стиле...')">🎼 Музыка</button>
+<button class="tool-btn" onclick="insertPrompt('threeAngles')">🎭 3 угла</button>
+</div>
+<div class="input-wrapper">
+<button class="reset-btn" onclick="document.getElementById('aiPrompt').value='';document.getElementById('aiPrompt').focus();">🔄</button>
+<textarea id="aiPrompt" placeholder="Напиши сообщение..." rows="1" onkeypress="handleEnter(event)" oninput="handleTyping()"></textarea>
+<button class="send-btn" onclick="speakChat()" style="background:#3b82f6;">🔊</button>
+<button class="send-btn" onclick="sendMessage()">➤</button>
+</div>
+</div>
+<div class="modal" id="apiSettingsModal">
+<div class="modal-content">
+<div class="modal-header"><span>🔑 API Ключ (Groq)</span><button onclick="closeModal('apiSettingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<input type="password" id="apiKeyInput" class="input-field" placeholder="gsk_...">
+<button class="btn-primary" onclick="saveApiKey()">Сохранить</button>
+<button class="btn-secondary" onclick="toggleView()">📜 Режим сценария</button>
+<button class="btn-secondary" onclick="clearChat()" style="background:#ef4444;">🗑️ Очистить чат</button>
+</div>
+</div>
+<div class="modal" id="genreModal">
+<div class="modal-content">
+<div class="modal-header"><span>🎨 Стиль и Жанры</span><button onclick="closeModal('genreModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<button class="btn-primary" style="background:linear-gradient(135deg,#f59e0b,#ef4444);margin-bottom:15px;" onclick="mixGenres()">🎲 Смешать жанры</button>
+<div id="genreContainer"></div>
+</div>
+</div>
+<div class="modal" id="broadcastSettingsModal">
+<div class="modal-content" id="studioModalContent">
+<div class="modal-header"><span>⚙️ Студия</span><button onclick="closeModal('broadcastSettingsModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<div class="panel-section">
+<h4>🎙️ Персонажи</h4>
+<div id="characterList" class="character-grid"></div>
+<button class="q-btn" onclick="addNewCharacter()" style="width:100%;margin-top:10px;">➕ Добавить друга</button>
+</div>
+<div class="panel-section">
+<h4>Реакции</h4>
+<label style="display:block;margin-bottom:5px;font-size:13px;"><input type="checkbox" id="enableCatMode" checked> Режим кота</label>
+<label style="display:block;margin-bottom:5px;font-size:13px;"><input type="checkbox" id="enableGlitch" checked> Сбой эфира</label>
+</div>
+<div class="panel-section" style="border-color:#ff5252;">
+<h4 style="color:#ff5252;">🚨 Секрет</h4>
+<button class="btn-secondary" onclick="triggerApocalypse()" style="background:#ff5252;color:#fff;width:100%;">🚨 Апокалипсис эфира</button>
+</div>
+<div class="panel-section">
+<h4>Триггер-фразы</h4>
+<div class="trigger-row"><input type="text" id="triggerInput" placeholder="Если..."><input type="text" id="responseInput" placeholder="Ответ..."><button class="add-trigger-btn" onclick="addTrigger()">+</button></div>
+<div id="triggersList" style="max-height:100px;overflow-y:auto;font-size:12px;margin-top:5px;"></div>
+</div>
+<button class="btn-primary" onclick="saveBroadcastSettings()" style="background:#f59e0b;">Сохранить</button>
+</div>
+</div>
+<div class="modal" id="langModal">
+<div class="modal-content">
+<div class="modal-header"><span>🌐 Языки</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<input type="text" id="langSearch" class="input-field" placeholder="Поиск..." oninput="filterLangs()">
+<div id="langList" class="lang-grid"></div>
+</div>
+</div>
+<div class="modal" id="verityChatModal">
+<div class="modal-content" style="background:#2a2a2a;">
+<div class="modal-header"><span>💬 Чат с Verity</span><button onclick="closeModal('verityChatModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<div id="verityChatHistory" style="height:200px;overflow-y:auto;background:#111;padding:10px;border-radius:10px;margin-bottom:10px;display:flex;flex-direction:column;gap:8px;"><div style="font-size:12px;color:#888;">Задай мне вопрос!</div></div>
+<div style="display:flex;gap:5px;"><input type="text" id="verityInput" class="input-field" style="margin-bottom:0;" placeholder="Написать..."><button class="btn-primary" style="margin-bottom:0;padding:10px;" onclick="sendVerityText()">➤</button></div>
+</div>
+</div>
+<div class="modal" id="musicModal">
+<div class="modal-content">
+<div class="modal-header"><span>🎵 Музыка</span><button onclick="closeModal('musicModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
+<p style="font-size:13px; color:#aaa; margin-bottom:15px;">Вставьте прямую ссылку на MP3-файл (например, с SoundHelix) или загрузите файл с устройства.</p>
+<input type="text" id="musicUrlInput" class="input-field" placeholder="https://example.com/song.mp3">
+<button class="btn-primary" onclick="playMusicFromUrl()">▶ Воспроизвести по ссылке</button>
+<label class="btn-secondary" style="display:block; text-align:center; cursor:pointer;">
+    📂 Загрузить файл (MP3)
+    <input type="file" accept="audio/*" style="display:none;" onchange="playLocalFile(event)">
+</label>
+</div>
+</div>
+<script>
+window.onerror=function(msg){console.warn("Ошибка:",msg);return true;};
+let selectedGenre="Случайный",chatHistory=[],isChatMode=true,lastBotMessageText="";
+let selectedLanguage=localStorage.getItem('cometa_language')||'ru',selectedLanguageName=localStorage.getItem('cometa_language_name')||'Русский';
+let defaultChars=[
+{id:'verity',name:'Веррити',gender:'male',ageGroup:'adult',color:'#FFD700',prompt:'Ты — Веррити, радиоведущий. Твой стиль: уверенный. ЗАПРЕЩЕНО: обсуждать долги, суды.',chance:0.4},
+{id:'mini-verity',name:'Мини',gender:'male',ageGroup:'child',color:'#FFA500',prompt:'Ты — Мини-Веррити, маленький напарник. Говоришь быстро, с восторгом.',chance:0.2},
+{id:'luna',name:'Луна',gender:'female',ageGroup:'adult',color:'#FFC0CB',prompt:'Ты — Луна, звукорежиссёрка. Замечаешь детали.',chance:0.25},
+{id:'pixie',name:'Пикси',gender:'female',ageGroup:'child',color:'#FFDAB9',prompt:'Ты — Пикси, маленькая помощница.',chance:0.15}];
+let characters;try{characters=JSON.parse(localStorage.getItem('verityCharactersV3'))||defaultChars;}catch(e){characters=defaultChars;}
+let activeChar=characters[0];
+let defaultSettings={catMode:true,glitchMode:true,triggers:[{phrase:"алиса",response:"Эй, тут я главная!"},{phrase:"кот",response:"Мяу!"},{phrase:"спасибо",response:"Пожалуйста!"}]};
+let broadcastSettings;try{broadcastSettings=JSON.parse(localStorage.getItem('verityBroadcastSettings'))||defaultSettings;}catch(e){broadcastSettings=defaultSettings;}
+let soundBuffer=[],chatCount=0,EAVESDROP_INTERVAL=6;
+const eavesdroppedPhrases=['Кстати, ты говорил про Minecraft… А если сделать сцену в стиле стоунер-рок?','Ты любишь нуар? У меня есть один дождливый переулок.','Помнишь, ты хотел добавить музыку?'];
+const apocalypsePhrases=["Внимание! Налоговая требует лицензию!","Моё имущество арестовано!","Суд постановил: эфир прекращён!","Переходим на аналоговый сигнал!"];
+function getGreeting(){const g={'ru':'Привет! Я Веррити. Твой умный помощник. Нажми на микрофон или напиши мне!','en':'Hi! I am Verity. Click the microphone or text me!'};return g[selectedLanguage]||g['en'];}
+let loginScreen=document.getElementById('loginScreen'),verityContainer=document.getElementById('verityContainer'),verityFace=document.getElementById('verityFace'),angryClicks=0,idleTimer,typingTimer,radioGlitchInterval,hasStartedRadio=false,isApocalypse=false;
+document.getElementById('loginBtn').onclick=()=>loginScreen.style.display='flex';
+function closeLoginScreen(){loginScreen.style.display='none';}
+function summonVerity(){closeLoginScreen();verityContainer.style.display='block';verityContainer.classList.add('active');speakVerity(getGreeting());setTimeout(()=>verityContainer.classList.remove('active'),4000);resetVerityIdle();}
+document.getElementById('openApiSettingsBtn').onclick=()=>{document.getElementById('apiKeyInput').value=localStorage.getItem('cometa_api_key')||'';document.getElementById('apiSettingsModal').style.display='flex';};
+function closeModal(id){document.getElementById(id).style.display='none';}
+function saveApiKey(){const key=document.getElementById('apiKeyInput').value.trim();if(key.length>10){localStorage.setItem('cometa_api_key',key);alert("Ключ Groq сохранен!");closeModal('apiSettingsModal');}}
+function resetVerityIdle(){clearTimeout(idleTimer);if(verityFace.classList.contains('sleeping')){verityFace.classList.remove('sleeping');speakVerity("Ой, я не спал!");}idleTimer=setTimeout(()=>{if(verityContainer.style.display==='block'){verityFace.classList.add('sleeping');speakVerity("Знаешь, тишина — тоже музыка.");}},180000);}
+function handleTyping(){resetVerityIdle();verityFace.classList.add('typing-pulse');clearTimeout(typingTimer);typingTimer=setTimeout(()=>verityFace.classList.remove('typing-pulse'),1500);}
+let isDragging=false,offsetX,offsetY;
+verityContainer.addEventListener('mousedown',(e)=>{startDrag(e);resetVerityIdle();});verityContainer.addEventListener('touchstart',(e)=>{startDrag(e);resetVerityIdle();},{passive:false});
+function startDrag(e){isDragging=false;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;offsetX=cx-verityContainer.getBoundingClientRect().left;offsetY=cy-verityContainer.getBoundingClientRect().top;document.addEventListener('mousemove',drag);document.addEventListener('touchmove',drag,{passive:false});document.addEventListener('mouseup',stopDrag);document.addEventListener('touchend',stopDrag);}
+function drag(e){e.preventDefault();isDragging=true;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;verityContainer.style.left=(cx-offsetX)+'px';verityContainer.style.top=(cy-offsetY)+'px';}
+function stopDrag(){document.removeEventListener('mousemove',drag);document.removeEventListener('touchmove',drag);document.removeEventListener('mouseup',stopDrag);document.removeEventListener('touchend',stopDrag);}
 
-    <div id="loginScreen">
-        <button class="skip-btn" onclick="closeLoginScreen()">Пропустить</button>
-        <div class="login-box" onclick="summonVerity()">
-            <div class="box-inner">
-                <div class="box-left">
-                    <svg class="broken-glass-svg" viewBox="0 0 24 24"><path d="M6 2h12l-1 10a5 5 0 0 1-10 0L6 2z" /><path d="M12 12v8" /><path d="M8 22h8" /><path d="M8 6l8 6" stroke="#e8c452" stroke-width="2"/></svg>
-                </div>
-                <div class="box-right"><div class="red-mark-top"></div><div class="red-exclamation">!</div><div class="red-mark-bottom"></div></div>
-            </div>
-        </div>
-    </div>
+function spawnParticles(type){let emoji=type==='coffee'?'☕':(type==='angry'?'☁️':'💖');for(let i=0;i<3;i++){const p=document.createElement('div');p.className='particle';p.innerText=emoji;p.style.left=(Math.random()*40)+'px';p.style.top=(Math.random()*20)+'px';verityContainer.appendChild(p);setTimeout(()=>p.remove(),1000);}}
 
-    <div id="verityContainer" style="top: 70%; left: 80%;">
-        <div class="verity-face" id="verityFace"><div class="verity-eye left"></div><div class="verity-eye right"></div><div class="verity-mouth"></div></div>
-        <div class="verity-controls">
-            <div class="v-btn" onclick="startVoiceInput()">🎤</div>
-            <div class="v-btn" onclick="playRadio()">📻</div>
-        </div>
-    </div>
+function setGlow(c){verityFace.classList.remove('glow-neutral','glow-blush','glow-angry');if(c)verityFace.classList.add(c);}
 
-    <div class="header">
-        <div class="logo">Cometa AI</div>
-        <div class="header-controls">
-            <button class="icon-btn" id="openApiSettingsBtn">🔑</button>
-            <button class="icon-btn" id="openLangBtn">🌐</button>
-            <button class="icon-btn" onclick="document.getElementById('loginScreen').style.display = 'flex'">☰</button>
-        </div>
-    </div>
+verityFace.addEventListener('click',()=>{if(isDragging)return;resetVerityIdle();angryClicks++;if(angryClicks===3&&broadcastSettings.catMode){verityFace.classList.add('cat-mode');speakVerity("Мяу! Я не кот... Но иногда хочется.");setTimeout(()=>verityFace.classList.remove('cat-mode'),2000);}else if(angryClicks>5){verityFace.classList.add('angry');setGlow('glow-angry');spawnParticles('angry');speakVerity("Прекрати меня тыкать!");setTimeout(()=>{verityFace.classList.remove('angry');setGlow(null);angryClicks=0;verityContainer.style.display='none';setTimeout(()=>{verityContainer.style.display='block';speakVerity("Ладно, я вернулся.");},5000);},2000);}else{speakVerity("Хи-хи! Щекотно.");verityFace.classList.add('blush');setGlow('glow-blush');spawnParticles('blush');setTimeout(()=>{verityFace.classList.remove('blush');setGlow(null);},1000);}});
 
-    <div class="content-area" id="contentArea">
-        <svg id="mainLoader" viewBox="0 0 100 100">
-            <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#4b74ff" /><stop offset="100%" stop-color="#51d5a7" />
-                </linearGradient>
-            </defs>
-            <path class="loader-track" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
-            <path class="loader-anim" d="M 25 10 L 80 10 A 15 15 0 0 1 95 25 L 95 75 A 15 15 0 0 1 80 90 L 25 90 A 15 15 0 0 1 10 75 L 10 25 A 15 15 0 0 1 25 10 Z" />
-            <text x="50" y="62" class="loader-text">AI</text>
-        </svg>
+function getBehaviorTraits(c){const t=[];if(c.ageGroup==='child')t.push('говорит быстро');else t.push('говорит размеренно');if(c.gender==='male')t.push('аналогии с техникой');else t.push('аналогии с природой');return t.join('; ');}
+function triggerApocalypse(){if(isApocalypse)return;isApocalypse=true;closeModal('broadcastSettingsModal');verityFace.classList.add('startled','glitch');setGlow('glow-angry');spawnParticles('angry');const p1=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)];addMessageToChat('bot',p1,activeChar.name,activeChar.color);speakVerity(p1);setTimeout(()=>{const p2=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)];addMessageToChat('bot',p2,activeChar.name,activeChar.color);speakVerity(p2);},8000);setTimeout(()=>{isApocalypse=false;verityFace.classList.remove('startled','glitch');setGlow(null);speakVerity("Фух... Сигнал восстановлен.");addMessageToChat('bot',"Фух... Сигнал восстановлен.",activeChar.name,activeChar.color);},30000);}
+function renderCharacters(){const list=document.getElementById('characterList');list.innerHTML='';characters.forEach((c)=>{const el=document.createElement('div');el.className=`char-avatar ${c.id===activeChar.id?'active':''}`;el.style.background=c.color;el.innerHTML=`<span>${c.name}</span>`;el.addEventListener('click',()=>{activeChar=c;verityFace.style.background=c.color;renderCharacters();const s=document.getElementById('studioModalContent');s.style.background=`linear-gradient(145deg,#1a1a2e,${c.color}22)`;s.style.borderColor=c.color;speakVerity(`Привет! Я ${c.name}.`);});list.appendChild(el);});}
+function addNewCharacter(){const name=prompt('Имя:');if(!name)return;const color=prompt('Цвет:','#9c27b0')||'#9c27b0';const promptText=prompt('Характер:','Он просто хочет поболтать.')||'Он просто хочет поболтать.';characters.push({id:name.toLowerCase().replace(/\s+/g,'-'),name,gender:'male',ageGroup:'adult',color,prompt:promptText,chance:0.1});localStorage.setItem('verityCharactersV3',JSON.stringify(characters));renderCharacters();}
+document.getElementById('openBroadcastSettingsBtn').onclick=()=>{document.getElementById('enableCatMode').checked=broadcastSettings.catMode;document.getElementById('enableGlitch').checked=broadcastSettings.glitchMode;const s=document.getElementById('studioModalContent');s.style.background=`linear-gradient(145deg,#1a1a2e,${activeChar.color}22)`;s.style.borderColor=activeChar.color;renderCharacters();renderTriggersUI();document.getElementById('broadcastSettingsModal').style.display='flex';};
+function renderTriggersUI(){const list=document.getElementById('triggersList');list.innerHTML='';broadcastSettings.triggers.forEach((t,i)=>{const d=document.createElement('div');d.style.cssText="display:flex;justify-content:space-between;margin-bottom:4px;background:#222;padding:4px;border-radius:4px;";d.innerHTML=`<span>"${t.phrase}" &rarr; "${t.response.substring(0,15)}..."</span> <span style="color:red;cursor:pointer;" onclick="removeTrigger(${i})">✕</span>`;list.appendChild(d);});}
+function addTrigger(){const p=document.getElementById('triggerInput').value.trim();const r=document.getElementById('responseInput').value.trim();if(p&&r){broadcastSettings.triggers.push({phrase:p,response:r});document.getElementById('triggerInput').value='';document.getElementById('responseInput').value='';renderTriggersUI();}}
+function removeTrigger(i){broadcastSettings.triggers.splice(i,1);renderTriggersUI();}
+function saveBroadcastSettings(){broadcastSettings.catMode=document.getElementById('enableCatMode').checked;broadcastSettings.glitchMode=document.getElementById('enableGlitch').checked;localStorage.setItem('verityBroadcastSettings',JSON.stringify(broadcastSettings));alert('Сохранено!');closeModal('broadcastSettingsModal');}
+function checkTriggers(t){const lt=t.toLowerCase();for(const tr of broadcastSettings.triggers){if(lt.includes(tr.phrase.toLowerCase()))return tr.response;}return null;}
+function addSound(s){const i=document.getElementById('aiPrompt');i.value+=(i.value?" ":"")+s;i.focus();soundBuffer.push(s);if(soundBuffer.length>=3){i.value=`Создай сцену со звуками: ${soundBuffer.join(', ')}.`;soundBuffer=[];}closeModal('broadcastSettingsModal');}
+function insertPrompt(t){const i=document.getElementById('aiPrompt');if(t==='threeAngles')i.value=`[СЫЩИК]: \n[ЗЛОДЕЙ]: \n[ПРОХОЖИЙ]: `;else if(t==='radioPlay')i.value=`[ЗВУК: дождь]\n[ГОЛОС: ]\n`;closeModal('broadcastSettingsModal');}
+function playJingle(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(440,c.currentTime);o.frequency.exponentialRampToValueAtTime(880,c.currentTime+0.2);g.gain.setValueAtTime(0.3,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.8);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.8);}catch(e){}}
 
-        <div id="setupScreen">
-            <div class="setup-title">Налаштування ролі</div>
-            <div class="setup-group">
-                <label>Фон та вступ</label>
-                <textarea id="setupBackground" placeholder="Наприклад: Ти - зухвалий кіберпанк-хакер. Ми в барі..."></textarea>
-            </div>
-            <div class="setup-group">
-                <label>Привітання бота</label>
-                <textarea id="setupGreeting" placeholder="Наприклад: *поправляючи окуляри* Ну що, готовий зламати корпорацію?"></textarea>
-            </div>
-            <button class="btn-start" onclick="startRoleplay()">Почати спілкування</button>
-        </div>
+// --- МУЗЫКА ---
+function openMusicModal(){document.getElementById('musicUrlInput').value='';document.getElementById('musicModal').style.display='flex';resetVerityIdle();}
+function playMusicFromUrl(){const url=document.getElementById('musicUrlInput').value.trim();if(!url){alert("Вставьте ссылку!");return;}const b=document.getElementById('bgMusic');b.src=url;b.volume=0.4;b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex';document.getElementById('musicTitle').innerText="Играет по ссылке";closeModal('musicModal');speakVerity("Включаю трек!");}).catch(e=>{alert("Не удалось включить: " + e.message);});}
+function playLocalFile(e){const file=e.target.files[0];if(!file)return;const url=URL.createObjectURL(file);const b=document.getElementById('bgMusic');b.src=url;b.volume=0.4;b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex';document.getElementById('musicTitle').innerText=file.name;closeModal('musicModal');speakVerity("Играю твой файл!");}).catch(err=>{alert("Ошибка файла: " + err.message);});}
+function stopRadio(){document.getElementById('bgMusic').pause();document.getElementById('audioPlayer').style.display='none';speakVerity("Музыка остановлена.");}
 
-        <div id="chatContainer"></div>
-        <div id="bookContainer"></div>
-    </div>
+function speakVerity(text){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=selectedLanguage==='ru'?'ru-RU':'en-US';const b=document.getElementById('bgMusic');let ov=b.volume;const h=new Date().getHours();if(h>=23||h<6){u.pitch=0.8;u.volume=0.4;u.rate=0.9;}else{if(activeChar.ageGroup==='child')u.pitch=1.6;else if(activeChar.gender==='female')u.pitch=1.3;else u.pitch=1.0;}u.onstart=()=>{if(!b.paused)b.volume=0.1;verityFace.classList.add('talking');setGlow('glow-neutral');verityFace.style.transform=`rotate(${Math.random()>0.5?5:-5}deg)`;};u.onend=()=>{if(!b.paused)b.volume=ov;verityFace.classList.remove('talking');setGlow(null);verityFace.style.transform='rotate(0deg)';};window.speechSynthesis.speak(u);}}
+function startVoiceInput(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Нет микрофона.");return;}const r=new SR();r.lang=selectedLanguage==='ru'?'ru-RU':'en-US';r.onstart=()=>{speakVerity("Я слушаю...");resetVerityIdle();};r.onresult=(e)=>processVerityRequest(e.results[0][0].transcript);r.start();}
+function openVerityChat(){document.getElementById('verityChatModal').style.display='flex';resetVerityIdle();}
+function sendVerityText(){const i=document.getElementById('verityInput');if(!i.value)return;const t=i.value;document.getElementById('verityChatHistory').innerHTML+=`<div style="background:#3b82f6;padding:8px;border-radius:8px;align-self:flex-end;font-size:13px;color:#fff;">${t}</div>`;i.value='';processVerityRequest(t);resetVerityIdle();}
 
-    <div class="control-panel">
-        <div class="tool-tabs">
-            <button class="tab-btn active" onclick="switchTool('chat', this)">💬 Чат зі ШІ</button>
-            <button class="tab-btn" onclick="switchTool('writer', this)">✍️ Письменник</button>
-            <button class="tab-btn" onclick="switchTool('music', this)">🎼 Музика</button>
-        </div>
-        <div class="sub-tools active" id="sub-tools-chat">
-            <button class="sub-btn" onclick="insertPrompt('threeAngles')">🎭 3 кути</button>
-            <button class="sub-btn" onclick="resetToSetup()" style="color:#ef4444; border-color:#ef4444;">🗑️ Очистити чат</button>
-            <button class="sub-btn" onclick="convertToBook()">📖 Перетворити на книгу</button>
-        </div>
-        <div class="sub-tools" id="sub-tools-writer">
-            <button class="sub-btn" onclick="generatePrompt('writer', 'Фентезі')">🐉 Фентезі</button>
-            <button class="sub-btn" onclick="generatePrompt('writer', 'Детектив')">🕵️ Детектив</button>
-            <button class="sub-btn" onclick="generatePrompt('writer', 'Фантастика')">🚀 Фантастика</button>
-        </div>
-        <div class="sub-tools" id="sub-tools-music">
-            <button class="sub-btn" onclick="generatePrompt('music', 'Рок')">🎸 Рок</button>
-            <button class="sub-btn" onclick="generatePrompt('music', 'Поп')">🎤 Поп</button>
-            <button class="sub-btn" onclick="generatePrompt('music', 'Джаз')">🎷 Джаз</button>
-        </div>
-        <div class="input-wrapper">
-            <textarea id="aiPrompt" placeholder="Напиши повідомлення..." rows="1" onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); }"></textarea>
-            <button class="send-btn" onclick="sendMessage()">➤</button>
-        </div>
-    </div>
+// --- ЗАПРОС К GROQ ---
+async function processVerityRequest(text){
+    const box=document.getElementById('verityChatHistory');
+    box.scrollTop=box.scrollHeight;
+    const lid='ld-'+Date.now();
+    box.innerHTML+=`<div id="${lid}" style="font-size:12px;color:#aaa;font-style:italic;">Думает...</div>`;
+    const cr=checkTriggers(text);
+    if(cr){document.getElementById(lid).remove();box.innerHTML+=`<div style="background:#444;padding:8px;border-radius:8px;align-self:flex-start;font-size:13px;color:#fff;">${cr}</div>`;speakVerity(cr);return;}
+    const key=localStorage.getItem('cometa_api_key');
+    if(!key){document.getElementById(lid).remove();speakVerity("Добавь API ключ (🔑)!");return;}
+    try{
+        const traits=getBehaviorTraits(activeChar);
+        const sys=`${activeChar.prompt} Особенности: ${traits} ВАЖНО: Не придумывай бытовые драмы. Отвечай на языке: ${selectedLanguageName}.`;
+        const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+            body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:[{role:'system',content:sys},{role:'user',content:text}]})
+        });
+        const data=await res.json();
+        if(data.error) throw new Error(data.error.message);
+        const rep=data.choices[0].message.content;
+        document.getElementById(lid).remove();
+        box.innerHTML+=`<div style="background:#444;padding:8px;border-radius:8px;align-self:flex-start;font-size:13px;color:#fff;">${rep}</div>`;
+        box.scrollTop=box.scrollHeight;
+        speakVerity(rep);
+    }catch(e){
+        document.getElementById(lid).remove();
+        speakVerity("Запуталась в проводах...");
+    }
+}
 
-    <div class="modal" id="apiSettingsModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>🔑 API Ключ (Mistral)</span><button onclick="closeModal('apiSettingsModal')" style="background:none;border:none;color:#fff;">✕</button></div>
-            <input type="password" id="apiKeyInput" class="input-field" placeholder="Вставте ключ Mistral...">
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <button class="btn-primary" onclick="saveApiKey()" style="margin:0;">Зберегти</button>
-                <button class="btn-secondary" onclick="toggleHelp()" style="margin:0; flex:0.5; background:#3b82f6;">Допомога 🤖</button>
-            </div>
-            <div class="help-box" id="helpBox">
-                <b>Де взяти ключ Mistral?</b><br><br>
-                1. Зайди на <b>console.mistral.ai</b>.<br>
-                2. Увійди через Google.<br>
-                3. У лівому меню вибери <b>API Keys</b>.<br>
-                4. Створи ключ і скопіюй його.
-            </div>
-        </div>
-    </div>
+document.getElementById('openLangBtn').onclick=()=>{document.getElementById('langSearch').value='';renderLangs();document.getElementById('langModal').style.display='flex';};
+function renderChat(){const c=document.getElementById('chatContainer');c.innerHTML='';chatHistory.forEach((m,i)=>{const r=document.createElement('div');r.className=`message-row ${m.role}`;const b=document.createElement('div');b.className='message-bubble';if(m.role==='bot'&&m.speaker)b.innerHTML=`<span class="speaker-name" style="color:${m.color}">${m.speaker}</span>${m.text.replace(/\n/g,'<br>')}`;else b.innerHTML=m.text.replace(/\n/g,'<br>');r.appendChild(b);if(i===chatHistory.length-1){const a=document.createElement('div');a.className='message-actions';a.innerHTML=`<span onclick="editMessage(${i})">✏️ Редактировать</span>`;r.appendChild(a);}c.appendChild(r);});document.getElementById('contentArea').scrollTop=document.getElementById('contentArea').scrollHeight;}
+function addMessageToChat(role,text,speaker=null,color=null){chatHistory.push({role,text,speaker,color});if(role==='bot')lastBotMessageText=text;renderChat();}
+function editMessage(i){const m=chatHistory[i];const r=document.getElementById('chatContainer').querySelectorAll('.message-row');r[i].innerHTML=`<textarea class="edit-textarea" id="editInput-${i}">${m.text}</textarea><div class="edit-buttons"><button class="btn-small btn-save" onclick="saveEditedMessage(${i})">Сохранить</button><button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button></div>`;}
+function saveEditedMessage(i){chatHistory[i].text=document.getElementById('editInput-'+i).value;if(chatHistory[i].role==='bot')lastBotMessageText=chatHistory[i].text;renderChat();}
+function clearChat(){chatHistory=[];addMessageToChat('bot','Чат очищен.');closeModal('apiSettingsModal');}
+function handleEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function sendMessage(){const i=document.getElementById('aiPrompt');const t=i.value.trim();if(!t)return;if(t===t.toUpperCase()&&t.length>3||t.split('!').length>2){verityFace.classList.add('startled');speakVerity("Тише!");setTimeout(()=>verityFace.classList.remove('startled'),1000);}resetVerityIdle();const cr=checkTriggers(t);if(cr){addMessageToChat('user',t);i.value='';setTimeout(()=>{addMessageToChat('bot',cr,activeChar.name,activeChar.color);speakVerity(cr);},500);return;}addMessageToChat('user',t);i.value='';sendToAPI();}
 
-    <div class="modal" id="langModal">
-        <div class="modal-content">
-            <div class="modal-header"><span>🌐 Мови</span><button onclick="closeModal('langModal')" style="background:none;border:none;color:#fff;">✕</button></div>
-            <div style="font-size:12px; color:#888; margin-bottom:10px;">Оберіть мову спілкування.</div>
-            <div id="langList" class="lang-grid"></div>
-        </div>
-    </div>
-
-    <script>
-        window.onerror = function(msg) { console.warn("Помилка JS: ", msg); return true; };
-        let chatHistory = []; 
-        let selectedLanguage = 'uk';
-        let selectedLangName = 'Українська';
-        let systemPrompt = "";
-        let firstGreeting = "";
-        let verityContainer = document.getElementById('verityContainer');
-        let verityFace = document.getElementById('verityFace');
-        let idleTimer;
-
-        function closeLoginScreen() { document.getElementById('loginScreen').style.display = 'none'; }
-        function summonVerity() {
-            closeLoginScreen();
-            verityContainer.style.display = 'block';
-            speakVerity("Привіт! Налаштуй мене в меню і почнімо!");
-            resetIdle();
-        }
-
-        function resetIdle() {
-            clearTimeout(idleTimer);
-            verityFace.classList.remove('sleeping');
-            idleTimer = setTimeout(() => {
-                if(verityContainer.style.display === 'block') {
-                    verityFace.classList.add('sleeping');
-                    speakVerity("Я подрімаю...");
-                }
-            }, 180000);
-        }
-
-        let isDragging = false, offsetX, offsetY;
-        verityContainer.addEventListener('mousedown', (e) => startDrag(e));
-        verityContainer.addEventListener('touchstart', (e) => startDrag(e), {passive: false});
-        function startDrag(e) {
-            isDragging = false;
-            let cx = e.touches ? e.touches[0].clientX : e.clientX;
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
-            offsetX = cx - verityContainer.getBoundingClientRect().left;
-            offsetY = cy - verityContainer.getBoundingClientRect().top;
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('touchmove', drag, {passive: false});
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchend', stopDrag);
-        }
-        function drag(e) {
-            e.preventDefault(); isDragging = true; resetIdle();
-            let cx = e.touches ? e.touches[0].clientX : e.clientX;
-            let cy = e.touches ? e.touches[0].clientY : e.clientY;
-            verityContainer.style.left = (cx - offsetX) + 'px';
-            verityContainer.style.top = (cy - offsetY) + 'px';
-        }
-        function stopDrag() {
-            document.removeEventListener('mousemove', drag);
-            document.removeEventListener('touchmove', drag);
-            document.removeEventListener('mouseup', stopDrag);
-            document.removeEventListener('touchend', stopDrag);
-        }
-
-        function speakVerity(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const shortText = text.length > 250 ? text.slice(0, 250) + '...' : text;
-            const u = new SpeechSynthesisUtterance(shortText);
-            if (selectedLanguage === 'uk') u.lang = 'uk-UA';
-            else if (selectedLanguage === 'ru') u.lang = 'ru-RU';
-            else if (selectedLanguage === 'en') u.lang = 'en-US';
-            else u.lang = selectedLanguage + '-' + selectedLanguage.toUpperCase(); 
-            u.onstart = () => verityFace.classList.add('talking');
-            u.onend = () => verityFace.classList.remove('talking');
-            u.onerror = () => verityFace.classList.remove('talking');
-            window.speechSynthesis.speak(u);
-        }
-
-        function startVoiceInput() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SR) { alert("Мікрофон не підтримується."); return; }
-            const r = new SR();
-            if (selectedLanguage === 'uk') r.lang = 'uk-UA';
-            else if (selectedLanguage === 'ru') r.lang = 'ru-RU';
-            else r.lang = 'en-US';
-            r.onstart = () => { speakVerity("Я слухаю..."); resetIdle(); };
-            r.onresult = (e) => {
-                const text = e.results[0][0].transcript;
-                document.getElementById('aiPrompt').value = text;
-                sendMessage();
-            };
-            r.start();
-        }
-
-        function switchTool(tool, btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.querySelectorAll('.sub-tools').forEach(t => t.classList.remove('active'));
-            document.getElementById(`sub-tools-${tool}`).classList.add('active');
-            document.getElementById('bookContainer').style.display = 'none';
-            if (tool === 'chat' && chatHistory.length === 0) {
-                document.getElementById('setupScreen').style.display = 'flex';
-                document.getElementById('chatContainer').style.display = 'none';
-            } else {
-                document.getElementById('setupScreen').style.display = 'none';
-                document.getElementById('chatContainer').style.display = 'flex';
-            }
-        }
-
-        function startRoleplay() {
-            systemPrompt = document.getElementById('setupBackground').value.trim();
-            firstGreeting = document.getElementById('setupGreeting').value.trim();
-            if(!firstGreeting) firstGreeting = "Привіт! Я готовий до спілкування. Про що поговоримо?";
-            chatHistory = [];
-            addMessageToChat('bot', firstGreeting);
-            document.getElementById('setupScreen').style.display = 'none';
-            document.getElementById('chatContainer').style.display = 'flex';
-            speakVerity(firstGreeting);
-        }
-
-        function resetToSetup() {
-            chatHistory = [];
-            document.getElementById('chatContainer').innerHTML = '';
-            document.getElementById('setupScreen').style.display = 'flex';
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('bookContainer').style.display = 'none';
-            document.getElementById('setupBackground').value = '';
-            document.getElementById('setupGreeting').value = '';
-        }
-
-        function generatePrompt(type, genre) {
-            let promptText = "";
-            if (type === 'writer') promptText = `Ось промпт для написання книги в жанрі "${genre}":\n\n"Напиши захоплюючий сценарій у жанрі ${genre} про... (допиши свою ідею)."`;
-            else if (type === 'music') promptText = `Ось промпт для генерації музики в стилі "${genre}":\n\n"Створи музичний трек у стилі ${genre}. Настрій: динамічний."`;
-            addMessageToChat('bot', promptText);
-            speakVerity(`Я підготувала промпт для ${genre}. Подивись у чаті!`);
-        }
-
-        function insertPrompt(type) {
-            const i = document.getElementById('aiPrompt');
-            if(type === 'threeAngles') i.value = `[ДЕТЕКТИВ]: \n[ЛИХОДІЙ]: \n[ПЕРЕХОЖИЙ]: `;
-            i.focus();
-        }
-
-        document.getElementById('openApiSettingsBtn').onclick = () => { 
-            document.getElementById('apiKeyInput').value = localStorage.getItem('cometa_api_key') || '';
-            document.getElementById('apiSettingsModal').style.display = 'flex'; 
-        };
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function toggleHelp() { const h = document.getElementById('helpBox'); h.style.display = h.style.display === 'block' ? 'none' : 'block'; }
-        function saveApiKey() { 
-            const key = document.getElementById('apiKeyInput').value.trim(); 
-            if (key.length > 10) { localStorage.setItem('cometa_api_key', key); alert("Ключ збережено!"); closeModal('apiSettingsModal'); } 
-        }
-        document.getElementById('openLangBtn').onclick = () => { document.getElementById('langModal').style.display = 'flex'; };
-
-        function renderChat() {
-            const c = document.getElementById('chatContainer'); c.innerHTML = '';
-            chatHistory.forEach((m, i) => {
-                const r = document.createElement('div'); r.className = `message-row ${m.role}`;
-                const b = document.createElement('div'); b.className = 'message-bubble';
-                b.innerHTML = m.text.replace(/\n/g, '<br>');
-                r.appendChild(b);
-                if (m.role === 'bot' && i === chatHistory.length - 1) {
-                    const a = document.createElement('div'); a.className = 'message-actions';
-                    a.innerHTML = `<span onclick="editMessage(${i})">✏️ Редагувати</span>`;
-                    r.appendChild(a);
-                }
-                c.appendChild(r);
-            });
-            document.getElementById('contentArea').scrollTop = document.getElementById('contentArea').scrollHeight;
-        }
-
-        function addMessageToChat(role, text) { chatHistory.push({ role, text }); renderChat(); }
-
-        function editMessage(i) {
-            const m = chatHistory[i]; 
-            const r = document.getElementById('chatContainer').querySelectorAll('.message-row');
-            r[i].innerHTML = `<textarea class="input-field" id="editInput-${i}" style="min-height:80px; margin-bottom:5px;">${m.text}</textarea><div style="display:flex; gap:10px;"><button class="btn-primary" onclick="saveEditedMessage(${i})" style="padding:5px 10px;">Зберегти</button><button class="btn-secondary" onclick="renderChat()" style="padding:5px 10px;">Скасувати</button></div>`;
-        }
+async function sendToAPI(){
+    const key=localStorage.getItem('cometa_api_key');
+    if(!key){alert("Введите ключ Groq!");document.getElementById('apiSettingsModal').style.display='flex';return;}
+    document.getElementById('mainLoader').style.display='block';
+    if(verityFace){verityFace.style.transform='rotate(-5deg)';setGlow('glow-neutral');}
+    try{
+        const traits=getBehaviorTraits(activeChar);
+        let sys=`${activeChar.prompt} Особенности: ${traits} ВАЖНО: Не придумывай бытовые драмы. Отвечай на языке: ${selectedLanguageName}.`;
+        let msg=[{role:'system',content:sys}];
+        chatHistory.forEach(m=>msg.push({role:m.role==='bot'?'assistant':'user',content:m.text}));
         
-        function saveEditedMessage(i) { 
-            chatHistory[i].text = document.getElementById('editInput-' + i).value; 
-            renderChat(); 
-        }
-
-        function convertToBook() {
-            if(chatHistory.length === 0) { alert("Чат порожній."); return; }
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('setupScreen').style.display = 'none';
-            const bookDiv = document.getElementById('bookContainer');
-            bookDiv.style.display = 'block';
-            bookDiv.innerHTML = '<div style="text-align:center; padding:20px;">Генерація книги...</div>';
-            document.getElementById('mainLoader').style.display = 'block';
-            
-            let bookHTML = `<h2 style="text-align:center; color:#10b981; margin-bottom:20px;">Твоя історія</h2>`;
-            
-            chatHistory.forEach((m, i) => {
-                if(m.role === 'bot') bookHTML += `<p style="font-style:italic;">${m.text}</p>`;
-                else bookHTML += `<p style="color:#aaa;">— ${m.text}</p>`;
-                
-                if (i > 0 && i % 3 === 0) {
-                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(m.text.substring(0, 100))}?width=1024&height=1024&nologo=true`;
-                    bookHTML += `<img src="${imgUrl}" loading="lazy" onerror="this.style.display='none'">`;
-                }
-            });
-
-            setTimeout(() => {
-                bookDiv.innerHTML = bookHTML;
-                document.getElementById('mainLoader').style.display = 'none';
-            }, 1500);
-        }
-async function sendMessage() {
-            const i = document.getElementById('aiPrompt');
-            const t = i.value.trim();
-            if (!t) return;
-            
-            resetIdle();
-            addMessageToChat('user', t);
-            i.value = '';
-
-            const key = localStorage.getItem('cometa_api_key');
-            if (!key) {
-                alert("Введіть API ключ (🔑)!");
-                document.getElementById('apiSettingsModal').style.display = 'flex';
-                return;
-            }
-
-            document.getElementById('mainLoader').style.display = 'block';
-            document.getElementById('verityFace').style.transform = 'rotate(-5deg)';
-
-            try {
-                // ИСПРАВЛЕНИЕ: Добавлено объявление sysMsg
-                let sysMsg = systemPrompt ? systemPrompt : "Ти корисний ШІ-помічник.";
-                sysMsg += ` Відповідай мовою: ${selectedLangName}.`;
-
-                const messages = [
-                    { role: 'system', content: sysMsg },
-                    ...chatHistory.map(m => ({
-                        role: m.role === 'bot' ? 'assistant' : 'user',
-                        content: m.text
-                    }))
-                ];
-
-                const res = await fetch("https://api.mistral.ai/v1/chat/completions", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${key}`
-                    },
-                    body: JSON.stringify({
-                        model: "mistral-large-latest",
-                        max_tokens: 1024,
-                        messages: messages
-                    })
-                });
-
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData?.message || `HTTP ${res.status}`);
-                }
-
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message);
-
-                const reply = data.choices[0].message.content;
-                addMessageToChat('bot', reply);
-                speakVerity(reply);
-
-            } catch (e) {
-                addMessageToChat('bot', `Помилка: ${e.message}`);
-                speakVerity("Ой, я заплуталася в дротах.");
-            } finally {
-                document.getElementById('mainLoader').style.display = 'none';
-                document.getElementById('verityFace').style.transform = 'rotate(0deg)';
-            }
-        }
-
-        function playRadio() {
-            let bgMusic = document.getElementById('bgMusic');
-            if (!bgMusic) {
-                const audio = document.createElement('audio');
-                audio.id = 'bgMusic';
-                audio.loop = true;
-                document.body.appendChild(audio);
-                bgMusic = document.getElementById('bgMusic');
-            }
-            bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-            bgMusic.volume = 0.3;
-            bgMusic.play().catch(() => {
-                speakVerity("Не можу увімкнути ефір — браузер блокує звук.");
-            });
-            speakVerity("Вмикаю ефір! Тема сьогоднішнього дня: Місто після дощу.");
-        }
-
-        const langs = [
-            {c:'uk', n:'Українська'}, {c:'ru', n:'Русский'}, {c:'en', n:'English'}, 
-            {c:'be', n:'Беларуская'}, {c:'de', n:'Deutsch'}, {c:'fr', n:'Français'}, 
-            {c:'es', n:'Español'}, {c:'pt', n:'Português'}, {c:'it', n:'Italiano'}, 
-            {c:'pl', n:'Polski'}, {c:'cs', n:'Čeština'}, {c:'sk', n:'Slovenčina'}, 
-            {c:'bg', n:'Български'}, {c:'sr', n:'Српски'}, {c:'hr', n:'Hrvatski'}, 
-            {c:'ro', n:'Română'}, {c:'hu', n:'Magyar'}, {c:'el', n:'Ελληνικά'}, 
-            {c:'tr', n:'Türkçe'}, {c:'az', n:'Azərbaycan'}, {c:'kk', n:'Қазақ'}, 
-            {c:'uz', n:'Oʻzbek'}, {c:'hy', n:'Հայերեն'}, {c:'ka', n:'ქართული'}, 
-            {c:'zh', n:'简体中文'}, {c:'ja', n:'日本語'}, {c:'ko', n:'한국어'}, 
-            {c:'vi', n:'Tiếng Việt'}, {c:'th', n:'ไทย'}, {c:'id', n:'Bahasa Indonesia'}, 
-            {c:'hi', n:'हिन्दी'}, {c:'ar', n:'العربية'}, {c:'he', n:'עברית'}, 
-            {c:'fa', n:'فارسی'}, {c:'nl', n:'Nederlands'}, {c:'sv', n:'Svenska'}, 
-            {c:'da', n:'Dansk'}, {c:'no', n:'Norsk'}, {c:'fi', n:'Suomi'}, 
-            {c:'eo', n:'Esperanto'}, {c:'la', n:'Latina'}
-        ];
-
-        const langList = document.getElementById('langList');
-        langs.forEach(l => {
-            const d = document.createElement('div');
-            d.className = 'lang-item';
-            d.innerText = l.n;
-            if (l.c === selectedLanguage) d.classList.add('active');
-            d.onclick = () => {
-                selectedLanguage = l.c;
-                selectedLangName = l.n;
-                document.querySelectorAll('.lang-item').forEach(el => el.classList.remove('active'));
-                d.classList.add('active');
-                speakVerity("Мову змінено на " + l.n);
-                closeModal('langModal');
-            };
-            langList.appendChild(d);
+        const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+            body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:msg})
         });
+        
+        if(!res.ok)throw new Error("Ошибка API");
+        const data=await res.json();
+        if(data.error) throw new Error(data.error.message);
+        
+        addMessageToChat('bot',data.choices[0].message.content,activeChar.name,activeChar.color);
+        chatCount++;
+        if(chatCount%EAVESDROP_INTERVAL===0){const p=eavesdroppedPhrases[Math.floor(Math.random()*eavesdroppedPhrases.length)];setTimeout(()=>{addMessageToChat('bot',p,activeChar.name,activeChar.color);speakVerity(p);},2000);}
+        if(Math.random()<0.2&&characters.length>1)setTimeout(()=>triggerInterruption(),2000);
+    }catch(e){
+        if(verityContainer.style.display==='block'){verityFace.classList.add('startled');speakVerity("Ой, я запуталась...");setTimeout(()=>verityFace.classList.remove('startled'),2000);}
+        else alert("Ошибка ИИ: "+e.message);
+    }finally{
+        document.getElementById('mainLoader').style.display='none';
+        if(verityFace){verityFace.style.transform='rotate(0deg)';setGlow(null);}
+    }
+}
 
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('setupScreen').style.display = 'flex';
-            document.getElementById('chatContainer').style.display = 'none';
-        });
-    </script>
+async function triggerInterruption(){const o=characters.filter(c=>c.id!==activeChar.id);if(o.length===0)return;const inr=o[Math.floor(Math.random()*o.length)];const key=localStorage.getItem('cometa_api_key');if(!key)return;const oc=verityFace.style.background;verityFace.style.background=inr.color;verityFace.style.transform='scale(0.9)';setTimeout(()=>verityFace.style.transform='scale(1)',100);try{const tr=getBehaviorTraits(inr);const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:[{role:'system',content:`${inr.prompt} Особенности: ${tr} Только что ответил ${activeChar.name}. Вставь 1 предложение.`},{role:'user',content:"..."}]})});const data=await res.json();if(data.error)return;addMessageToChat('bot',data.choices[0].message.content,inr.name,inr.color);speakVerity(data.choices[0].message.content);}catch(e){}setTimeout(()=>{verityFace.style.background=oc;},3000);}
+
+function speakChat(){if(lastBotMessageText)speakVerity(lastBotMessageText);}
+function toggleView(){isChatMode=!isChatMode;document.getElementById('chatContainer').style.display=isChatMode?'flex':'none';document.getElementById('scriptContainer').style.display=isChatMode?'none':'block';if(!isChatMode)generateScriptWithImages();closeModal('apiSettingsModal');}
+
+async function generateScriptWithImages(){document.getElementById('mainLoader').style.display='block';let fh='';const sp=selectedGenre!=="Случайный"?`, стиль: ${selectedGenre}`:'';chatHistory.forEach((m,i)=>{fh+=`<p><strong>${m.speaker||(m.role==='user'?'Вы':'ИИ')}:</strong> ${m.text}</p>`;if((i+1)%10===0||i===0){const iu=`https://image.pollinations.ai/prompt/${encodeURIComponent(m.text.substring(0,100)+sp)}?width=1024&height=1024&nologo=true`;fh+=`<img src="${iu}" loading="lazy" onerror="this.style.display='none'">`;}});setTimeout(()=>{document.getElementById('scriptContainer').innerHTML=fh;document.getElementById('mainLoader').style.display='none';},1500);}
+
+const genres={"Древние / Ритуальные":["Григорианский хорал","Знаменное пение","Византийская","Мадригал","Мотет","Шаманские ритмы","Суфийская каввали"],"Классика / Академическая":["Фуга","Токката","Симфония","Ноктюрн","Импрессионизм","Минимализм","Атональность","Электроакустика"],"Фольклор / Этника":["Русская народная","Кельтская (джига)","Фламенко","Индийская (рага)","Арабская (макам)","Африканские ритмы","Балканский фолк","Японская"],"Вокал":["Бельканто","Горловое пение","Йодль","Скэт","Битбокс","Плачи"],"Джаз / Блюз":["Дельта-блюз","Буги-вуги","Свинг","Бибоп","Кул-джаз","Фри-джаз","Босса-нова"],"Рок":["Рок-н-ролл","Психоделик","Прогрессив","Панк-рок","Готик-рок","Гранж","Шугейз","Мат-рок"],"Метал":["Хэви-метал","Трэш","Дэт-метал","Блэк-метал","Дум-метал","Фолк-метал","Металкор","Пост-метал"],"Поп / Эстрада":["Синти-поп","Европоп","Диско","K-pop","J-pop","Пауэр-баллада"],"Хип-хоп":["Old School","G-funk","Trap","Drill","Lo-fi hip-hop","Phonk","Cloud rap"],"Электроника":["Техно","Хаус","Транс","Драм-н-бейс","Дабстеп","IDM","Эмбиент","Synthwave","Hardstyle","Breakcore"],"Латина":["Регги","Ска","Сальса","Бачата","Кумбия","Самба"],"R&B / Соул":["Классический R&B","Neo-soul","Фанк","Go-go"],"Эксперимент":["Индастриал","Noise","Field recordings","Конкретная музыка"],"Кино / Игры":["Опера","Мюзикл","Саундтрек","Chiptune (8-bit)"]};
+
+function renderGenres(){const c=document.getElementById('genreContainer');c.innerHTML='';for(const[cat,items]of Object.entries(genres)){const d=document.createElement('div');d.className='genre-category';d.innerText=cat;const l=document.createElement('div');l.className='genre-list';items.forEach(i=>{const it=document.createElement('div');it.className='genre-item';it.innerText=i;it.onclick=()=>{selectedGenre=i;setPrompt(`Создай сцену/музыку в стиле: ${i}.`);closeModal('genreModal');};l.appendChild(it);});d.onclick=()=>l.style.display=l.style.display==='block'?'none':'block';c.appendChild(d);c.appendChild(l);}}
+renderGenres();document.getElementById('openGenreBtn').onclick=()=>document.getElementById('genreModal').style.display='flex';
+function mixGenres(){let ag=[];for(const items of Object.values(genres))ag=ag.concat(items);ag=ag.filter(g=>g!=="Случайный");const g1=ag[Math.floor(Math.random()*ag.length)];let g2=ag[Math.floor(Math.random()*ag.length)];while(g1===g2)g2=ag[Math.floor(Math.random()*ag.length)];document.getElementById('aiPrompt').value=`Напиши сцену в стиле ${g1} + ${g2}.`;closeModal('genreModal');}
+
+let langStr="ru:Русский,en:English,uk:Українська,be:Беларуская,de:Deutsch,fr:Français,es:Español,pt:Português,it:Italiano,pl:Polski,cs:Čeština,sk:Slovenčina,bg:Български,sr:Српски,hr:Hrvatski,sl:Slovenščina,mk:Македонски,ro:Română,hu:Magyar,el:Ελληνικά,tr:Türkçe,az:Azərbaycan,kk:Қазақ,uz:Oʻzbek,ky:Кыргызча,tg:Тоҷикӣ,hy:Հայերեն,ka:ქართული,zh:简体中文,zh_tw:繁體中文,ja:日本語,ko:한국어,vi:Tiếng Việt,th:ไทย,id:Bahasa Indonesia,ms:Bahasa Melayu,tl:Tagalog,my:မြန်မာ,km:ខ្មែរ,lo:ລາວ,mn:Монгол,hi:हिन्दी,bn:বাংলা,pa:ਪੰਜਾਬੀ,gu:ગુજરાતી,mr:मराठी,ta:தமிழ்,te:తెలుగు,kn:ಕನ್ನಡ,ml:മലയാളം,si:සිංහල,ne:नेपाली,ar:العربية,he:עברית,fa:فارسی,ur:اردو,ps:پښتو,ku:Kurdî,am:አማርኛ,so:Soomaali,sw:Kiswahili,yo:Yorùbá,ig:Igbo,ha:Hausa,zu:isiZulu,af:Afrikaans,nl:Nederlands,sv:Svenska,da:Dansk,no:Norsk,fi:Suomi,is:Íslenska,ga:Gaeilge,cy:Cymraeg,gd:Gàidhlig,mt:Malti,eo:Esperanto,la:Latina,en_pt:Pirate Speak,en_ws:Shakespearean,en_ud:Upside Down,lol:LOLCAT,tlh:Klingon,qya:Elvish (Quenya),sjn:Sindarin,doth:Dothraki,val:Valyrian,ang:Anglish,tok:Toki Pona,nav:Naʼvi,grc:Ancient Greek,sa:Sanskrit,pi:Pali,haw:Hawaiian,mi:Māori,sm:Samoan,to:Tongan,fj:Fijian,qu:Quechua,ay:Aymara,gn:Guaraní,nah:Nahuatl,yua:Yucatec Maya,iu:Inuktitut,kl:Kalaallisut,chr:Cherokee,nv:Navajo,oj:Ojibwe,cu:Словѣ́ньскъ,lb:Lëtzebuergesch,fo:Føroyskt,ca:Català,gl:Galego,oc:Occitan,co:Corsu,sc:Sardu,rm:Rumantsch,fur:Furlan,kv:Коми,udm:Удмурт,mhr:Марий,myv:Эрзянь,tk:Türkmençe,ba:Башҡорт,tt:Татарча,cv:Чӑвашла,sah:Саха,os:Ирон,ce:Нохчийн,av:Авар,kbd:Адыгэбзэ,bo:བོད་སྐད་,ug:ئۇيغۇرچە,yue:粵語,wuu:吴语,nan:闽南语,hak:客家话,jv:Basa Jawa,su:Basa Sunda,ceb:Cebuano,as:অসমীয়া,or:ଓଡ଼ିଆ,sd:سنڌي,xh:isiXhosa,st:Sesotho,tn:Setswana,mg:Malagasy,ti:ትግርኛ,om:Oromoo,wo:Wolof,ty:Reo Tahiti,cr:Cree,ia:Interlingua,vo:Volapük,jbo:Lojban,lfn:Lingua Franca Nova,afh:Afrihili";
+const allLangs=langStr.split(',').map(x=>{const[c,...n]=x.split(':');return{c,n:n.join(':')}});
+
+function renderLangs(f=""){const l=document.getElementById('langList');l.innerHTML='';const fl=allLangs.filter(x=>x.n.toLowerCase().includes(f.toLowerCase())||x.c.includes(f.toLowerCase()));if(fl.length===0)l.innerHTML='<div style="color:#888;text-align:center;grid-column:span 2;">Ничего не найдено</div>';else fl.forEach(x=>{const d=document.createElement('div');d.className='lang-item';d.innerText=x.n;d.onclick=()=>{selectedLanguage=x.c;selectedLanguageName=x.n;localStorage.setItem('cometa_language',x.c);localStorage.setItem('cometa_language_name',x.n);alert("Язык: "+x.n);closeModal('langModal');if(verityContainer.style.display==='block')speakVerity(getGreeting());};l.appendChild(d);});}
+function filterLangs(){renderLangs(document.getElementById('langSearch').value);}
+renderLangs();
+window.addEventListener('DOMContentLoaded',()=>{addMessageToChat('bot',"Привет! Я Cometa AI. Проверь ключ в 🔑 и давай начнем!");});
+</script>
 </body>
 </html>
