@@ -95,6 +95,7 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 .genre-category{padding:14px;background:#111;border-radius:10px;margin-bottom:10px;cursor:pointer;border:1px solid #333;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
 .genre-list{display:none;margin-top:-5px;margin-bottom:15px;padding:10px;background:#0a0a0a;border-radius:0 0 10px 10px;border:1px solid #333;border-top:none}
 .genre-item{padding:10px 12px;background:#1a1a1a;border-radius:6px;margin-bottom:6px;font-size:14px;cursor:pointer;color:#ccc}
+.genre-item:hover{background:#333;color:#fff}
 .lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .lang-item{padding:10px;background:#111;border-radius:8px;cursor:pointer;border:1px solid #222;font-size:13px;text-align:center}
 .lang-item:hover{border-color:#10b981}
@@ -107,7 +108,6 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 .trigger-row input{flex:1;background:#333;border:1px solid #555;color:#fff;padding:6px;border-radius:4px;font-size:12px}
 .add-trigger-btn{background:#ff9800;color:#000;border:none;cursor:pointer;padding:0 10px;border-radius:4px;font-weight:bold}
 .q-btn{background:#1a1a1a;border:1px solid #333;color:#ccc;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;margin:2px}
-.s-btn{background:#222;border:1px solid #444;padding:4px 8px;border-radius:6px;font-size:16px;cursor:pointer;margin:2px}
 .character-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(65px,1fr));gap:15px;margin-bottom:15px;margin-top:10px}
 .char-avatar{width:65px;height:65px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;cursor:pointer;transition:transform .2s,box-shadow .2s;position:relative;font-size:11px;text-align:center;padding:0 4px;text-transform:uppercase;letter-spacing:.5px;line-height:1.1}
 .char-avatar:hover{transform:scale(1.1);box-shadow:0 0 15px rgba(255,255,255,.2)}
@@ -159,8 +159,8 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 </div>
 <div class="control-panel">
 <div class="quick-tools">
-<button class="tool-btn" onclick="setPrompt('Напиши интересный сценарий для короткого фильма про...')">✍️ Писатель</button>
-<button class="tool-btn" onclick="setPrompt('Сгенерируй промпт для создания музыки в стиле...')">🎼 Музыка</button>
+<button class="tool-btn" onclick="setPrompt('writer')">✍️ Писатель</button>
+<button class="tool-btn" onclick="setPrompt('music')">🎼 Музыка</button>
 <button class="tool-btn" onclick="insertPrompt('threeAngles')">🎭 3 угла</button>
 </div>
 <div class="input-wrapper">
@@ -176,7 +176,7 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 <input type="password" id="apiKeyInput" class="input-field" placeholder="gsk_...">
 <button class="btn-primary" onclick="saveApiKey()">Сохранить</button>
 <button class="btn-secondary" onclick="toggleView()">📜 Режим сценария</button>
-<button class="btn-secondary" onclick="clearChat()" style="background:#ef4444;">🗑️ Очистить чат</button>
+<button class="btn-secondary" onclick="clearChat()" style="background:#ef4444;">🗑️ Очистить чат (в начало)</button>
 </div>
 </div>
 <div class="modal" id="genreModal">
@@ -228,7 +228,7 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 <div class="modal" id="musicModal">
 <div class="modal-content">
 <div class="modal-header"><span>🎵 Музыка</span><button onclick="closeModal('musicModal')" style="background:none;border:none;color:#fff;font-size:20px;">✕</button></div>
-<p style="font-size:13px; color:#aaa; margin-bottom:15px;">Вставьте прямую ссылку на MP3-файл (например, с SoundHelix) или загрузите файл с устройства.</p>
+<p style="font-size:13px; color:#aaa; margin-bottom:15px;">Вставьте прямую ссылку на MP3-файл или загрузите файл с устройства.</p>
 <input type="text" id="musicUrlInput" class="input-field" placeholder="https://example.com/song.mp3">
 <button class="btn-primary" onclick="playMusicFromUrl()">▶ Воспроизвести по ссылке</button>
 <label class="btn-secondary" style="display:block; text-align:center; cursor:pointer;">
@@ -239,8 +239,8 @@ textarea{flex:1;height:50px;background:#000;border:1px solid #333;border-radius:
 </div>
 <script>
 window.onerror=function(msg){console.warn("Ошибка:",msg);return true;};
-let selectedGenre="Случайный",chatHistory=[],isChatMode=true,lastBotMessageText="";
-let selectedLanguage=localStorage.getItem('cometa_language')||'ru',selectedLanguageName=localStorage.getItem('cometa_language_name')||'Русский';
+let selectedGenre="Случайный", chatHistory=[], isChatMode=true, lastBotMessageText="";
+let selectedLanguage=localStorage.getItem('cometa_language')||'ru', selectedLanguageName=localStorage.getItem('cometa_language_name')||'Русский';
 let defaultChars=[
 {id:'verity',name:'Веррити',gender:'male',ageGroup:'adult',color:'#FFD700',prompt:'Ты — Веррити, радиоведущий. Твой стиль: уверенный. ЗАПРЕЩЕНО: обсуждать долги, суды.',chance:0.4},
 {id:'mini-verity',name:'Мини',gender:'male',ageGroup:'child',color:'#FFA500',prompt:'Ты — Мини-Веррити, маленький напарник. Говоришь быстро, с восторгом.',chance:0.2},
@@ -250,55 +250,52 @@ let characters;try{characters=JSON.parse(localStorage.getItem('verityCharactersV
 let activeChar=characters[0];
 let defaultSettings={catMode:true,glitchMode:true,triggers:[{phrase:"алиса",response:"Эй, тут я главная!"},{phrase:"кот",response:"Мяу!"},{phrase:"спасибо",response:"Пожалуйста!"}]};
 let broadcastSettings;try{broadcastSettings=JSON.parse(localStorage.getItem('verityBroadcastSettings'))||defaultSettings;}catch(e){broadcastSettings=defaultSettings;}
-let soundBuffer=[],chatCount=0,EAVESDROP_INTERVAL=6;
+let soundBuffer=[], chatCount=0, EAVESDROP_INTERVAL=6;
 const eavesdroppedPhrases=['Кстати, ты говорил про Minecraft… А если сделать сцену в стиле стоунер-рок?','Ты любишь нуар? У меня есть один дождливый переулок.','Помнишь, ты хотел добавить музыку?'];
 const apocalypsePhrases=["Внимание! Налоговая требует лицензию!","Моё имущество арестовано!","Суд постановил: эфир прекращён!","Переходим на аналоговый сигнал!"];
 function getGreeting(){const g={'ru':'Привет! Я Веррити. Твой умный помощник. Нажми на микрофон или напиши мне!','en':'Hi! I am Verity. Click the microphone or text me!'};return g[selectedLanguage]||g['en'];}
-let loginScreen=document.getElementById('loginScreen'),verityContainer=document.getElementById('verityContainer'),verityFace=document.getElementById('verityFace'),angryClicks=0,idleTimer,typingTimer,radioGlitchInterval,hasStartedRadio=false,isApocalypse=false;
+let loginScreen=document.getElementById('loginScreen'), verityContainer=document.getElementById('verityContainer'), verityFace=document.getElementById('verityFace'), angryClicks=0, idleTimer, typingTimer, radioGlitchInterval, hasStartedRadio=false, isApocalypse=false;
 document.getElementById('loginBtn').onclick=()=>loginScreen.style.display='flex';
 function closeLoginScreen(){loginScreen.style.display='none';}
-function summonVerity(){closeLoginScreen();verityContainer.style.display='block';verityContainer.classList.add('active');speakVerity(getGreeting());setTimeout(()=>verityContainer.classList.remove('active'),4000);resetVerityIdle();}
-document.getElementById('openApiSettingsBtn').onclick=()=>{document.getElementById('apiKeyInput').value=localStorage.getItem('cometa_api_key')||'';document.getElementById('apiSettingsModal').style.display='flex';};
+function summonVerity(){closeLoginScreen(); verityContainer.style.display='block'; verityContainer.classList.add('active'); speakVerity(getGreeting()); setTimeout(()=>verityContainer.classList.remove('active'),4000); resetVerityIdle();}
+document.getElementById('openApiSettingsBtn').onclick=()=>{document.getElementById('apiKeyInput').value=localStorage.getItem('cometa_api_key')||''; document.getElementById('apiSettingsModal').style.display='flex';};
 function closeModal(id){document.getElementById(id).style.display='none';}
-function saveApiKey(){const key=document.getElementById('apiKeyInput').value.trim();if(key.length>10){localStorage.setItem('cometa_api_key',key);alert("Ключ Groq сохранен!");closeModal('apiSettingsModal');}}
-function resetVerityIdle(){clearTimeout(idleTimer);if(verityFace.classList.contains('sleeping')){verityFace.classList.remove('sleeping');speakVerity("Ой, я не спал!");}idleTimer=setTimeout(()=>{if(verityContainer.style.display==='block'){verityFace.classList.add('sleeping');speakVerity("Знаешь, тишина — тоже музыка.");}},180000);}
-function handleTyping(){resetVerityIdle();verityFace.classList.add('typing-pulse');clearTimeout(typingTimer);typingTimer=setTimeout(()=>verityFace.classList.remove('typing-pulse'),1500);}
-let isDragging=false,offsetX,offsetY;
-verityContainer.addEventListener('mousedown',(e)=>{startDrag(e);resetVerityIdle();});verityContainer.addEventListener('touchstart',(e)=>{startDrag(e);resetVerityIdle();},{passive:false});
-function startDrag(e){isDragging=false;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;offsetX=cx-verityContainer.getBoundingClientRect().left;offsetY=cy-verityContainer.getBoundingClientRect().top;document.addEventListener('mousemove',drag);document.addEventListener('touchmove',drag,{passive:false});document.addEventListener('mouseup',stopDrag);document.addEventListener('touchend',stopDrag);}
-function drag(e){e.preventDefault();isDragging=true;let cx=e.touches?e.touches[0].clientX:e.clientX;let cy=e.touches?e.touches[0].clientY:e.clientY;verityContainer.style.left=(cx-offsetX)+'px';verityContainer.style.top=(cy-offsetY)+'px';}
-function stopDrag(){document.removeEventListener('mousemove',drag);document.removeEventListener('touchmove',drag);document.removeEventListener('mouseup',stopDrag);document.removeEventListener('touchend',stopDrag);}
+function saveApiKey(){const key=document.getElementById('apiKeyInput').value.trim(); if(key.length>10){localStorage.setItem('cometa_api_key',key); alert("Ключ Groq сохранен!"); closeModal('apiSettingsModal');}}
+function resetVerityIdle(){clearTimeout(idleTimer); if(verityFace.classList.contains('sleeping')){verityFace.classList.remove('sleeping'); speakVerity("Ой, я не спал!");} idleTimer=setTimeout(()=>{if(verityContainer.style.display==='block'){verityFace.classList.add('sleeping'); speakVerity("Знаешь, тишина — тоже музыка.");}},180000);}
+function handleTyping(){resetVerityIdle(); verityFace.classList.add('typing-pulse'); clearTimeout(typingTimer); typingTimer=setTimeout(()=>verityFace.classList.remove('typing-pulse'),1500);}
 
-function spawnParticles(type){let emoji=type==='coffee'?'☕':(type==='angry'?'☁️':'💖');for(let i=0;i<3;i++){const p=document.createElement('div');p.className='particle';p.innerText=emoji;p.style.left=(Math.random()*40)+'px';p.style.top=(Math.random()*20)+'px';verityContainer.appendChild(p);setTimeout(()=>p.remove(),1000);}}
+let isDragging=false, offsetX, offsetY;
+verityContainer.addEventListener('mousedown',(e)=>{startDrag(e);resetVerityIdle();}); verityContainer.addEventListener('touchstart',(e)=>{startDrag(e);resetVerityIdle();},{passive:false});
+function startDrag(e){isDragging=false; let cx=e.touches?e.touches[0].clientX:e.clientX; let cy=e.touches?e.touches[0].clientY:e.clientY; offsetX=cx-verityContainer.getBoundingClientRect().left; offsetY=cy-verityContainer.getBoundingClientRect().top; document.addEventListener('mousemove',drag); document.addEventListener('touchmove',drag,{passive:false}); document.addEventListener('mouseup',stopDrag); document.addEventListener('touchend',stopDrag);}
+function drag(e){e.preventDefault(); isDragging=true; let cx=e.touches?e.touches[0].clientX:e.clientX; let cy=e.touches?e.touches[0].clientY:e.clientY; verityContainer.style.left=(cx-offsetX)+'px'; verityContainer.style.top=(cy-offsetY)+'px';}
+function stopDrag(){document.removeEventListener('mousemove',drag); document.removeEventListener('touchmove',drag); document.removeEventListener('mouseup',stopDrag); document.removeEventListener('touchend',stopDrag);}
 
-function setGlow(c){verityFace.classList.remove('glow-neutral','glow-blush','glow-angry');if(c)verityFace.classList.add(c);}
+function spawnParticles(type){let emoji=type==='coffee'?'☕':(type==='angry'?'☁️':'💖'); for(let i=0;i<3;i++){const p=document.createElement('div'); p.className='particle'; p.innerText=emoji; p.style.left=(Math.random()*40)+'px'; p.style.top=(Math.random()*20)+'px'; verityContainer.appendChild(p); setTimeout(()=>p.remove(),1000);}}
+function setGlow(c){verityFace.classList.remove('glow-neutral','glow-blush','glow-angry'); if(c)verityFace.classList.add(c);}
 
-verityFace.addEventListener('click',()=>{if(isDragging)return;resetVerityIdle();angryClicks++;if(angryClicks===3&&broadcastSettings.catMode){verityFace.classList.add('cat-mode');speakVerity("Мяу! Я не кот... Но иногда хочется.");setTimeout(()=>verityFace.classList.remove('cat-mode'),2000);}else if(angryClicks>5){verityFace.classList.add('angry');setGlow('glow-angry');spawnParticles('angry');speakVerity("Прекрати меня тыкать!");setTimeout(()=>{verityFace.classList.remove('angry');setGlow(null);angryClicks=0;verityContainer.style.display='none';setTimeout(()=>{verityContainer.style.display='block';speakVerity("Ладно, я вернулся.");},5000);},2000);}else{speakVerity("Хи-хи! Щекотно.");verityFace.classList.add('blush');setGlow('glow-blush');spawnParticles('blush');setTimeout(()=>{verityFace.classList.remove('blush');setGlow(null);},1000);}});
+verityFace.addEventListener('click',()=>{if(isDragging)return; resetVerityIdle(); angryClicks++; if(angryClicks===3&&broadcastSettings.catMode){verityFace.classList.add('cat-mode'); speakVerity("Мяу! Я не кот... Но иногда хочется."); setTimeout(()=>verityFace.classList.remove('cat-mode'),2000);}else if(angryClicks>5){verityFace.classList.add('angry'); setGlow('glow-angry'); spawnParticles('angry'); speakVerity("Прекрати меня тыкать!"); setTimeout(()=>{verityFace.classList.remove('angry'); setGlow(null); angryClicks=0; verityContainer.style.display='none'; setTimeout(()=>{verityContainer.style.display='block'; speakVerity("Ладно, я вернулся.");},5000);},2000);}else{speakVerity("Хи-хи! Щекотно."); verityFace.classList.add('blush'); setGlow('glow-blush'); spawnParticles('blush'); setTimeout(()=>{verityFace.classList.remove('blush'); setGlow(null);},1000);}});
 
-function getBehaviorTraits(c){const t=[];if(c.ageGroup==='child')t.push('говорит быстро');else t.push('говорит размеренно');if(c.gender==='male')t.push('аналогии с техникой');else t.push('аналогии с природой');return t.join('; ');}
-function triggerApocalypse(){if(isApocalypse)return;isApocalypse=true;closeModal('broadcastSettingsModal');verityFace.classList.add('startled','glitch');setGlow('glow-angry');spawnParticles('angry');const p1=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)];addMessageToChat('bot',p1,activeChar.name,activeChar.color);speakVerity(p1);setTimeout(()=>{const p2=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)];addMessageToChat('bot',p2,activeChar.name,activeChar.color);speakVerity(p2);},8000);setTimeout(()=>{isApocalypse=false;verityFace.classList.remove('startled','glitch');setGlow(null);speakVerity("Фух... Сигнал восстановлен.");addMessageToChat('bot',"Фух... Сигнал восстановлен.",activeChar.name,activeChar.color);},30000);}
-function renderCharacters(){const list=document.getElementById('characterList');list.innerHTML='';characters.forEach((c)=>{const el=document.createElement('div');el.className=`char-avatar ${c.id===activeChar.id?'active':''}`;el.style.background=c.color;el.innerHTML=`<span>${c.name}</span>`;el.addEventListener('click',()=>{activeChar=c;verityFace.style.background=c.color;renderCharacters();const s=document.getElementById('studioModalContent');s.style.background=`linear-gradient(145deg,#1a1a2e,${c.color}22)`;s.style.borderColor=c.color;speakVerity(`Привет! Я ${c.name}.`);});list.appendChild(el);});}
-function addNewCharacter(){const name=prompt('Имя:');if(!name)return;const color=prompt('Цвет:','#9c27b0')||'#9c27b0';const promptText=prompt('Характер:','Он просто хочет поболтать.')||'Он просто хочет поболтать.';characters.push({id:name.toLowerCase().replace(/\s+/g,'-'),name,gender:'male',ageGroup:'adult',color,prompt:promptText,chance:0.1});localStorage.setItem('verityCharactersV3',JSON.stringify(characters));renderCharacters();}
-document.getElementById('openBroadcastSettingsBtn').onclick=()=>{document.getElementById('enableCatMode').checked=broadcastSettings.catMode;document.getElementById('enableGlitch').checked=broadcastSettings.glitchMode;const s=document.getElementById('studioModalContent');s.style.background=`linear-gradient(145deg,#1a1a2e,${activeChar.color}22)`;s.style.borderColor=activeChar.color;renderCharacters();renderTriggersUI();document.getElementById('broadcastSettingsModal').style.display='flex';};
-function renderTriggersUI(){const list=document.getElementById('triggersList');list.innerHTML='';broadcastSettings.triggers.forEach((t,i)=>{const d=document.createElement('div');d.style.cssText="display:flex;justify-content:space-between;margin-bottom:4px;background:#222;padding:4px;border-radius:4px;";d.innerHTML=`<span>"${t.phrase}" &rarr; "${t.response.substring(0,15)}..."</span> <span style="color:red;cursor:pointer;" onclick="removeTrigger(${i})">✕</span>`;list.appendChild(d);});}
-function addTrigger(){const p=document.getElementById('triggerInput').value.trim();const r=document.getElementById('responseInput').value.trim();if(p&&r){broadcastSettings.triggers.push({phrase:p,response:r});document.getElementById('triggerInput').value='';document.getElementById('responseInput').value='';renderTriggersUI();}}
-function removeTrigger(i){broadcastSettings.triggers.splice(i,1);renderTriggersUI();}
-function saveBroadcastSettings(){broadcastSettings.catMode=document.getElementById('enableCatMode').checked;broadcastSettings.glitchMode=document.getElementById('enableGlitch').checked;localStorage.setItem('verityBroadcastSettings',JSON.stringify(broadcastSettings));alert('Сохранено!');closeModal('broadcastSettingsModal');}
-function checkTriggers(t){const lt=t.toLowerCase();for(const tr of broadcastSettings.triggers){if(lt.includes(tr.phrase.toLowerCase()))return tr.response;}return null;}
-function addSound(s){const i=document.getElementById('aiPrompt');i.value+=(i.value?" ":"")+s;i.focus();soundBuffer.push(s);if(soundBuffer.length>=3){i.value=`Создай сцену со звуками: ${soundBuffer.join(', ')}.`;soundBuffer=[];}closeModal('broadcastSettingsModal');}
-function insertPrompt(t){const i=document.getElementById('aiPrompt');if(t==='threeAngles')i.value=`[СЫЩИК]: \n[ЗЛОДЕЙ]: \n[ПРОХОЖИЙ]: `;else if(t==='radioPlay')i.value=`[ЗВУК: дождь]\n[ГОЛОС: ]\n`;closeModal('broadcastSettingsModal');}
-function playJingle(){try{const c=new(window.AudioContext||window.webkitAudioContext)();const o=c.createOscillator();const g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(440,c.currentTime);o.frequency.exponentialRampToValueAtTime(880,c.currentTime+0.2);g.gain.setValueAtTime(0.3,c.currentTime);g.gain.exponentialRampToValueAtTime(0.01,c.currentTime+0.8);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+0.8);}catch(e){}}
+function getBehaviorTraits(c){const t=[]; if(c.ageGroup==='child')t.push('говорит быстро'); else t.push('говорит размеренно'); if(c.gender==='male')t.push('аналогии с техникой'); else t.push('аналогии с природой'); return t.join('; ');}
+function triggerApocalypse(){if(isApocalypse)return; isApocalypse=true; closeModal('broadcastSettingsModal'); verityFace.classList.add('startled','glitch'); setGlow('glow-angry'); spawnParticles('angry'); const p1=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)]; addMessageToChat('bot',p1,activeChar.name,activeChar.color); speakVerity(p1); setTimeout(()=>{const p2=apocalypsePhrases[Math.floor(Math.random()*apocalypsePhrases.length)]; addMessageToChat('bot',p2,activeChar.name,activeChar.color); speakVerity(p2);},8000); setTimeout(()=>{isApocalypse=false; verityFace.classList.remove('startled','glitch'); setGlow(null); speakVerity("Фух... Сигнал восстановлен."); addMessageToChat('bot',"Фух... Сигнал восстановлен.",activeChar.name,activeChar.color);},30000);}
+function renderCharacters(){const list=document.getElementById('characterList'); list.innerHTML=''; characters.forEach((c)=>{const el=document.createElement('div'); el.className=`char-avatar ${c.id===activeChar.id?'active':''}`; el.style.background=c.color; el.innerHTML=`<span>${c.name}</span>`; el.addEventListener('click',()=>{activeChar=c; verityFace.style.background=c.color; renderCharacters(); const s=document.getElementById('studioModalContent'); s.style.background=`linear-gradient(145deg,#1a1a2e,${c.color}22)`; s.style.borderColor=c.color; speakVerity(`Привет! Я ${c.name}.`);}); list.appendChild(el);});}
+function addNewCharacter(){const name=prompt('Имя:'); if(!name)return; const color=prompt('Цвет:','#9c27b0')||'#9c27b0'; const promptText=prompt('Характер:','Он просто хочет поболтать.')||'Он просто хочет поболтать.'; characters.push({id:name.toLowerCase().replace(/\s+/g,'-'),name,gender:'male',ageGroup:'adult',color,prompt:promptText,chance:0.1}); localStorage.setItem('verityCharactersV3',JSON.stringify(characters)); renderCharacters();}
+document.getElementById('openBroadcastSettingsBtn').onclick=()=>{document.getElementById('enableCatMode').checked=broadcastSettings.catMode; document.getElementById('enableGlitch').checked=broadcastSettings.glitchMode; const s=document.getElementById('studioModalContent'); s.style.background=`linear-gradient(145deg,#1a1a2e,${activeChar.color}22)`; s.style.borderColor=activeChar.color; renderCharacters(); renderTriggersUI(); document.getElementById('broadcastSettingsModal').style.display='flex';};
+function renderTriggersUI(){const list=document.getElementById('triggersList'); list.innerHTML=''; broadcastSettings.triggers.forEach((t,i)=>{const d=document.createElement('div'); d.style.cssText="display:flex;justify-content:space-between;margin-bottom:4px;background:#222;padding:4px;border-radius:4px;"; d.innerHTML=`<span>"${t.phrase}" &rarr; "${t.response.substring(0,15)}..."</span> <span style="color:red;cursor:pointer;" onclick="removeTrigger(${i})">✕</span>`; list.appendChild(d);});}
+function addTrigger(){const p=document.getElementById('triggerInput').value.trim(); const r=document.getElementById('responseInput').value.trim(); if(p&&r){broadcastSettings.triggers.push({phrase:p,response:r}); document.getElementById('triggerInput').value=''; document.getElementById('responseInput').value=''; renderTriggersUI();}}
+function removeTrigger(i){broadcastSettings.triggers.splice(i,1); renderTriggersUI();}
+function saveBroadcastSettings(){broadcastSettings.catMode=document.getElementById('enableCatMode').checked; broadcastSettings.glitchMode=document.getElementById('enableGlitch').checked; localStorage.setItem('verityBroadcastSettings',JSON.stringify(broadcastSettings)); alert('Сохранено!'); closeModal('broadcastSettingsModal');}
+function checkTriggers(t){const lt=t.toLowerCase(); for(const tr of broadcastSettings.triggers){if(lt.includes(tr.phrase.toLowerCase()))return tr.response;} return null;}
 
 // --- МУЗЫКА ---
-function openMusicModal(){document.getElementById('musicUrlInput').value='';document.getElementById('musicModal').style.display='flex';resetVerityIdle();}
-function playMusicFromUrl(){const url=document.getElementById('musicUrlInput').value.trim();if(!url){alert("Вставьте ссылку!");return;}const b=document.getElementById('bgMusic');b.src=url;b.volume=0.4;b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex';document.getElementById('musicTitle').innerText="Играет по ссылке";closeModal('musicModal');speakVerity("Включаю трек!");}).catch(e=>{alert("Не удалось включить: " + e.message);});}
-function playLocalFile(e){const file=e.target.files[0];if(!file)return;const url=URL.createObjectURL(file);const b=document.getElementById('bgMusic');b.src=url;b.volume=0.4;b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex';document.getElementById('musicTitle').innerText=file.name;closeModal('musicModal');speakVerity("Играю твой файл!");}).catch(err=>{alert("Ошибка файла: " + err.message);});}
-function stopRadio(){document.getElementById('bgMusic').pause();document.getElementById('audioPlayer').style.display='none';speakVerity("Музыка остановлена.");}
+function openMusicModal(){document.getElementById('musicUrlInput').value=''; document.getElementById('musicModal').style.display='flex'; resetVerityIdle();}
+function playMusicFromUrl(){const url=document.getElementById('musicUrlInput').value.trim(); if(!url){alert("Вставьте ссылку!"); return;} const b=document.getElementById('bgMusic'); b.src=url; b.volume=0.4; b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex'; document.getElementById('musicTitle').innerText="Играет по ссылке"; closeModal('musicModal'); speakVerity("Включаю трек!");}).catch(e=>{alert("Не удалось включить: " + e.message);});}
+function playLocalFile(e){const file=e.target.files[0]; if(!file)return; const url=URL.createObjectURL(file); const b=document.getElementById('bgMusic'); b.src=url; b.volume=0.4; b.play().then(()=>{document.getElementById('audioPlayer').style.display='flex'; document.getElementById('musicTitle').innerText=file.name; closeModal('musicModal'); speakVerity("Играю твой файл!");}).catch(err=>{alert("Ошибка файла: " + err.message);});}
+function stopRadio(){document.getElementById('bgMusic').pause(); document.getElementById('audioPlayer').style.display='none'; speakVerity("Музыка остановлена.");}
 
-function speakVerity(text){if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=selectedLanguage==='ru'?'ru-RU':'en-US';const b=document.getElementById('bgMusic');let ov=b.volume;const h=new Date().getHours();if(h>=23||h<6){u.pitch=0.8;u.volume=0.4;u.rate=0.9;}else{if(activeChar.ageGroup==='child')u.pitch=1.6;else if(activeChar.gender==='female')u.pitch=1.3;else u.pitch=1.0;}u.onstart=()=>{if(!b.paused)b.volume=0.1;verityFace.classList.add('talking');setGlow('glow-neutral');verityFace.style.transform=`rotate(${Math.random()>0.5?5:-5}deg)`;};u.onend=()=>{if(!b.paused)b.volume=ov;verityFace.classList.remove('talking');setGlow(null);verityFace.style.transform='rotate(0deg)';};window.speechSynthesis.speak(u);}}
-function startVoiceInput(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Нет микрофона.");return;}const r=new SR();r.lang=selectedLanguage==='ru'?'ru-RU':'en-US';r.onstart=()=>{speakVerity("Я слушаю...");resetVerityIdle();};r.onresult=(e)=>processVerityRequest(e.results[0][0].transcript);r.start();}
-function openVerityChat(){document.getElementById('verityChatModal').style.display='flex';resetVerityIdle();}
-function sendVerityText(){const i=document.getElementById('verityInput');if(!i.value)return;const t=i.value;document.getElementById('verityChatHistory').innerHTML+=`<div style="background:#3b82f6;padding:8px;border-radius:8px;align-self:flex-end;font-size:13px;color:#fff;">${t}</div>`;i.value='';processVerityRequest(t);resetVerityIdle();}
+function speakVerity(text){if('speechSynthesis' in window){window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=selectedLanguage==='ru'?'ru-RU':'en-US'; const b=document.getElementById('bgMusic'); let ov=b.volume; const h=new Date().getHours(); if(h>=23||h<6){u.pitch=0.8; u.volume=0.4; u.rate=0.9;}else{if(activeChar.ageGroup==='child')u.pitch=1.6; else if(activeChar.gender==='female')u.pitch=1.3; else u.pitch=1.0;} u.onstart=()=>{if(!b.paused)b.volume=0.1; verityFace.classList.add('talking'); setGlow('glow-neutral'); verityFace.style.transform=`rotate(${Math.random()>0.5?5:-5}deg)`;}; u.onend=()=>{if(!b.paused)b.volume=ov; verityFace.classList.remove('talking'); setGlow(null); verityFace.style.transform='rotate(0deg)';}; window.speechSynthesis.speak(u);}}
+function startVoiceInput(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR){alert("Нет микрофона."); return;} const r=new SR(); r.lang=selectedLanguage==='ru'?'ru-RU':'en-US'; r.onstart=()=>{speakVerity("Я слушаю..."); resetVerityIdle();}; r.onresult=(e)=>processVerityRequest(e.results[0][0].transcript); r.start();}
+function openVerityChat(){document.getElementById('verityChatModal').style.display='flex'; resetVerityIdle();}
+function sendVerityText(){const i=document.getElementById('verityInput'); if(!i.value)return; const t=i.value; document.getElementById('verityChatHistory').innerHTML+=`<div style="background:#3b82f6;padding:8px;border-radius:8px;align-self:flex-end;font-size:13px;color:#fff;">${t}</div>`; i.value=''; processVerityRequest(t); resetVerityIdle();}
 
 // --- ЗАПРОС К GROQ ---
 async function processVerityRequest(text){
@@ -307,9 +304,9 @@ async function processVerityRequest(text){
     const lid='ld-'+Date.now();
     box.innerHTML+=`<div id="${lid}" style="font-size:12px;color:#aaa;font-style:italic;">Думает...</div>`;
     const cr=checkTriggers(text);
-    if(cr){document.getElementById(lid).remove();box.innerHTML+=`<div style="background:#444;padding:8px;border-radius:8px;align-self:flex-start;font-size:13px;color:#fff;">${cr}</div>`;speakVerity(cr);return;}
+    if(cr){document.getElementById(lid).remove(); box.innerHTML+=`<div style="background:#444;padding:8px;border-radius:8px;align-self:flex-start;font-size:13px;color:#fff;">${cr}</div>`; speakVerity(cr); return;}
     const key=localStorage.getItem('cometa_api_key');
-    if(!key){document.getElementById(lid).remove();speakVerity("Добавь API ключ (🔑)!");return;}
+    if(!key){document.getElementById(lid).remove(); speakVerity("Добавь API ключ (🔑)!"); return;}
     try{
         const traits=getBehaviorTraits(activeChar);
         const sys=`${activeChar.prompt} Особенности: ${traits} ВАЖНО: Не придумывай бытовые драмы. Отвечай на языке: ${selectedLanguageName}.`;
@@ -328,23 +325,24 @@ async function processVerityRequest(text){
     }catch(e){
         document.getElementById(lid).remove();
         speakVerity("Запуталась в проводах...");
+        box.innerHTML+=`<div style="font-size:12px;color:#f87171;">Ошибка: ${e.message}</div>`;
     }
 }
 
-document.getElementById('openLangBtn').onclick=()=>{document.getElementById('langSearch').value='';renderLangs();document.getElementById('langModal').style.display='flex';};
-function renderChat(){const c=document.getElementById('chatContainer');c.innerHTML='';chatHistory.forEach((m,i)=>{const r=document.createElement('div');r.className=`message-row ${m.role}`;const b=document.createElement('div');b.className='message-bubble';if(m.role==='bot'&&m.speaker)b.innerHTML=`<span class="speaker-name" style="color:${m.color}">${m.speaker}</span>${m.text.replace(/\n/g,'<br>')}`;else b.innerHTML=m.text.replace(/\n/g,'<br>');r.appendChild(b);if(i===chatHistory.length-1){const a=document.createElement('div');a.className='message-actions';a.innerHTML=`<span onclick="editMessage(${i})">✏️ Редактировать</span>`;r.appendChild(a);}c.appendChild(r);});document.getElementById('contentArea').scrollTop=document.getElementById('contentArea').scrollHeight;}
-function addMessageToChat(role,text,speaker=null,color=null){chatHistory.push({role,text,speaker,color});if(role==='bot')lastBotMessageText=text;renderChat();}
-function editMessage(i){const m=chatHistory[i];const r=document.getElementById('chatContainer').querySelectorAll('.message-row');r[i].innerHTML=`<textarea class="edit-textarea" id="editInput-${i}">${m.text}</textarea><div class="edit-buttons"><button class="btn-small btn-save" onclick="saveEditedMessage(${i})">Сохранить</button><button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button></div>`;}
-function saveEditedMessage(i){chatHistory[i].text=document.getElementById('editInput-'+i).value;if(chatHistory[i].role==='bot')lastBotMessageText=chatHistory[i].text;renderChat();}
-function clearChat(){chatHistory=[];addMessageToChat('bot','Чат очищен.');closeModal('apiSettingsModal');}
-function handleEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
-function sendMessage(){const i=document.getElementById('aiPrompt');const t=i.value.trim();if(!t)return;if(t===t.toUpperCase()&&t.length>3||t.split('!').length>2){verityFace.classList.add('startled');speakVerity("Тише!");setTimeout(()=>verityFace.classList.remove('startled'),1000);}resetVerityIdle();const cr=checkTriggers(t);if(cr){addMessageToChat('user',t);i.value='';setTimeout(()=>{addMessageToChat('bot',cr,activeChar.name,activeChar.color);speakVerity(cr);},500);return;}addMessageToChat('user',t);i.value='';sendToAPI();}
+document.getElementById('openLangBtn').onclick=()=>{document.getElementById('langSearch').value=''; renderLangs(); document.getElementById('langModal').style.display='flex';};
+function renderChat(){const c=document.getElementById('chatContainer'); c.innerHTML=''; chatHistory.forEach((m,i)=>{const r=document.createElement('div'); r.className=`message-row ${m.role}`; const b=document.createElement('div'); b.className='message-bubble'; if(m.role==='bot'&&m.speaker)b.innerHTML=`<span class="speaker-name" style="color:${m.color}">${m.speaker}</span>${m.text.replace(/\n/g,'<br>')}`; else b.innerHTML=m.text.replace(/\n/g,'<br>'); r.appendChild(b); if(i===chatHistory.length-1){const a=document.createElement('div'); a.className='message-actions'; a.innerHTML=`<span onclick="editMessage(${i})">✏️ Редактировать</span>`; r.appendChild(a);} c.appendChild(r);}); document.getElementById('contentArea').scrollTop=document.getElementById('contentArea').scrollHeight;}
+function addMessageToChat(role,text,speaker=null,color=null){chatHistory.push({role,text,speaker,color}); if(role==='bot')lastBotMessageText=text; renderChat();}
+function editMessage(i){const m=chatHistory[i]; const r=document.getElementById('chatContainer').querySelectorAll('.message-row'); r[i].innerHTML=`<textarea class="edit-textarea" id="editInput-${i}">${m.text}</textarea><div class="edit-buttons"><button class="btn-small btn-save" onclick="saveEditedMessage(${i})">Сохранить</button><button class="btn-small btn-cancel" onclick="renderChat()">Отмена</button></div>`;}
+function saveEditedMessage(i){chatHistory[i].text=document.getElementById('editInput-'+i).value; if(chatHistory[i].role==='bot')lastBotMessageText=chatHistory[i].text; renderChat();}
+function clearChat(){chatHistory=[]; addMessageToChat('bot','Чат очищен. Вернитесь к настройке роли.'); closeModal('apiSettingsModal'); setTimeout(resetToSetup, 1500);}
+function handleEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault(); sendMessage();}}
+function sendMessage(){const i=document.getElementById('aiPrompt'); const t=i.value.trim(); if(!t)return; if(t===t.toUpperCase()&&t.length>3||t.split('!').length>2){verityFace.classList.add('startled'); speakVerity("Тише!"); setTimeout(()=>verityFace.classList.remove('startled'),1000);} resetVerityIdle(); const cr=checkTriggers(t); if(cr){addMessageToChat('user',t); i.value=''; setTimeout(()=>{addMessageToChat('bot',cr,activeChar.name,activeChar.color); speakVerity(cr);},500); return;} addMessageToChat('user',t); i.value=''; sendToAPI();}
 
 async function sendToAPI(){
     const key=localStorage.getItem('cometa_api_key');
-    if(!key){alert("Введите ключ Groq!");document.getElementById('apiSettingsModal').style.display='flex';return;}
+    if(!key){alert("Введите ключ Groq!"); document.getElementById('apiSettingsModal').style.display='flex'; return;}
     document.getElementById('mainLoader').style.display='block';
-    if(verityFace){verityFace.style.transform='rotate(-5deg)';setGlow('glow-neutral');}
+    if(verityFace){verityFace.style.transform='rotate(-5deg)'; setGlow('glow-neutral');}
     try{
         const traits=getBehaviorTraits(activeChar);
         let sys=`${activeChar.prompt} Особенности: ${traits} ВАЖНО: Не придумывай бытовые драмы. Отвечай на языке: ${selectedLanguageName}.`;
@@ -357,43 +355,131 @@ async function sendToAPI(){
             body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:msg})
         });
         
-        if(!res.ok)throw new Error("Ошибка API");
+        if(!res.ok) {
+            const errData = await res.json().catch(()=>({}));
+            throw new Error(errData.error?.message || `HTTP ${res.status}`);
+        }
         const data=await res.json();
         if(data.error) throw new Error(data.error.message);
         
         addMessageToChat('bot',data.choices[0].message.content,activeChar.name,activeChar.color);
         chatCount++;
-        if(chatCount%EAVESDROP_INTERVAL===0){const p=eavesdroppedPhrases[Math.floor(Math.random()*eavesdroppedPhrases.length)];setTimeout(()=>{addMessageToChat('bot',p,activeChar.name,activeChar.color);speakVerity(p);},2000);}
+        if(chatCount%EAVESDROP_INTERVAL===0){const p=eavesdroppedPhrases[Math.floor(Math.random()*eavesdroppedPhrases.length)]; setTimeout(()=>{addMessageToChat('bot',p,activeChar.name,activeChar.color); speakVerity(p);},2000);}
         if(Math.random()<0.2&&characters.length>1)setTimeout(()=>triggerInterruption(),2000);
     }catch(e){
-        if(verityContainer.style.display==='block'){verityFace.classList.add('startled');speakVerity("Ой, я запуталась...");setTimeout(()=>verityFace.classList.remove('startled'),2000);}
-        else alert("Ошибка ИИ: "+e.message);
+        if(verityContainer.style.display==='block'){verityFace.classList.add('startled'); speakVerity("Ой, я запуталась..."); setTimeout(()=>verityFace.classList.remove('startled'),2000);}
+        addMessageToChat('bot', `Ошибка: ${e.message}. Возможно, нужен VPN.`);
     }finally{
         document.getElementById('mainLoader').style.display='none';
-        if(verityFace){verityFace.style.transform='rotate(0deg)';setGlow(null);}
+        if(verityFace){verityFace.style.transform='rotate(0deg)'; setGlow(null);}
     }
 }
 
-async function triggerInterruption(){const o=characters.filter(c=>c.id!==activeChar.id);if(o.length===0)return;const inr=o[Math.floor(Math.random()*o.length)];const key=localStorage.getItem('cometa_api_key');if(!key)return;const oc=verityFace.style.background;verityFace.style.background=inr.color;verityFace.style.transform='scale(0.9)';setTimeout(()=>verityFace.style.transform='scale(1)',100);try{const tr=getBehaviorTraits(inr);const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:[{role:'system',content:`${inr.prompt} Особенности: ${tr} Только что ответил ${activeChar.name}. Вставь 1 предложение.`},{role:'user',content:"..."}]})});const data=await res.json();if(data.error)return;addMessageToChat('bot',data.choices[0].message.content,inr.name,inr.color);speakVerity(data.choices[0].message.content);}catch(e){}setTimeout(()=>{verityFace.style.background=oc;},3000);}
+async function triggerInterruption(){const o=characters.filter(c=>c.id!==activeChar.id); if(o.length===0)return; const inr=o[Math.floor(Math.random()*o.length)]; const key=localStorage.getItem('cometa_api_key'); if(!key)return; const oc=verityFace.style.background; verityFace.style.background=inr.color; verityFace.style.transform='scale(0.9)'; setTimeout(()=>verityFace.style.transform='scale(1)',100); try{const tr=getBehaviorTraits(inr); const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:"llama-3.1-70b-versatile",messages:[{role:'system',content:`${inr.prompt} Особенности: ${tr} Только что ответил ${activeChar.name}. Вставь 1 предложение.`},{role:'user',content:"..."}]})}); const data=await res.json(); if(data.error)return; addMessageToChat('bot',data.choices[0].message.content,inr.name,inr.color); speakVerity(data.choices[0].message.content);}catch(e){} setTimeout(()=>{verityFace.style.background=oc;},3000);}
 
 function speakChat(){if(lastBotMessageText)speakVerity(lastBotMessageText);}
-function toggleView(){isChatMode=!isChatMode;document.getElementById('chatContainer').style.display=isChatMode?'flex':'none';document.getElementById('scriptContainer').style.display=isChatMode?'none':'block';if(!isChatMode)generateScriptWithImages();closeModal('apiSettingsModal');}
+function toggleView(){isChatMode=!isChatMode; document.getElementById('chatContainer').style.display=isChatMode?'flex':'none'; document.getElementById('scriptContainer').style.display=isChatMode?'none':'block'; if(!isChatMode)generateScriptWithImages(); closeModal('apiSettingsModal');}
 
-async function generateScriptWithImages(){document.getElementById('mainLoader').style.display='block';let fh='';const sp=selectedGenre!=="Случайный"?`, стиль: ${selectedGenre}`:'';chatHistory.forEach((m,i)=>{fh+=`<p><strong>${m.speaker||(m.role==='user'?'Вы':'ИИ')}:</strong> ${m.text}</p>`;if((i+1)%10===0||i===0){const iu=`https://image.pollinations.ai/prompt/${encodeURIComponent(m.text.substring(0,100)+sp)}?width=1024&height=1024&nologo=true`;fh+=`<img src="${iu}" loading="lazy" onerror="this.style.display='none'">`;}});setTimeout(()=>{document.getElementById('scriptContainer').innerHTML=fh;document.getElementById('mainLoader').style.display='none';},1500);}
+async function generateScriptWithImages(){
+    document.getElementById('mainLoader').style.display='block'; 
+    let fh=`<h2 style="color:#10b981; margin-bottom:15px; text-align:center;">Жанр: ${selectedGenre}</h2>`; 
+    const sp=selectedGenre!=="Случайный"?`, стиль: ${selectedGenre}`:'';
+    chatHistory.forEach((m,i)=>{fh+=`<p><strong>${m.speaker||(m.role==='user'?'Вы':'ИИ')}:</strong> ${m.text}</p>`; if((i+1)%10===0||i===0){const iu=`https://image.pollinations.ai/prompt/${encodeURIComponent(m.text.substring(0,100)+sp)}?width=1024&height=1024&nologo=true`; fh+=`<img src="${iu}" loading="lazy" onerror="this.style.display='none'">`;}}); 
+    setTimeout(()=>{document.getElementById('scriptContainer').innerHTML=fh; document.getElementById('mainLoader').style.display='none';},1500);
+}
 
-const genres={"Древние / Ритуальные":["Григорианский хорал","Знаменное пение","Византийская","Мадригал","Мотет","Шаманские ритмы","Суфийская каввали"],"Классика / Академическая":["Фуга","Токката","Симфония","Ноктюрн","Импрессионизм","Минимализм","Атональность","Электроакустика"],"Фольклор / Этника":["Русская народная","Кельтская (джига)","Фламенко","Индийская (рага)","Арабская (макам)","Африканские ритмы","Балканский фолк","Японская"],"Вокал":["Бельканто","Горловое пение","Йодль","Скэт","Битбокс","Плачи"],"Джаз / Блюз":["Дельта-блюз","Буги-вуги","Свинг","Бибоп","Кул-джаз","Фри-джаз","Босса-нова"],"Рок":["Рок-н-ролл","Психоделик","Прогрессив","Панк-рок","Готик-рок","Гранж","Шугейз","Мат-рок"],"Метал":["Хэви-метал","Трэш","Дэт-метал","Блэк-метал","Дум-метал","Фолк-метал","Металкор","Пост-метал"],"Поп / Эстрада":["Синти-поп","Европоп","Диско","K-pop","J-pop","Пауэр-баллада"],"Хип-хоп":["Old School","G-funk","Trap","Drill","Lo-fi hip-hop","Phonk","Cloud rap"],"Электроника":["Техно","Хаус","Транс","Драм-н-бейс","Дабстеп","IDM","Эмбиент","Synthwave","Hardstyle","Breakcore"],"Латина":["Регги","Ска","Сальса","Бачата","Кумбия","Самба"],"R&B / Соул":["Классический R&B","Neo-soul","Фанк","Go-go"],"Эксперимент":["Индастриал","Noise","Field recordings","Конкретная музыка"],"Кино / Игры":["Опера","Мюзикл","Саундтрек","Chiptune (8-bit)"]};
+const genres={
+    "Текстовые жанры":["Фэнтези","Детектив","Фантастика","Ужасы","Любовный роман","Киберпанк","Нуар","Постапокалипсис"],
+    "Музыкальные стили":["Рок","Поп","Джаз","Эмбиент","Хип-хоп","Техно","Классика","Синтвейв","Метал","Блюз"],
+    "Древние / Ритуальные":["Григорианский хорал","Знаменное пение","Шаманские ритмы","Суфийская каввали"],
+    "Классика / Академическая":["Фуга","Токката","Симфония","Ноктюрн","Импрессионизм","Минимализм","Атональность"],
+    "Фольклор / Этника":["Русская народная","Кельтская (джига)","Фламенко","Индийская (рага)","Арабская (макам)","Африканские ритмы"],
+    "Вокал":["Бельканто","Горловое пение","Йодль","Скэт","Битбокс"],
+    "Джаз / Блюз":["Дельта-блюз","Буги-вуги","Свинг","Бибоп","Кул-джаз","Фри-джаз","Босса-нова"],
+    "Рок":["Рок-н-ролл","Психоделик","Прогрессив","Панк-рок","Готик-рок","Гранж","Шугейз"],
+    "Метал":["Хэви-метал","Трэш","Дэт-метал","Блэк-метал","Дум-метал","Фолк-метал"],
+    "Поп / Эстрада":["Синти-поп","Европоп","Диско","K-pop","J-pop"],
+    "Хип-хоп":["Old School","G-funk","Trap","Drill","Lo-fi hip-hop","Phonk"],
+    "Электроника":["Техно","Хаус","Транс","Драм-н-бейс","Дабстеп","IDM","Эмбиент","Synthwave"],
+    "Латина":["Регги","Ска","Сальса","Бачата","Кумбия","Самба"],
+    "R&B / Соул":["Классический R&B","Neo-soul","Фанк","Go-go"],
+    "Эксперимент":["Индастриал","Noise","Field recordings","Конкретная музыка"],
+    "Кино / Игры":["Опера","Мюзикл","Саундтрек","Chiptune (8-bit)"]
+};
 
-function renderGenres(){const c=document.getElementById('genreContainer');c.innerHTML='';for(const[cat,items]of Object.entries(genres)){const d=document.createElement('div');d.className='genre-category';d.innerText=cat;const l=document.createElement('div');l.className='genre-list';items.forEach(i=>{const it=document.createElement('div');it.className='genre-item';it.innerText=i;it.onclick=()=>{selectedGenre=i;setPrompt(`Создай сцену/музыку в стиле: ${i}.`);closeModal('genreModal');};l.appendChild(it);});d.onclick=()=>l.style.display=l.style.display==='block'?'none':'block';c.appendChild(d);c.appendChild(l);}}
-renderGenres();document.getElementById('openGenreBtn').onclick=()=>document.getElementById('genreModal').style.display='flex';
-function mixGenres(){let ag=[];for(const items of Object.values(genres))ag=ag.concat(items);ag=ag.filter(g=>g!=="Случайный");const g1=ag[Math.floor(Math.random()*ag.length)];let g2=ag[Math.floor(Math.random()*ag.length)];while(g1===g2)g2=ag[Math.floor(Math.random()*ag.length)];document.getElementById('aiPrompt').value=`Напиши сцену в стиле ${g1} + ${g2}.`;closeModal('genreModal');}
+function renderGenres(){
+    const c=document.getElementById('genreContainer'); 
+    c.innerHTML=''; 
+    for(const[cat,items]of Object.entries(genres)){
+        const d=document.createElement('div'); 
+        d.className='genre-category'; 
+        d.innerText=cat; 
+        const l=document.createElement('div'); 
+        l.className='genre-list'; 
+        items.forEach(i=>{
+            const it=document.createElement('div'); 
+            it.className='genre-item'; 
+            it.innerText=i; 
+            it.onclick=()=>{
+                selectedGenre=i; 
+                alert(`Выбран стиль: ${i}`); 
+                closeModal('genreModal');
+            }; 
+            l.appendChild(it);
+        }); 
+        d.onclick=()=>l.style.display=l.style.display==='block'?'none':'block'; 
+        c.appendChild(d); 
+        c.appendChild(l);
+    }
+}
+renderGenres(); 
+document.getElementById('openGenreBtn').onclick=()=>document.getElementById('genreModal').style.display='flex';
 
+function mixGenres(){let ag=[]; for(const items of Object.values(genres))ag=ag.concat(items); ag=ag.filter(g=>g!=="Случайный"); const g1=ag[Math.floor(Math.random()*ag.length)]; let g2=ag[Math.floor(Math.random()*ag.length)]; while(g1===g2)g2=ag[Math.floor(Math.random()*ag.length)]; selectedGenre=`${g1} + ${g2}`; alert(`Случайный стиль: ${selectedGenre}`); closeModal('genreModal');}
+
+function setPrompt(type){
+    const i=document.getElementById('aiPrompt');
+    if(type==='writer') i.value=`Напиши сценарий для короткометражки в жанре "${selectedGenre}" про... `;
+    else if(type==='music') i.value=`Создай текст песни и опиши аранжировку в стиле "${selectedGenre}" на тему... `;
+    i.focus();
+}
+
+function insertPrompt(t){const i=document.getElementById('aiPrompt'); if(t==='threeAngles')i.value=`[СЫЩИК]: \n[ЗЛОДЕЙ]: \n[ПРОХОЖИЙ]: `; i.focus();}
 let langStr="ru:Русский,en:English,uk:Українська,be:Беларуская,de:Deutsch,fr:Français,es:Español,pt:Português,it:Italiano,pl:Polski,cs:Čeština,sk:Slovenčina,bg:Български,sr:Српски,hr:Hrvatski,sl:Slovenščina,mk:Македонски,ro:Română,hu:Magyar,el:Ελληνικά,tr:Türkçe,az:Azərbaycan,kk:Қазақ,uz:Oʻzbek,ky:Кыргызча,tg:Тоҷикӣ,hy:Հայերեն,ka:ქართული,zh:简体中文,zh_tw:繁體中文,ja:日本語,ko:한국어,vi:Tiếng Việt,th:ไทย,id:Bahasa Indonesia,ms:Bahasa Melayu,tl:Tagalog,my:မြန်မာ,km:ខ្មែរ,lo:ລາວ,mn:Монгол,hi:हिन्दी,bn:বাংলা,pa:ਪੰਜਾਬੀ,gu:ગુજરાતી,mr:मराठी,ta:தமிழ்,te:తెలుగు,kn:ಕನ್ನಡ,ml:മലയാളം,si:සිංහල,ne:नेपाली,ar:العربية,he:עברית,fa:فارسی,ur:اردو,ps:پښتو,ku:Kurdî,am:አማርኛ,so:Soomaali,sw:Kiswahili,yo:Yorùbá,ig:Igbo,ha:Hausa,zu:isiZulu,af:Afrikaans,nl:Nederlands,sv:Svenska,da:Dansk,no:Norsk,fi:Suomi,is:Íslenska,ga:Gaeilge,cy:Cymraeg,gd:Gàidhlig,mt:Malti,eo:Esperanto,la:Latina,en_pt:Pirate Speak,en_ws:Shakespearean,en_ud:Upside Down,lol:LOLCAT,tlh:Klingon,qya:Elvish (Quenya),sjn:Sindarin,doth:Dothraki,val:Valyrian,ang:Anglish,tok:Toki Pona,nav:Naʼvi,grc:Ancient Greek,sa:Sanskrit,pi:Pali,haw:Hawaiian,mi:Māori,sm:Samoan,to:Tongan,fj:Fijian,qu:Quechua,ay:Aymara,gn:Guaraní,nah:Nahuatl,yua:Yucatec Maya,iu:Inuktitut,kl:Kalaallisut,chr:Cherokee,nv:Navajo,oj:Ojibwe,cu:Словѣ́ньскъ,lb:Lëtzebuergesch,fo:Føroyskt,ca:Català,gl:Galego,oc:Occitan,co:Corsu,sc:Sardu,rm:Rumantsch,fur:Furlan,kv:Коми,udm:Удмурт,mhr:Марий,myv:Эрзянь,tk:Türkmençe,ba:Башҡорт,tt:Татарча,cv:Чӑвашла,sah:Саха,os:Ирон,ce:Нохчийн,av:Авар,kbd:Адыгэбзэ,bo:བོད་སྐད་,ug:ئۇيغۇرچە,yue:粵語,wuu:吴语,nan:闽南语,hak:客家话,jv:Basa Jawa,su:Basa Sunda,ceb:Cebuano,as:অসমীয়া,or:ଓଡ଼ିଆ,sd:سنڌي,xh:isiXhosa,st:Sesotho,tn:Setswana,mg:Malagasy,ti:ትግርኛ,om:Oromoo,wo:Wolof,ty:Reo Tahiti,cr:Cree,ia:Interlingua,vo:Volapük,jbo:Lojban,lfn:Lingua Franca Nova,afh:Afrihili";
+
 const allLangs=langStr.split(',').map(x=>{const[c,...n]=x.split(':');return{c,n:n.join(':')}});
 
-function renderLangs(f=""){const l=document.getElementById('langList');l.innerHTML='';const fl=allLangs.filter(x=>x.n.toLowerCase().includes(f.toLowerCase())||x.c.includes(f.toLowerCase()));if(fl.length===0)l.innerHTML='<div style="color:#888;text-align:center;grid-column:span 2;">Ничего не найдено</div>';else fl.forEach(x=>{const d=document.createElement('div');d.className='lang-item';d.innerText=x.n;d.onclick=()=>{selectedLanguage=x.c;selectedLanguageName=x.n;localStorage.setItem('cometa_language',x.c);localStorage.setItem('cometa_language_name',x.n);alert("Язык: "+x.n);closeModal('langModal');if(verityContainer.style.display==='block')speakVerity(getGreeting());};l.appendChild(d);});}
+function renderLangs(f=""){
+    const l=document.getElementById('langList');
+    l.innerHTML='';
+    const fl=allLangs.filter(x=>x.n.toLowerCase().includes(f.toLowerCase())||x.c.includes(f.toLowerCase()));
+    if(fl.length===0){
+        l.innerHTML='<div style="color:#888;text-align:center;grid-column:span 2;">Ничего не найдено</div>';
+    } else {
+        fl.forEach(x=>{
+            const d=document.createElement('div');
+            d.className='lang-item';
+            d.innerText=x.n;
+            d.onclick=()=>{
+                selectedLanguage=x.c;
+                selectedLanguageName=x.n;
+                localStorage.setItem('cometa_language',x.c);
+                localStorage.setItem('cometa_language_name',x.n);
+                alert("Язык: "+x.n);
+                closeModal('langModal');
+                if(verityContainer.style.display==='block') speakVerity(getGreeting());
+            };
+            l.appendChild(d);
+        });
+    }
+}
+
 function filterLangs(){renderLangs(document.getElementById('langSearch').value);}
 renderLangs();
-window.addEventListener('DOMContentLoaded',()=>{addMessageToChat('bot',"Привет! Я Cometa AI. Проверь ключ в 🔑 и давай начнем!");});
+
+window.addEventListener('DOMContentLoaded',()=>{
+    addMessageToChat('bot',"Привет! Я Cometa AI. Проверь ключ в 🔑 и давай начнем!");
+});
 </script>
 </body>
 </html>
